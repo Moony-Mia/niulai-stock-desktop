@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>牛来看盘神器</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+  #wrap { position: relative; width: 100vw; height: 100vh; -webkit-app-region: drag;
+    /* 完全无色：整窗背景透明，牛后面不衬任何底色，桌面背景原样透出；
+       #wrap 本身是 -webkit-app-region:drag 拖拽层，仍完全可命中（拖拽/右键别处照常），不需要任何黑底兜底 */
+    background: transparent; }
+  #bg { position: absolute; inset: 0; transition: background .7s ease; pointer-events: none; }
+  /* 完全无色：牛后面不衬任何红/蓝/灰底色，桌面背景原样透出 */
+  #bg.up, #bg.down, #bg.rest, #bg.flat { background: transparent; }
+
+  #ticker {
+    position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,.75);
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 8px;
+    padding: 6px 18px 6px 16px;
+    width: 210px;
+    min-width: 210px;
+    max-width: 210px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.45);
+    backdrop-filter: blur(10px);
+    -webkit-app-region: no-drag;
+    pointer-events: auto;
+    z-index: 5;
+  }
+  #ticker .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; }
+  #ticker .name { font-weight: 800; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ticker-symbol-trigger {
+    min-width: 0; max-width: 112px; padding: 0; border: 0; background: transparent; color: #fff;
+    display: inline-flex; align-items: center; gap: 4px; cursor: pointer; text-align: left; font: inherit;
+  }
+  .ticker-symbol-trigger:not(:disabled):hover .name { text-decoration: underline; text-underline-offset: 2px; }
+  .ticker-symbol-trigger:disabled { cursor: default; }
+  #tickerSymbolChevron { flex: 0 0 auto; font-size: 9px; opacity: .65; transform: translateY(-.5px); }
+  #tickerWatchMenu {
+    display: none; margin: 5px -10px 3px; padding: 4px; border: 1px solid rgba(255,255,255,.13);
+    border-radius: 6px; background: rgba(12,12,15,.96); box-shadow: 0 6px 18px rgba(0,0,0,.34);
+  }
+  #tickerWatchMenu.visible { display: block; }
+  #tickerWatchItems { display: flex; flex-direction: column; gap: 2px; }
+  .ticker-watch-item {
+    width: 100%; min-height: 24px; padding: 3px 5px; border: 1px solid transparent; border-radius: 4px;
+    background: transparent; color: #fff; cursor: pointer; display: grid; grid-template-columns: 12px minmax(0,1fr) auto;
+    align-items: center; gap: 4px; text-align: left; font-family: "Microsoft YaHei UI", "PingFang SC", "Segoe UI", sans-serif;
+  }
+  .ticker-watch-item:hover { background: rgba(255,255,255,.08); }
+  .ticker-watch-item.current { border-color: rgba(10,132,255,.58); background: rgba(10,132,255,.14); }
+  .ticker-watch-check { font-size: 9px; color: #64d2ff; text-align: center; }
+  .ticker-watch-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; font-weight: 750; }
+  .ticker-watch-code { font-size: 9px; opacity: .55; font-family: "SF Mono", Consolas, monospace; }
+  #ticker .badge { flex: 0 0 auto; white-space: nowrap; font-size: 9px; padding: 1px 5px; border-radius: 3px; background: rgba(255,255,255,.22); font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
+  #feedStatusDot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; background: #8e8e93; box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
+  #feedStatusDot.fresh { background: #30d158; box-shadow: 0 0 6px rgba(48,209,88,.8); }
+  #feedStatusDot.aging, #feedStatusDot.reconnecting { background: #ffd60a; box-shadow: 0 0 6px rgba(255,214,10,.65); }
+  #feedStatusDot.offline { background: #ff453a; box-shadow: 0 0 6px rgba(255,69,58,.75); }
+  #feedStatusDot.idle, #feedStatusDot.sim { background: #8e8e93; }
+  #feedTime { opacity: .82; font-variant-numeric: tabular-nums; }
+  #ticker.feed-offline .mid, #ticker.feed-offline .bot span { color: #a6a6aa !important; }
+  #ticker.feed-offline { filter: saturate(.45); }
+  #ticker.feed-reconnecting { opacity: .88; }
+  #ticker .mid { margin-top: 3px; font-size: 17px; font-weight: 900; font-family: "SF Mono", Consolas, monospace; transition: color .25s ease; }
+  #ticker .bot { margin-top: 2px; font-size: 11px; font-weight: 800; display: flex; gap: 8px; }
+  #ticker .mid.up, #ticker .up { color: #ff453a; }
+  #ticker .mid.down, #ticker .down { color: #30d158; }
+  #ticker .mid.flat, #ticker .flat { color: #aeaeb2; }
+
+  #petbox { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.3); display: flex; flex-direction: column; align-items: center; pointer-events: auto; -webkit-app-region: no-drag; transform-origin: center center; }
+  #slogan { font-size: 32px; font-weight: 900; letter-spacing: 4px; color: #fff;
+    text-shadow: 0 0 2px rgba(0,0,0,.95), 0 0 4px rgba(0,0,0,.85), 0 0 8px rgba(0,0,0,.7), 0 2px 12px rgba(0,0,0,.6);
+    margin-bottom: 4px; transition: color .4s ease; white-space: pre-line; text-align: center; line-height: 1.08;
+    transform-origin: center bottom; }
+  @keyframes sloganBreathe { 0%,100% { opacity: .72; transform: scale(.96); } 50% { opacity: 1; transform: scale(1.04); } }
+  @keyframes sloganBounce { 0% { opacity: 0; transform: translateY(8px) scale(.88); } 55% { opacity: 1; transform: translateY(-4px) scale(1.06); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes sloganFloat { 0%,100% { transform: translateY(1px); } 50% { transform: translateY(-5px); } }
+  @keyframes sloganGlow { 0% { opacity: .6; filter: brightness(.9); transform: scale(.94); } 60% { opacity: 1; filter: brightness(1.28); transform: scale(1.06); } 100% { opacity: 1; filter: brightness(1); transform: scale(1); } }
+  @keyframes sloganWeekend { 0%,100% { transform: translateY(0) rotate(-.6deg); } 50% { transform: translateY(-4px) rotate(.6deg); } }
+  .slogan-breathe { animation: sloganBreathe 2.6s ease-in-out infinite; }
+  .slogan-bounce { animation: sloganBounce .72s cubic-bezier(.2,.9,.25,1.2) both; }
+  .slogan-float { animation: sloganFloat 2.8s ease-in-out infinite; }
+  .slogan-glow { animation: sloganGlow .95s ease-out both; }
+  .slogan-weekend { animation: sloganWeekend 3.4s ease-in-out infinite; letter-spacing: 3px; }
+  #slogan.up { color: #ff453a; }
+  #slogan.down { color: #30d158; }
+  #slogan.rest { color: #0a84ff; }
+  #slogan.flat { color: #aeaeb2; }
+  #stage { position: relative; width: 192px; height: 208px; }
+  canvas { display: block; width: 192px; height: 208px; }
+
+  /* 涨态截图动效：文字沿弧形环绕牛头，再向外飘散；用 Web Animations API 控制，避免 CSS var 在 keyframes 里失效 */
+  .particle-arc {
+    position: absolute; font-size: 32px; font-weight: 900; pointer-events: none;
+    white-space: nowrap; opacity: 0;
+    color: var(--c, #ff453a);
+    text-shadow:
+      -2px -2px 0 rgba(80,0,0,.85), 2px -2px 0 rgba(80,0,0,.85),
+      -2px  2px 0 rgba(80,0,0,.85), 2px  2px 0 rgba(80,0,0,.85),
+      0 0 10px currentColor, 0 0 24px currentColor;
+    will-change: transform, opacity;
+  }
+  .particle-drop {
+    position: absolute; pointer-events: none; white-space: nowrap; opacity: 0;
+    font-size: 20px; font-weight: 900; color: #30d158;
+    text-shadow: 0 1px 2px rgba(0,0,0,.9), 0 0 9px currentColor;
+    will-change: transform, opacity;
+  }
+  .particle-soft {
+    position: absolute; pointer-events: none; white-space: nowrap; opacity: 0;
+    font-size: 16px; font-weight: 800; color: #ffd166;
+    text-shadow: 0 1px 3px rgba(0,0,0,.65), 0 0 8px currentColor;
+    will-change: transform, opacity;
+  }
+
+  #hud {
+    --hud-offset: 145px;
+    --hud-title-size: 13px;
+    --hud-main-size: 11px;
+    --hud-label-size: 10px;
+    --hud-meta-size: 9px;
+    display: none; /* 桌宠默认隐藏；右键先出快捷菜单，点“更多设置”才展开 */
+    position: absolute; top: 50%; left: calc(50% + var(--hud-offset)); right: auto; bottom: auto;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,.82);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 9px; padding: 7px;
+    box-shadow: 0 7px 22px rgba(0,0,0,.45);
+    backdrop-filter: blur(10px);
+    -webkit-app-region: no-drag;
+    pointer-events: auto;
+    z-index: 40;
+    font-family: "Microsoft YaHei UI", "PingFang SC", "Segoe UI", sans-serif;
+    width: 220px;
+    min-width: 220px;
+    max-width: 220px;
+  }
+  #hud.visible { display: block; }
+  #hud.side-left {
+    left: auto; right: calc(50% + var(--hud-offset));
+  }
+
+  #hud-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; }
+  #hud-title { font-weight: 800; font-size: var(--hud-title-size); line-height: 1.25; }
+  .hud-field { display: flex; flex-direction: column; gap: 4px; margin-top: 7px; font-size: var(--hud-main-size); }
+  .hud-field:first-of-type { margin-top: 0; }
+  .hud-label { font-size: var(--hud-label-size); font-weight: 700; line-height: 1.25; color: rgba(255,255,255,.78); }
+  .hud-field-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .hud-field-head > span { font-size: var(--hud-meta-size); line-height: 1.25; color: rgba(255,255,255,.62); font-variant-numeric: tabular-nums; }
+  #hud input[type="range"] { width: 100%; min-width: 0; }
+  #hud input[type="text"] { width: 100%; min-width: 0; background: rgba(0,0,0,.45); color: #fff; border: 1px solid rgba(255,255,255,.25); border-radius: 6px; padding: 5px 6px; font-size: var(--hud-main-size); outline: none; }
+  #hud input[type="text"]:focus { border-color: rgba(10,132,255,.9); box-shadow: 0 0 0 2px rgba(10,132,255,.15); }
+  .hud-custom-field { gap: 4px; }
+  .hud-query { width: 42px; flex: 0 0 42px; padding: 5px 5px; }
+  .symbol-picker { position: relative; }
+  .symbol-trigger { width: 100%; min-height: 32px; border: 1px solid rgba(255,255,255,.24); border-radius: 7px; padding: 6px 7px; background: rgba(0,0,0,.42); color: #fff; cursor: pointer; display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 6px; align-items: center; text-align: left; font-family: inherit; }
+  .symbol-trigger-name { font-size: var(--hud-main-size); line-height: 1.25; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .symbol-trigger-code { font-size: var(--hud-meta-size); line-height: 1.25; opacity: .65; font-family: "SF Mono", Consolas, monospace; }
+  .symbol-menu { display: none; margin-top: 5px; border: 1px solid rgba(255,255,255,.14); border-radius: 8px; background: rgba(14,14,18,.95); padding: 6px; box-shadow: 0 7px 18px rgba(0,0,0,.3); }
+  .symbol-menu.visible { display: block; }
+  .symbol-menu-head, .recent-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: var(--hud-label-size); line-height: 1.25; font-weight: 800; color: rgba(255,255,255,.72); padding: 2px 2px 5px; }
+  .watch-list { display: flex; flex-direction: column; gap: 4px; max-height: 190px; overflow-y: auto; }
+  .watch-row { min-height: 34px; display: grid; grid-template-columns: 18px minmax(0,1fr) 22px; gap: 4px; align-items: center; border-radius: 6px; background: rgba(255,255,255,.055); border: 1px solid transparent; }
+  .watch-row.current { border-color: rgba(10,132,255,.72); background: rgba(10,132,255,.13); }
+  .watch-row.dragging { opacity: .42; }
+  .watch-grip { cursor: grab; font-size: var(--hud-main-size); text-align: center; opacity: .58; user-select: none; line-height: 1; }
+  .watch-main, .recent-item, .search-result { border: 0; background: transparent; color: #fff; cursor: pointer; text-align: left; min-width: 0; font-family: inherit; }
+  .watch-main { padding: 5px 3px; display: flex; flex-direction: column; gap: 2px; }
+  .watch-name { font-size: var(--hud-main-size); line-height: 1.2; font-weight: 800; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .watch-code { font-size: var(--hud-meta-size); line-height: 1.2; opacity: .58; font-family: "SF Mono", Consolas, monospace; }
+  .watch-remove { border: 0; background: transparent; color: rgba(255,255,255,.55); cursor: pointer; font-size: var(--hud-main-size); line-height: 1; padding: 4px 2px; font-family: inherit; }
+  .watch-remove:hover { color: #ff6b6b; }
+  #watchlistEmpty { display: none; font-size: var(--hud-meta-size); line-height: 1.35; opacity: .58; padding: 7px 3px; text-align: center; }
+  .recent-block { display: none; margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,.09); }
+  .recent-block.visible { display: block; }
+  #recentSymbols { display: flex; flex-direction: column; gap: 3px; }
+  .recent-item { width: 100%; min-height: 28px; padding: 5px 5px; border-radius: 5px; display: flex; align-items: center; justify-content: space-between; gap: 7px; font-size: var(--hud-main-size); line-height: 1.2; }
+  .recent-item:hover, .search-result:hover { background: rgba(255,255,255,.08); }
+  .recent-item code, .search-result code { font-size: var(--hud-meta-size); line-height: 1.2; opacity: .58; font-family: "SF Mono", Consolas, monospace; }
+  .search-row { display: flex; gap: 5px; align-items: stretch; }
+  #searchStatus { min-height: 13px; font-size: var(--hud-meta-size); line-height: 1.35; color: rgba(255,255,255,.62); }
+  #searchStatus.warn { color: #ffd60a; }
+  #searchStatus.error { color: #ff6b6b; }
+  #actionToast { display: none; min-height: 22px; margin-top: 2px; padding: 4px 6px; border-radius: 5px; font-size: var(--hud-meta-size); line-height: 1.3; }
+  #actionToast.visible { display: block; }
+  #actionToast.ok { color: #8ff3a0; background: rgba(48,209,88,.1); border: 1px solid rgba(48,209,88,.24); }
+  #actionToast.warn { color: #ffd60a; background: rgba(255,214,10,.1); border: 1px solid rgba(255,214,10,.24); }
+  #searchResults { display: none; border: 1px solid rgba(255,255,255,.1); border-radius: 6px; padding: 3px; background: rgba(0,0,0,.35); max-height: 116px; overflow-y: auto; }
+  #searchResults.visible { display: block; }
+  .search-result { width: 100%; min-height: 28px; padding: 5px 6px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; gap: 7px; font-size: var(--hud-main-size); line-height: 1.2; }
+  .diag-panel { display: none; margin-top: 6px; border: 1px solid rgba(255,255,255,.12); border-radius: 7px; padding: 6px; background: rgba(0,0,0,.3); }
+  .diag-panel.visible { display: block; }
+  .diag-row { display: flex; justify-content: space-between; gap: 8px; font-size: var(--hud-meta-size); line-height: 1.3; padding: 2px 0; }
+  .diag-row span:first-child { opacity: .55; }
+  .diag-row span:last-child { text-align: right; font-family: "SF Mono", Consolas, monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 130px; }
+  #copyDiag { width: 100%; margin-top: 5px; }
+  #undoToast { display: none; margin-top: 6px; padding: 6px 7px; border-radius: 6px; background: rgba(255,159,10,.15); border: 1px solid rgba(255,159,10,.32); font-size: var(--hud-meta-size); line-height: 1.3; align-items: center; justify-content: space-between; gap: 6px; }
+  #undoToast.visible { display: flex; }
+  #undoDelete { border: 0; background: transparent; color: #ffd60a; font-weight: 800; cursor: pointer; font-size: var(--hud-meta-size); font-family: inherit; }
+  .btn { border: 1px solid rgba(255,255,255,.15); border-radius: 5px; padding: 4px 7px; background: rgba(255,255,255,.08); color: #fff; font-size: 10px; cursor: pointer; }
+  .btn.active { background: rgba(10,132,255,.35); border-color: #0a84ff; }
+  .btn.danger { color: #ff6b6b; border-color: rgba(255,107,107,.35); }
+  .btn.danger:hover { background: rgba(255,107,107,.16); }
+  .btn.close-panel { width: 24px; height: 22px; padding: 0; font-size: 14px; line-height: 1; color: rgba(255,255,255,.82); }
+  .state-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 6px; }
+  .state-btn { border: 1px solid rgba(255,255,255,.12); border-radius: 6px; padding: 4px 2px; background: rgba(255,255,255,.06); color: #fff; font-size: 10px; cursor: pointer; }
+  .state-btn:hover { background: rgba(255,255,255,.12); }
+  .state-btn.active { background: rgba(245,166,35,.2); border-color: #f5a623; }
+
+  /* 第一层：右键快捷菜单。完整设置只从“更多设置”进入。 */
+  #petMenu {
+    display: none; position: fixed; z-index: 50; width: 142px;
+    background: rgba(20,20,24,.94); border: 1px solid rgba(255,255,255,.14);
+    border-radius: 8px; padding: 4px; backdrop-filter: blur(10px);
+    box-shadow: 0 7px 20px rgba(0,0,0,.42);
+    -webkit-app-region: no-drag; pointer-events: auto;
+  }
+  #petMenu.visible { display: block; }
+  .menu-scale-row { display: grid; grid-template-columns: 22px 1fr 22px; gap: 4px; align-items: center; padding: 2px 3px; }
+  .menu-step, .menu-value, .preset-btn {
+    border: 1px solid rgba(255,255,255,.14); border-radius: 6px; cursor: pointer;
+    background: rgba(255,255,255,.07); color: #fff; font-weight: 700;
+    -webkit-app-region: no-drag;
+  }
+  .menu-step { width: 22px; height: 22px; font-size: 13px; line-height: 1; }
+  .menu-value { height: 22px; font-size: 9px; }
+  .menu-step:hover, .menu-value:hover, .preset-btn:hover { background: rgba(255,255,255,.14); }
+  #scalePresets { display: none; grid-template-columns: repeat(4, 1fr); gap: 3px; padding: 2px 3px 4px; }
+  #scalePresets.visible { display: grid; }
+  .preset-btn { padding: 4px 1px; font-size: 9px; }
+  .preset-btn.active { background: rgba(10,132,255,.32); border-color: rgba(10,132,255,.8); }
+  .menu-sep { height: 1px; margin: 3px 3px; background: rgba(255,255,255,.11); }
+  #petMenu .mi {
+    display: block; width: 100%; text-align: left; border: none; cursor: pointer;
+    background: transparent; color: #fff; font-size: 11px; font-weight: 600;
+    padding: 6px 7px; border-radius: 5px;
+  }
+  #petMenu .mi:hover { background: rgba(255,255,255,.09); }
+  #petMenu .mi.danger { color: #ff6b6b; }
+  #petMenu .mi.danger:hover { background: rgba(255,107,107,.16); }
+  #uiScaleFineValue { width: 44px; text-align: right; font-size: 11px; color: rgba(255,255,255,.82); font-variant-numeric: tabular-nums; }
+
+
+  /* 隐藏时间模拟器：只通过 Ctrl+Shift+T 呼出，不占普通设置菜单的位置。 */
+  #timeSimulator {
+    --time-offset: 145px;
+    display: none;
+    position: absolute; top: 50%; left: calc(50% + var(--time-offset)); right: auto;
+    transform: translateY(-50%);
+    width: 276px;
+    padding: 9px;
+    background: rgba(14,14,18,.94);
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 10px;
+    box-shadow: 0 9px 28px rgba(0,0,0,.48);
+    backdrop-filter: blur(12px);
+    -webkit-app-region: no-drag;
+    pointer-events: auto;
+    z-index: 70;
+  }
+  #timeSimulator.visible { display: block; }
+  #timeSimulator.side-left { left: auto; right: calc(50% + var(--time-offset)); }
+  .time-sim-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .time-sim-title { font-size: 12px; font-weight: 900; }
+  .time-sim-close {
+    width: 24px; height: 22px; padding: 0; border: 1px solid rgba(255,255,255,.14);
+    border-radius: 5px; background: rgba(255,255,255,.06); color: rgba(255,255,255,.82);
+    cursor: pointer; font-size: 14px; line-height: 1;
+  }
+  #timeSimulatorStatus {
+    margin-top: 6px; padding: 6px 7px; border-radius: 6px;
+    background: rgba(255,255,255,.055); color: rgba(255,255,255,.78);
+    font-size: 10px; font-variant-numeric: tabular-nums;
+  }
+  #timePresetGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 7px; }
+  .time-preset {
+    min-height: 34px; padding: 5px 3px; border: 1px solid rgba(255,255,255,.13);
+    border-radius: 6px; background: rgba(255,255,255,.06); color: #fff; cursor: pointer;
+    font-size: 10px; font-weight: 750; line-height: 1.18;
+  }
+  .time-preset:hover { background: rgba(255,255,255,.12); }
+  .time-preset.active { background: rgba(10,132,255,.3); border-color: rgba(10,132,255,.9); }
+  .time-preset small { display: block; margin-top: 2px; font-size: 8px; font-weight: 650; opacity: .65; }
+  #realTimeBtn {
+    width: 100%; margin-top: 7px; padding: 7px 8px; border: 1px solid rgba(39,201,63,.42);
+    border-radius: 6px; background: rgba(39,201,63,.1); color: #8ff3a0; cursor: pointer;
+    font-size: 10px; font-weight: 850;
+  }
+  #realTimeBtn:hover, #realTimeBtn.active { background: rgba(39,201,63,.2); border-color: rgba(39,201,63,.8); }
+  .time-sim-tip { margin-top: 6px; text-align: center; color: rgba(255,255,255,.42); font-size: 8px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="bg"></div>
+
+  <div id="petbox">
+    <div id="ticker">
+      <div class="top"><button id="tickerSymbolTrigger" class="ticker-symbol-trigger" type="button" aria-expanded="false"><span class="name" id="idxName">上证指数</span><span id="tickerSymbolChevron" aria-hidden="true">▾</span></button><span class="badge" id="idxBadge"><span id="feedStatusDot" class="sim"></span><span id="idxBadgeText">sh000001</span><span id="feedTime">--:--</span></span></div>
+      <div id="tickerWatchMenu" aria-hidden="true"><div id="tickerWatchItems"></div></div>
+      <div class="mid" id="idxPrice">--</div>
+      <div class="bot"><span id="idxChg" class="flat">--%</span><span id="idxAbs" class="flat">--</span></div>
+    </div>
+    <div id="slogan" class="flat">牛来看盘</div>
+    <div id="stage"><canvas id="pet" width="192" height="208"></canvas></div>
+  </div>
+
+  <div id="hud" aria-label="更多设置">
+    <div id="hud-head">
+      <div id="hud-title">更多设置</div>
+      <button id="closePetInline" class="btn close-panel" type="button" title="关闭设置面板" aria-label="关闭设置面板">×</button>
+    </div>
+    <div class="hud-field">
+      <div class="hud-field-head"><label class="hud-label">标的</label><span id="watchCount">6 / 8</span></div>
+      <div id="symbolPicker" class="symbol-picker">
+        <button id="symbolTrigger" class="symbol-trigger" type="button" aria-expanded="false">
+          <span id="symbolTriggerName" class="symbol-trigger-name">上证指数</span>
+          <span id="symbolTriggerCode" class="symbol-trigger-code">sh000001</span>
+          <span aria-hidden="true">▾</span>
+        </button>
+        <div id="symbolMenu" class="symbol-menu" aria-hidden="true">
+          <div class="symbol-menu-head"><span>我的标的</span><span>拖动排序 · × 删除</span></div>
+          <div id="watchlistItems" class="watch-list"></div>
+          <div id="watchlistEmpty">还没有标的，搜一只看看</div>
+          <div id="recentBlock" class="recent-block">
+            <div class="recent-head"><span>最近查看</span><span>最多 5 个</span></div>
+            <div id="recentSymbols"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hud-field hud-custom-field">
+      <label class="hud-label" for="customSymbol">搜索行情</label>
+      <div class="search-row">
+        <input id="customSymbol" type="text" inputmode="search" autocomplete="off" placeholder="名称 / 代码，如 贵州茅台 / 600519" />
+        <button id="addSymbol" class="btn hud-query" type="button">查</button>
+      </div>
+      <div id="searchStatus"></div>
+      <div id="searchResults"></div>
+      <div id="actionToast" aria-live="polite"></div>
+    </div>
+    <div class="hud-field">
+      <div class="hud-field-head">
+        <label class="hud-label" for="uiScaleRange">大小精调</label>
+        <span id="uiScaleFineValue">130%</span>
+      </div>
+      <input id="uiScaleRange" type="range" min="50" max="200" step="5" value="130" aria-label="界面大小精调" />
+    </div>
+    <div class="hud-field">
+      <button id="diagToggle" class="btn" type="button">行情诊断</button>
+      <div id="marketDiag" class="diag-panel">
+        <div class="diag-row"><span>当前标的</span><span id="diagSymbol">--</span></div>
+        <div class="diag-row"><span>行情源</span><span>新浪</span></div>
+        <div class="diag-row"><span>源行情时间</span><span id="diagQuoteTime">--</span></div>
+        <div class="diag-row"><span>最后接收</span><span id="diagReceived">--</span></div>
+        <div class="diag-row"><span>数据年龄</span><span id="diagAge">--</span></div>
+        <div class="diag-row"><span>请求耗时</span><span id="diagRequest">--</span></div>
+        <div class="diag-row"><span>连续失败</span><span id="diagFailures">0</span></div>
+        <div class="diag-row"><span>刷新周期</span><span id="diagRefresh">--</span></div>
+        <div class="diag-row"><span>连接方式</span><span id="diagTransport">--</span></div>
+        <button id="copyDiag" class="btn" type="button">复制诊断信息</button>
+      </div>
+      <div id="undoToast"><span id="undoText">已移除</span><button id="undoDelete" type="button">撤销</button></div>
+    </div>
+  </div>
+
+  <!-- 隐藏调试工具：Ctrl+Shift+T 呼出。仅改牛来的逻辑时间，不修改系统时间。 -->
+  <div id="timeSimulator" aria-label="时间模拟器" aria-hidden="true">
+    <div class="time-sim-head">
+      <div class="time-sim-title">时间模拟器</div>
+      <button id="timeSimulatorClose" class="time-sim-close" type="button" title="关闭时间模拟器" aria-label="关闭时间模拟器">×</button>
+    </div>
+    <div id="timeSimulatorStatus">真实时间</div>
+    <div id="timePresetGrid">
+      <button class="time-preset" type="button" data-time-preset="closed">休息<small>周一 08:30</small></button>
+      <button class="time-preset" type="button" data-time-preset="preopen">开盘准备<small>周一 09:27</small></button>
+      <button class="time-preset" type="button" data-time-preset="am-trading">上午盘<small>周一 10:00</small></button>
+      <button class="time-preset" type="button" data-time-preset="lunch-prompt">午饭提醒<small>周一 11:35</small></button>
+      <button class="time-preset" type="button" data-time-preset="lunch">午休<small>周一 12:00</small></button>
+      <button class="time-preset" type="button" data-time-preset="afternoon">下午准备<small>周一 12:57</small></button>
+      <button class="time-preset" type="button" data-time-preset="pm-trading">下午盘<small>周一 14:00</small></button>
+      <button class="time-preset" type="button" data-time-preset="close">收盘<small>周一 15:05</small></button>
+      <button class="time-preset" type="button" data-time-preset="review">复盘<small>周一 15:30</small></button>
+      <button class="time-preset" type="button" data-time-preset="offwork">下班<small>周一 17:00</small></button>
+      <button class="time-preset" type="button" data-time-preset="evening">晚间<small>周一 18:00</small></button>
+      <button class="time-preset" type="button" data-time-preset="weekend">周末<small>周六 10:00</small></button>
+    </div>
+    <button id="realTimeBtn" type="button">恢复真实时间</button>
+    <div class="time-sim-tip">Ctrl+Shift+T 显示 / 隐藏 · 不修改系统时间</div>
+  </div>
+
+  <!-- 第一层：右键快捷菜单 -->
+  <div id="petMenu" role="menu" aria-label="牛来快捷菜单">
+    <div class="menu-scale-row">
+      <button class="menu-step" id="scaleMinus" type="button" title="缩小 10%">−</button>
+      <button class="menu-value" id="scaleValue" type="button" title="选择预设大小">130%</button>
+      <button class="menu-step" id="scalePlus" type="button" title="放大 10%">+</button>
+    </div>
+    <div id="scalePresets" aria-label="预设大小">
+      <button class="preset-btn" type="button" data-scale="80">80%</button>
+      <button class="preset-btn" type="button" data-scale="100">100%</button>
+      <button class="preset-btn" type="button" data-scale="130">130%</button>
+      <button class="preset-btn" type="button" data-scale="160">160%</button>
+    </div>
+    <div class="menu-sep"></div>
+    <button class="mi" id="moreSettings" type="button">⚙ 更多设置</button>
+    <button class="mi danger" id="closePet" type="button">✕ 关闭牛来</button>
+  </div>
+</div>
+
+<script>
+// 诊断：仅输出到控制台，不再在牛身下方显示调试条
+(function(){
+  window.__diag = (msg) => { console.log('[diag] ' + msg); };
+  window.__diag('启动中…');
+  window.addEventListener('error', (e) => {
+    const m = '[window.error] ' + (e.message || e.error || 'unknown') + (e.filename ? ' @ ' + e.filename + ':' + e.lineno : '');
+    console.error(m);
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    const m = '[promise rejection] ' + (e.reason && e.reason.message ? e.reason.message : e.reason);
+    console.error(m);
+  });
+})();
+</script>
+
+<script>
+(() => {
+  // 优先用主进程注入的绝对 file:// 路径；fallback 保持相对路径以兼容浏览器直接打开
+  const SPRITESHEET = (typeof window !== 'undefined' && window.__SPRITE_URL) ? window.__SPRITE_URL : './spritesheet.webp';
+  const CELL_W = 192, CELL_H = 208;
+  const STATES = [
+    { id: 'idle', name: 'Idle', row: 0, frames: 7 },
+    { id: 'running-right', name: 'Run →', row: 1, frames: 8 },
+    { id: 'running-left', name: 'Run ←', row: 2, frames: 8 },
+    { id: 'waving', name: 'Wave', row: 3, frames: 4 },
+    { id: 'jumping', name: 'Jump', row: 4, frames: 5 },
+    { id: 'failed', name: 'Failed', row: 5, frames: 8 },
+    { id: 'waiting', name: 'Waiting', row: 6, frames: 6 },
+    { id: 'review', name: 'Review', row: 7, frames: 6 },
+    { id: 'thinking', name: 'Thinking', row: 8, frames: 6 },
+    { id: 'swaying', name: 'Swaying', row: 9, frames: 8 },
+    { id: 'turning', name: 'Turning', row: 10, frames: 8 }
+  ];
+  const stateById = Object.fromEntries(STATES.map(s => [s.id, s]));
+
+  const TIME_PRESETS = [
+    { id: 'closed',       label: '休息',     day: 1, hour: 8,  minute: 30 },
+    { id: 'preopen',      label: '开盘准备', day: 1, hour: 9,  minute: 27 },
+    { id: 'am-trading',   label: '上午盘',   day: 1, hour: 10, minute: 0  },
+    { id: 'lunch-prompt', label: '午饭提醒', day: 1, hour: 11, minute: 35 },
+    { id: 'lunch',        label: '午休',     day: 1, hour: 12, minute: 0  },
+    { id: 'afternoon',    label: '下午准备', day: 1, hour: 12, minute: 57 },
+    { id: 'pm-trading',   label: '下午盘',   day: 1, hour: 14, minute: 0  },
+    { id: 'close',        label: '收盘',     day: 1, hour: 15, minute: 5  },
+    { id: 'review',       label: '复盘',     day: 1, hour: 15, minute: 30 },
+    { id: 'offwork',      label: '下班',     day: 1, hour: 17, minute: 0  },
+    { id: 'evening',      label: '晚间',     day: 1, hour: 18, minute: 0  },
+    { id: 'weekend',      label: '周末',     day: 6, hour: 10, minute: 0  },
+  ];
+  const timePresetById = Object.fromEntries(TIME_PRESETS.map(p => [p.id, p]));
+
+  let currentState = STATES[0];
+  let frameIndex = 0, lastFrameTime = 0, speed = 1, uiScalePercent = 130;
+  let simMode = true, restMode = false, currentSymbol = 'sh000001';
+  let simPrice = 3200.00, simPrevClose = 3200.00; // 初始持平，避免启动瞬间先闪涨态红色
+  let lastDir = 'flat';
+  let lastPrice = simPrice, lastPrevClose = simPrevClose;
+  let lastMarketEffectDir = null, lastMarketEffectAt = 0;
+  const MARKET_EFFECT_COOLDOWN = 30000;
+  let sessionSeqTimer = null;
+  let currentPhase = null, manualRest = false;
+  let logicalNowOverride = null, activeTimePresetId = null;
+  let webFeedTimer = null;
+  const WATCHLIST_MAX = 8;
+  const WATCHLIST_KEY = 'niulai.watchlist.v1';
+  const RECENT_KEY = 'niulai.recentSymbols.v1';
+  const CURRENT_SYMBOL_KEY = 'niulai.currentSymbol.v1';
+  const DEFAULT_WATCHLIST = [
+    { symbol: 'sh000001', name: '上证指数' },
+    { symbol: 'sz399001', name: '深证成指' },
+    { symbol: 'sh000688', name: '科创50' },
+    { symbol: 'sh000300', name: '沪深300' },
+    { symbol: 'sh000016', name: '上证50' },
+    { symbol: 'sh000905', name: '中证500' },
+  ];
+  let watchlist = [];
+  let recentSymbols = [];
+  let lastDeletedWatch = null;
+  let undoTimer = null;
+  let actionToastTimer = null;
+  let searchSeq = 0, searchTimer = null, currentSearchResults = [];
+  let lastQuoteMeta = { quoteDate: '', quoteTime: '', receivedAt: '', requestMs: 0, transport: '' };
+  let lastFeedStatus = { state: 'sim', consecutiveFailures: 0, nextRefreshMs: 0, requestMs: 0, transport: '' };
+  let previousFeedState = 'sim';
+  let lastFreshnessClass = 'sim';
+  const FEED_OFFLINE_LABEL = '行情中断';
+
+  const canvas = document.getElementById('pet');
+  const ctx = canvas.getContext('2d');
+  const stage = document.getElementById('stage');
+  const bg = document.getElementById('bg');
+  const slogan = document.getElementById('slogan');
+  const idxName = document.getElementById('idxName');
+  const idxBadge = document.getElementById('idxBadge');
+  const idxBadgeText = document.getElementById('idxBadgeText');
+  const feedStatusDot = document.getElementById('feedStatusDot');
+  const feedTime = document.getElementById('feedTime');
+  const idxPrice = document.getElementById('idxPrice');
+  const idxChg = document.getElementById('idxChg');
+  const idxAbs = document.getElementById('idxAbs');
+  const timeSimulator = document.getElementById('timeSimulator');
+  const timeSimulatorStatus = document.getElementById('timeSimulatorStatus');
+  const realTimeBtn = document.getElementById('realTimeBtn');
+
+  const img = new Image(); img.src = SPRITESHEET;
+  console.log('[pet] SPRITESHEET =', SPRITESHEET);
+  img.onload = () => {
+    console.log('[pet] spritesheet loaded OK:', SPRITESHEET, 'size', img.naturalWidth + 'x' + img.naturalHeight);
+    if (window.__diag) window.__diag('精灵图已加载 OK ' + img.naturalWidth + 'x' + img.naturalHeight);
+    requestAnimationFrame(loop);
+  };
+  img.onerror = () => {
+    const msg = '[pet] spritesheet FAILED to load: ' + SPRITESHEET;
+    console.error(msg);
+    if (window.__diag) window.__diag('精灵图加载失败: ' + SPRITESHEET);
+    ctx.fillStyle = '#f5a623'; ctx.font = '14px sans-serif'; ctx.fillText('找不到 spritesheet.webp', 10, 30);
+  };
+  // 看门狗：若 6s 内既没 onload 也没 onerror（极少数卡死场景），给出明确提示
+  setTimeout(() => {
+    if (!img.complete) {
+      const m = '[pet] 6s 超时：精灵图既未加载也未报错，路径=' + SPRITESHEET;
+      console.error(m);
+      if (window.__diag) window.__diag('精灵图加载超时(卡死) ' + SPRITESHEET);
+    }
+  }, 6000);
+
+  function draw() { ctx.clearRect(0,0,CELL_W,CELL_H); if (!img.complete || !img.naturalWidth) return; ctx.drawImage(img, frameIndex*CELL_W, currentState.row*CELL_H, CELL_W, CELL_H, 0, 0, CELL_W, CELL_H); }
+  function setState(id) { if (!stateById[id]) return; currentState = stateById[id]; frameIndex = 0; if (document.getElementById('stateGrid')) renderButtons(); }
+  const petbox = document.getElementById('petbox');
+  const SCALE_MIN = 50, SCALE_MAX = 200;
+  let scaleCommitTimer = null;
+
+  function clampScalePercent(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return uiScalePercent;
+    return Math.max(SCALE_MIN, Math.min(SCALE_MAX, Math.round(n)));
+  }
+
+  function syncScaleControls() {
+    const valueBtn = document.getElementById('scaleValue');
+    const range = document.getElementById('uiScaleRange');
+    const fineValue = document.getElementById('uiScaleFineValue');
+    if (valueBtn) valueBtn.textContent = `${uiScalePercent}%`;
+    if (range && document.activeElement !== range) range.value = String(uiScalePercent);
+    if (fineValue) fineValue.textContent = `${uiScalePercent}%`;
+    document.querySelectorAll('#scalePresets [data-scale]').forEach(btn => {
+      btn.classList.toggle('active', Number(btn.dataset.scale) === uiScalePercent);
+    });
+  }
+
+  // 所有缩放入口统一走这里。commit:false 只缩放牛和行情本体，不动设置面板、不扩窗，避免滑杆拖动时布局反复抖动。
+  function setUIScale(value, { commit = true } = {}) {
+    uiScalePercent = clampScalePercent(value);
+    const factor = uiScalePercent / 100;
+    petbox.style.transform = `translate(-50%, -50%) scale(${factor})`;
+    syncScaleControls();
+    if (commit) commitUIScale();
+  }
+  window.setUIScale = setUIScale;
+
+  // 连续预览结束后只做一次布局提交：重算侧栏位置，再按最终包围盒调整 Electron 窗口。
+  function commitUIScale() {
+    if (hud && hud.classList.contains('visible')) positionSettingsPanel();
+    if (timeSimulator && timeSimulator.classList.contains('visible')) positionTimeSimulator();
+    requestAnimationFrame(reportSize);
+  }
+
+  function scheduleScaleCommit() {
+    if (scaleCommitTimer) clearTimeout(scaleCommitTimer);
+    scaleCommitTimer = setTimeout(() => {
+      scaleCommitTimer = null;
+      commitUIScale();
+    }, 180);
+  }
+
+  // 计算“以窗口中心为锚点”的最小窗口尺寸。
+  // petbox / HUD 都围绕 50% 中心定位，所以不能只用 maxX-minX：
+  // 当 HUD 在左侧时，单纯增加窗口宽度只会让左边界每次回收一半，导致面板永远还剩一截在窗口外。
+  function computeCenteredContentSize(rects, viewportWidth, viewportHeight, horizontalMargin = 36, verticalMargin = 44) {
+    const centerX = viewportWidth / 2;
+    const centerY = viewportHeight / 2;
+    let maxHalfWidth = 0, maxHalfHeight = 0;
+    for (const r of rects) {
+      if (r.width === 0 && r.height === 0) continue;
+      maxHalfWidth = Math.max(maxHalfWidth, centerX - r.left, r.right - centerX);
+      maxHalfHeight = Math.max(maxHalfHeight, centerY - r.top, r.bottom - centerY);
+    }
+    if (!Number.isFinite(maxHalfWidth) || !Number.isFinite(maxHalfHeight)) return { width: 240, height: 240 };
+    return {
+      width: Math.max(240, Math.ceil((maxHalfWidth + horizontalMargin) * 2)),
+      height: Math.max(240, Math.ceil((maxHalfHeight + verticalMargin) * 2)),
+    };
+  }
+
+  // 通知 Electron 主进程按内容调整窗口大小，保持透明矩形区域紧贴牛、panel 和 ticker
+  let lastReported = null; // 上一轮已下发的窗口尺寸，用于幂等去抖
+  function reportSize() {
+    if (dragging) return; // 拖拽中跳过：避免中途 resize 顶动窗口位置造成跳变
+    if (!window.__inElectron || typeof require === 'undefined') return;
+    // 计算所有可见元素的包围盒并集：#petbox + #ticker + 贴在牛侧边的 #hud。
+    // 用「逻辑状态 restMode」而非瞬时 display 决定是否为 ticker 留位置，避免过渡态把窗口算小导致面板被裁
+    const rects = [petbox.getBoundingClientRect()];
+    const ticker = document.getElementById('ticker');
+    if (ticker && !restMode) rects.push(ticker.getBoundingClientRect());
+    const hud = document.getElementById('hud');
+    if (hud && hud.classList.contains('visible')) rects.push(hud.getBoundingClientRect());
+    if (timeSimulator && timeSimulator.classList.contains('visible')) rects.push(timeSimulator.getBoundingClientRect());
+    // 横向和纵向都按“离窗口中心最远的一侧”对称计算。
+    // petbox 本身锚在 BrowserWindow 中心；若只按内容总高度，200% 等高倍率会把偏上的 ticker 推出透明窗口。
+    const size = computeCenteredContentSize(rects, window.innerWidth, window.innerHeight);
+    const w = size.width;
+    const h = size.height;
+    // 幂等去抖：尺寸变化 < 3px 视为同一状态，不再下发 resize，杜绝亚像素偏差引发的反复 setBounds 抖动
+    if (lastReported && Math.abs(lastReported.w - w) < 3 && Math.abs(lastReported.h - h) < 3) return;
+    lastReported = { w, h };
+    require('electron').ipcRenderer.send('resize-to-content', w, h);
+  }
+  window.reportSize = reportSize; // 供主进程在注入 __inElectron 后显式触发
+
+  function renderButtons() {
+    const grid = document.getElementById('stateGrid'); grid.innerHTML = '';
+    STATES.forEach(s => { const b=document.createElement('button'); b.className='state-btn'+(s.id===currentState.id?' active':''); b.textContent=s.name; b.onclick=()=>setState(s.id); grid.appendChild(b); });
+  }
+
+  function spawnParticles(text, color, count=4) {
+    const box = document.getElementById('petbox');
+    for (let i=0;i<count;i++) {
+      const p = document.createElement('div'); p.className='particle'; p.textContent=text; p.style.color=color;
+      p.style.left = (60 + Math.random()*80) + 'px';
+      p.style.top = (20 + Math.random()*40) + 'px';
+      p.style.animationDelay = (Math.random()*0.4)+'s';
+      box.appendChild(p);
+      setTimeout(() => p.remove(), 1500);
+    }
+  }
+
+  // 涨态截图动效：不规则扇形散射——从牛头中心向外，内大外小、随机角度/半径/字号
+  function spawnArcParticles(text, color, count=10) {
+    const stage = document.getElementById('stage');
+    // 粒子坐标必须使用 stage 的本地 192×208 坐标。getBoundingClientRect() 已含 petbox scale，
+    // 再把那个尺寸写回被 scale 的 stage 会造成二次缩放，倍率越高漂得越远。
+    const cx = CELL_W / 2;
+    const cy = CELL_H / 2 - 12; // 扇形焦点（牛头附近）
+    const startAngle = -158 * Math.PI / 180;
+    const endAngle = -22 * Math.PI / 180;
+    const scaleGuard = Math.min(1, Math.sqrt(130 / Math.max(130, uiScalePercent)));
+    const minR = 24 * scaleGuard, maxR = 96 * scaleGuard;
+    const minSize = 17 * scaleGuard, maxSize = 38 * scaleGuard;
+
+    // 生成随机点：半径越小事越大、越实；按半径由内到外排序，做出“从内圈向外”涌现感
+    const pts = [];
+    for (let i = 0; i < count; i++) {
+      const rr = Math.random(); // 0=内, 1=外
+      const angle = startAngle + Math.random() * (endAngle - startAngle);
+      const radius = minR + Math.pow(rr, 0.8) * (maxR - minR); // 略偏内，但分布随机
+      const baseSize = maxSize - rr * (maxSize - minSize);
+      const size = Math.max(minSize, Math.round(baseSize * (0.75 + Math.random() * 0.5)));
+      const peak = Math.max(0.55, 1 - rr * 0.45); // 内实外淡
+      pts.push({ angle, radius, size, peak });
+    }
+    pts.sort((a, b) => a.radius - b.radius);
+
+    pts.forEach((p, i) => {
+      const x = cx + p.radius * Math.cos(p.angle);
+      const y = cy + p.radius * Math.sin(p.angle);
+      const drift = p.radius * 0.26; // 越外飘得越远，但高倍率下不再甩出半个屏幕
+      const tx = drift * Math.cos(p.angle);
+      const ty = drift * Math.sin(p.angle);
+      const rot = (p.angle + Math.PI / 2) * 180 / Math.PI;
+      const el = document.createElement('div');
+      el.className = 'particle-arc';
+      el.textContent = text;
+      el.style.color = color;
+      el.style.fontSize = p.size + 'px';
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      el.style.transform = `translate(-50%,-50%) rotate(${rot}deg)`;
+      stage.appendChild(el);
+      const anim = el.animate([
+        { opacity: 0, transform: `translate(-50%,-50%) rotate(${rot}deg) scale(0.6)` },
+        { opacity: p.peak, transform: `translate(-50%,-50%) rotate(${rot}deg) scale(1)` },
+        { opacity: 0, left: `${x + tx}px`, top: `${y + ty}px`, transform: `translate(-50%,-50%) rotate(${rot}deg) scale(1.18)` }
+      ], {
+        duration: 1500,
+        easing: 'cubic-bezier(.25,.8,.25,1)',
+        delay: i * 55, // 由内向外依次出现
+        fill: 'forwards'
+      });
+      anim.onfinish = () => el.remove();
+    });
+  }
+
+  function spawnDropParticles(text, color, count=5) {
+    const scaleGuard = Math.min(1, Math.sqrt(130 / Math.max(130, uiScalePercent)));
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.className = 'particle-drop';
+      el.textContent = text;
+      el.style.color = color;
+      el.style.fontSize = `${Math.round((17 + Math.random() * 8) * scaleGuard)}px`;
+      const x = CELL_W / 2 + (Math.random() - .5) * 92 * scaleGuard;
+      const y = CELL_H / 2 - 46 + (Math.random() - .5) * 24 * scaleGuard;
+      const dx = (Math.random() - .5) * 24 * scaleGuard;
+      const dy = (26 + Math.random() * 28) * scaleGuard;
+      const rot = -8 + Math.random() * 16;
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+      stage.appendChild(el);
+      const anim = el.animate([
+        { opacity: 0, transform: `translate(-50%,-50%) rotate(${rot}deg) translateY(-6px) scale(.9)` },
+        { opacity: .92, offset: .25, transform: `translate(-50%,-50%) rotate(${rot}deg) translateY(0) scale(1)` },
+        { opacity: 0, left: `${x + dx}px`, top: `${y + dy}px`, transform: `translate(-50%,-50%) rotate(${rot + 4}deg) scale(.92)` }
+      ], { duration: 1150, delay: i * 75, easing: 'cubic-bezier(.2,.65,.3,1)', fill: 'forwards' });
+      anim.onfinish = () => el.remove();
+    }
+  }
+
+  function spawnSoftParticles(text, color, count=3) {
+    const scaleGuard = Math.min(1, Math.sqrt(130 / Math.max(130, uiScalePercent)));
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.className = 'particle-soft';
+      el.textContent = text;
+      el.style.color = color;
+      el.style.fontSize = `${Math.round((13 + Math.random() * 5) * scaleGuard)}px`;
+      const x = CELL_W / 2 + (Math.random() - .5) * 104 * scaleGuard;
+      const y = CELL_H / 2 - 58 + Math.random() * 58 * scaleGuard;
+      const dx = (Math.random() - .5) * 18 * scaleGuard;
+      const dy = -(18 + Math.random() * 24) * scaleGuard;
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+      stage.appendChild(el);
+      const anim = el.animate([
+        { opacity: 0, transform: 'translate(-50%,-50%) scale(.92)' },
+        { opacity: .58, offset: .35, transform: 'translate(-50%,-50%) scale(1)' },
+        { opacity: 0, left: `${x + dx}px`, top: `${y + dy}px`, transform: 'translate(-50%,-50%) scale(1.06)' }
+      ], { duration: 1800, delay: i * 180, easing: 'ease-out', fill: 'forwards' });
+      anim.onfinish = () => el.remove();
+    }
+  }
+
+  function shouldTriggerMarketEffect(dir, changePct, nowMs = Date.now()) {
+    const directionChanged = dir !== lastMarketEffectDir;
+    const strongMove = Math.abs(changePct) >= 1;
+    const cooldownReady = nowMs - lastMarketEffectAt >= MARKET_EFFECT_COOLDOWN;
+    if (!directionChanged && !(strongMove && cooldownReady)) return false;
+    lastMarketEffectDir = dir;
+    lastMarketEffectAt = nowMs;
+    return true;
+  }
+
+  function setTheme(dir) {
+    lastDir = dir;
+    bg.className = dir;
+    slogan.className = dir;
+    idxPrice.className = 'mid ' + (dir==='up' ? 'up' : dir==='down' ? 'down' : dir==='rest' ? 'flat' : 'flat');
+    const color = dir==='up' ? '#ff453a' : dir==='down' ? '#30d158' : dir==='rest' ? '#0a84ff' : '#aeaeb2';
+    idxChg.className = dir==='up' ? 'up' : dir==='down' ? 'down' : 'flat';
+    idxAbs.className = idxChg.className;
+    return color;
+  }
+
+  function setTicker(name, symbol, price, changePct, timeStr) {
+    idxName.textContent = name;
+    idxBadgeText.textContent = symbol || '--';
+    idxPrice.textContent = price.toFixed(2);
+    const sign = changePct > 0 ? '+' : '';
+    idxChg.textContent = `${sign}${changePct.toFixed(2)}%`;
+    idxAbs.textContent = `${sign}${(price - price/(1+changePct/100)).toFixed(2)}`;
+    if (timeStr) feedTime.textContent = timeStr;
+    // 行情文字刷新不改变窗口尺寸：ticker 已固定宽度，避免每次报价触发 Electron setBounds。
+  }
+
+  function applyMarket(price, prevClose, source='模拟') {
+    if (restMode) return; // 休市时只看数字，背景和姿态不变
+    lastPrice = price; lastPrevClose = prevClose;
+    const changePct = ((price - prevClose)/prevClose)*100;
+    const dir = changePct > 0.05 ? 'up' : changePct < -0.05 ? 'down' : 'flat';
+    const color = setTheme(dir);
+    const now = getLogicalNow();
+    const logicalTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const sourceTime = source === '真实' && lastQuoteMeta.quoteTime ? lastQuoteMeta.quoteTime.slice(0,5) : logicalTime;
+    setTicker(source==='模拟' ? '上证指数(模拟)' : window.lastMarketName || '上证指数', currentSymbol, price, changePct, sourceTime);
+    if (source === '模拟') { feedStatusDot.className = 'sim'; feedTime.textContent = logicalTime; }
+
+    const triggerEffect = shouldTriggerMarketEffect(dir, changePct);
+    if (dir === 'up') {
+      setState('jumping'); setSlogan('', color); // 涨：红橙弧形爆字
+      if (triggerEffect) spawnArcParticles('牛来', color);
+    } else if (dir === 'down') {
+      setState('failed'); setSlogan('', color); // 跌：绿色文字轻微下沉，不再完全静默
+      if (triggerEffect) spawnDropParticles('稳住', color);
+    } else {
+      setState('idle'); setSlogan('再等等…', color, 'breathe');
+    }
+  }
+
+  function setSlogan(text, color, effect = '') {
+    slogan.textContent = text;
+    slogan.style.color = color;
+    slogan.className = lastDir || 'flat';
+    if (effect) slogan.classList.add(`slogan-${effect}`);
+  }
+
+  function stepSimulation() {
+    if (restMode) return;
+    const jitter = (Math.random()-0.5)*3.5;
+    simPrice = Math.max(3100, simPrice + jitter);
+    applyMarket(simPrice, simPrevClose, '模拟');
+  }
+
+  // 播一个状态，播完后（按帧数*速度估算时长）执行 then
+  function playState(id, then) {
+    setState(id);
+    if (then) {
+      const st = stateById[id];
+      const dur = (st.frames * 120 / speed) + 80;
+      clearTimeout(sessionSeqTimer);
+      sessionSeqTimer = setTimeout(then, dur);
+    }
+  }
+
+  // 顺序循环保留给需要明确叙事顺序的状态。
+  function startStateLoop(seq) {
+    clearTimeout(sessionSeqTimer);
+    let k = 0;
+    const stepFn = () => {
+      const id = seq[k % seq.length];
+      setState(id);
+      const st = stateById[id];
+      const dur = st.frames * 120 / speed;
+      k++;
+      sessionSeqTimer = setTimeout(stepFn, dur);
+    };
+    stepFn();
+  }
+
+  function pickNextState(pool, recent = []) {
+    if (!Array.isArray(pool) || pool.length === 0) return 'idle';
+    let candidates = pool.filter(id => !recent.includes(id));
+    if (candidates.length === 0) candidates = pool.filter(id => id !== recent[0]);
+    if (candidates.length === 0) candidates = pool.slice();
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
+
+  // 生活态用随机动作池，并避开最近两个动作，解决固定两招来回播的机械感。
+  function startRandomStateLoop(pool) {
+    clearTimeout(sessionSeqTimer);
+    let recent = [];
+    const stepFn = () => {
+      const id = pickNextState(pool, recent);
+      setState(id);
+      recent = [id, ...recent].slice(0, 2);
+      const st = stateById[id];
+      const dur = st.frames * 120 / speed + 80 + Math.random() * 260;
+      sessionSeqTimer = setTimeout(stepFn, dur);
+    };
+    stepFn();
+  }
+
+  function startRestLoop() { startRandomStateLoop(['waiting', 'idle', 'swaying', 'turning']); }
+
+  // 停止生活状态循环（进入交易态时调用）；清掉未触发的定时器即可。
+  function stopRestLoop() { clearTimeout(sessionSeqTimer); }
+
+  // 逻辑时钟：默认跟随系统时间；时间模拟器启用后只替换牛来的“判时”，不碰 Windows 系统时钟。
+  function getLogicalNow() {
+    return logicalNowOverride ? new Date(logicalNowOverride.getTime()) : new Date();
+  }
+
+  function makePresetDate(preset, base = new Date()) {
+    const d = new Date(base.getTime());
+    d.setDate(d.getDate() + (preset.day - d.getDay()));
+    d.setHours(preset.hour, preset.minute, 0, 0);
+    return d;
+  }
+
+  function formatLogicalClock(d) {
+    const weekdays = ['周日','周一','周二','周三','周四','周五','周六'];
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    const ss = String(d.getSeconds()).padStart(2, '0');
+    return `${weekdays[d.getDay()]} ${hh}:${mm}:${ss}`;
+  }
+
+  function syncTimeSimulatorUI() {
+    if (!timeSimulatorStatus || !realTimeBtn) return;
+    const now = getLogicalNow();
+    if (logicalNowOverride) {
+      const preset = timePresetById[activeTimePresetId];
+      timeSimulatorStatus.textContent = `模拟时间：${formatLogicalClock(now)}${preset ? ' · ' + preset.label : ''}`;
+    } else {
+      timeSimulatorStatus.textContent = `真实时间：${formatLogicalClock(now)}`;
+    }
+    document.querySelectorAll('[data-time-preset]').forEach(btn => {
+      btn.classList.toggle('active', logicalNowOverride && btn.dataset.timePreset === activeTimePresetId);
+    });
+    realTimeBtn.classList.toggle('active', !logicalNowOverride);
+  }
+
+  function setTimePreset(id) {
+    const preset = timePresetById[id];
+    if (!preset) return false;
+    logicalNowOverride = makePresetDate(preset);
+    activeTimePresetId = id;
+    manualRest = false;
+    currentPhase = null; // 强制重新播放该时段对应动作/口号
+    evaluatePhase();
+    syncTimeSimulatorUI();
+    if (timeSimulator && timeSimulator.classList.contains('visible')) positionTimeSimulator();
+    requestAnimationFrame(reportSize);
+    return true;
+  }
+
+  function useRealTime() {
+    logicalNowOverride = null;
+    activeTimePresetId = null;
+    manualRest = false;
+    currentPhase = null;
+    evaluatePhase();
+    syncTimeSimulatorUI();
+    if (timeSimulator && timeSimulator.classList.contains('visible')) positionTimeSimulator();
+    requestAnimationFrame(reportSize);
+  }
+
+  window.__setTimePreset = setTimePreset;
+  window.__useRealTime = useRealTime;
+
+  // WorkBuddy 工作日状态。全部使用电脑本地时间；这里只判断周一到周五，不额外维护法定节假日表。
+  // 时间段：09:25准备开盘 / 09:30-11:30交易 / 11:30午饭提示 / 11:40午休 /
+  // 12:55下午开工 / 13:00-15:00交易 / 15:00收盘 / 15:10复盘 /
+  // 16:55-17:15下班 / 17:15以后晚间休息。
+  function getWorkBuddyPhaseAt(d = new Date()) {
+    const day = d.getDay();
+    if (day === 0 || day === 6) return 'weekend';
+    const m = d.getHours() * 60 + d.getMinutes();
+
+    if (m < 9 * 60 + 25) return 'closed';
+    if (m < 9 * 60 + 30) return 'preopen';
+    if (m < 11 * 60 + 30) return 'trading';
+    if (m < 11 * 60 + 40) return 'lunch-prompt';
+    if (m < 12 * 60 + 55) return 'lunch';
+    if (m < 13 * 60) return 'afternoon';
+    if (m < 15 * 60) return 'trading';
+    if (m < 15 * 60 + 10) return 'close';
+    if (m < 16 * 60 + 55) return 'review';
+    if (m < 17 * 60 + 15) return 'offwork';
+    return 'evening';
+  }
+
+  function marketPhase() { return getWorkBuddyPhaseAt(getLogicalNow()); }
+
+  // 牛来的一天：交易态仍由 applyMarket 根据涨跌控制动作；生活态负责文字和非交易动画。
+  function applyPhase(phase) {
+    if (phase === currentPhase) return; // 相位未变不重复触发
+    currentPhase = phase;
+    restMode = (phase !== 'trading') || manualRest;
+    const rb = document.getElementById('restBtn'); if (rb) rb.classList.toggle('active', restMode);
+    // 只有交易时显示行情面板。生活状态只显示牛和口号，避免行情刷新抢戏。
+    document.getElementById('ticker').style.display = restMode ? 'none' : 'block';
+    if (timeSimulator && timeSimulator.classList.contains('visible')) positionTimeSimulator();
+    requestAnimationFrame(reportSize); // panel 显隐属于结构变化，布局完成后只同步一次窗口大小
+
+    if (phase === 'preopen') {
+      stopRestLoop();
+      const color = setTheme(lastDir || 'flat');
+      setSlogan('准备开盘！', color);
+      setState('running-right');
+    } else if (phase === 'trading') {
+      stopRestLoop();
+      resumeTrading();
+    } else if (phase === 'lunch-prompt') {
+      const color = setTheme('rest');
+      setSlogan('吃饭啦～', '#ff9f0a', 'bounce');
+      playState('waving', () => { if (currentPhase === 'lunch-prompt') startRandomStateLoop(['waiting', 'swaying', 'turning']); });
+    } else if (phase === 'lunch') {
+      const color = setTheme('rest');
+      setSlogan('午休中…', '#64d2ff', 'breathe');
+      startRandomStateLoop(['waiting', 'swaying', 'turning']);
+    } else if (phase === 'afternoon') {
+      stopRestLoop();
+      const color = setTheme(lastDir || 'flat');
+      setSlogan('继续干活！', color);
+      setState('running-left');
+    } else if (phase === 'close') {
+      const color = setTheme('rest');
+      setSlogan('收盘啦', '#ffd166', 'glow');
+      playState('waving', () => { if (currentPhase === 'close') setState('review'); });
+    } else if (phase === 'review') {
+      const color = setTheme('rest');
+      setSlogan('复盘中…', '#bf5af2', 'float');
+      startRandomStateLoop(['review', 'thinking', 'waiting']);
+    } else if (phase === 'offwork') {
+      const color = '#f5a623';
+      setTheme('rest');
+      const isFriday = getLogicalNow().getDay() === 5;
+      setSlogan(isFriday ? '周末啦！' : '下班啦！', color);
+      playState('waving', () => { if (currentPhase === 'offwork') startRandomStateLoop(['waving', 'waiting', 'turning', 'idle']); });
+    } else if (phase === 'weekend') {
+      const color = setTheme('rest');
+      setSlogan('歇着吧\n今日不开盘', '#ffd166', 'weekend');
+      spawnSoftParticles('歇', '#ffd166', 3);
+      startRandomStateLoop(['waiting', 'idle', 'swaying', 'turning', 'waving']);
+    } else if (phase === 'evening') {
+      const color = setTheme('rest');
+      setSlogan('明天见～', '#64d2ff', 'float');
+      startRandomStateLoop(['idle', 'waiting', 'swaying', 'turning']);
+    } else { // closed：工作日早晨等普通休息时段
+      const color = setTheme('rest');
+      setSlogan('休息中…', color);
+      startRestLoop();
+    }
+  }
+
+  function evaluatePhase() {
+    applyPhase(manualRest ? 'closed' : marketPhase());
+  }
+
+  function resumeTrading() {
+    applyMarket(lastPrice, lastPrevClose, simMode ? '模拟' : '真实');
+  }
+
+
+
+  function safeLoadJSON(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw === null) return typeof fallback === 'function' ? fallback() : fallback;
+      return JSON.parse(raw);
+    } catch (_) { return typeof fallback === 'function' ? fallback() : fallback; }
+  }
+
+  function sanitizeSymbolItem(item) {
+    if (!item) return null;
+    const symbol = normalizeSymbol(item.symbol || item.code || '');
+    if (!symbol) return null;
+    return { symbol, name: String(item.name || symbol).trim().slice(0, 28) || symbol };
+  }
+
+  function sanitizeSymbolList(list, max) {
+    const out = [], seen = new Set();
+    for (const raw of Array.isArray(list) ? list : []) {
+      const item = sanitizeSymbolItem(raw);
+      if (!item || seen.has(item.symbol)) continue;
+      seen.add(item.symbol); out.push(item);
+      if (out.length >= max) break;
+    }
+    return out;
+  }
+
+  function saveWatchlist() { try { localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist)); } catch (_) {} }
+  function saveRecent() { try { localStorage.setItem(RECENT_KEY, JSON.stringify(recentSymbols)); } catch (_) {} }
+  function saveCurrentSymbol() { try { if (currentSymbol) localStorage.setItem(CURRENT_SYMBOL_KEY, JSON.stringify(currentSymbol)); } catch (_) {} }
+
+  function itemNameFor(symbol) {
+    const item = watchlist.find(v => v.symbol === symbol) || recentSymbols.find(v => v.symbol === symbol);
+    return item ? item.name : (window.lastMarketName || symbol);
+  }
+
+  function renderCurrentSymbol() {
+    const name = itemNameFor(currentSymbol) || '搜索标的';
+    const nameEl = document.getElementById('symbolTriggerName');
+    const codeEl = document.getElementById('symbolTriggerCode');
+    if (nameEl) nameEl.textContent = name;
+    if (codeEl) codeEl.textContent = currentSymbol || '未选择';
+    const count = document.getElementById('watchCount');
+    if (count) count.textContent = `${watchlist.length} / ${WATCHLIST_MAX}`;
+  }
+
+  function renderWatchlist() {
+    const box = document.getElementById('watchlistItems');
+    const empty = document.getElementById('watchlistEmpty');
+    if (!box) return;
+    box.innerHTML = '';
+    for (const item of watchlist) {
+      const row = document.createElement('div');
+      row.className = 'watch-row' + (item.symbol === currentSymbol ? ' current' : '');
+      row.dataset.symbol = item.symbol;
+      row.draggable = true;
+      row.setAttribute('draggable', 'true');
+      row.innerHTML = `<span class="watch-grip" title="拖动排序">☰</span><button class="watch-main" type="button"><span class="watch-name"></span><span class="watch-code"></span></button><button class="watch-remove" type="button" title="移除">×</button>`;
+      row.querySelector('.watch-name').textContent = item.name;
+      row.querySelector('.watch-code').textContent = item.symbol;
+      row.querySelector('.watch-main').onclick = () => { selectSymbol(item.symbol, { name: item.name }); toggleSymbolMenu(false); };
+      row.querySelector('.watch-remove').onclick = (e) => { e.stopPropagation(); removeWatchItem(item.symbol); };
+      row.addEventListener('dragstart', e => {
+        row.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', item.symbol);
+      });
+      row.addEventListener('dragend', () => row.classList.remove('dragging'));
+      row.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+      row.addEventListener('drop', e => {
+        e.preventDefault();
+        const from = e.dataTransfer.getData('text/plain');
+        moveWatchItem(from, item.symbol);
+      });
+      box.appendChild(row);
+    }
+    if (empty) empty.style.display = watchlist.length ? 'none' : 'block';
+    renderCurrentSymbol();
+  }
+
+  function renderRecent() {
+    const block = document.getElementById('recentBlock');
+    const box = document.getElementById('recentSymbols');
+    if (!block || !box) return;
+    const visible = recentSymbols.filter(r => !watchlist.some(w => w.symbol === r.symbol)).slice(0, 5);
+    block.classList.toggle('visible', visible.length > 0);
+    box.innerHTML = '';
+    for (const item of visible) {
+      const btn = document.createElement('button');
+      btn.className = 'recent-item'; btn.type = 'button';
+      btn.innerHTML = `<span></span><code></code>`;
+      btn.querySelector('span').textContent = item.name;
+      btn.querySelector('code').textContent = item.symbol;
+      btn.onclick = () => {
+        selectSymbol(item.symbol, { name: item.name });
+        const inWatch = maybeAutoAddWatch(item);
+        if (!inWatch && !watchlist.some(v => v.symbol === item.symbol)) addRecentSymbol(item);
+        toggleSymbolMenu(false);
+      };
+      box.appendChild(btn);
+    }
+  }
+
+  function renderTickerWatchlist() {
+    const trigger = document.getElementById('tickerSymbolTrigger');
+    const chevron = document.getElementById('tickerSymbolChevron');
+    const menu = document.getElementById('tickerWatchMenu');
+    const box = document.getElementById('tickerWatchItems');
+    if (!trigger || !chevron || !menu || !box) return;
+    const hasWatch = watchlist.length > 0;
+    trigger.disabled = !hasWatch;
+    chevron.hidden = !hasWatch;
+    box.innerHTML = '';
+    for (const item of watchlist) {
+      const btn = document.createElement('button');
+      btn.className = 'ticker-watch-item' + (item.symbol === currentSymbol ? ' current' : '');
+      btn.type = 'button';
+      btn.innerHTML = `<span class="ticker-watch-check"></span><span class="ticker-watch-name"></span><span class="ticker-watch-code"></span>`;
+      btn.querySelector('.ticker-watch-check').textContent = item.symbol === currentSymbol ? '✓' : '';
+      btn.querySelector('.ticker-watch-name').textContent = item.name;
+      btn.querySelector('.ticker-watch-code').textContent = item.symbol;
+      btn.onclick = () => { selectSymbol(item.symbol, { name: item.name }); toggleTickerWatchMenu(false); };
+      box.appendChild(btn);
+    }
+    if (!hasWatch) toggleTickerWatchMenu(false);
+  }
+
+  function renderSymbolControls() { renderWatchlist(); renderRecent(); renderTickerWatchlist(); }
+
+  function removeRecentSymbol(symbol) {
+    const normalized = normalizeSymbol(symbol); if (!normalized) return false;
+    const next = recentSymbols.filter(v => v.symbol !== normalized);
+    if (next.length === recentSymbols.length) return false;
+    recentSymbols = next; saveRecent(); return true;
+  }
+
+  function addRecentSymbol(item) {
+    const clean = sanitizeSymbolItem(item); if (!clean) return false;
+    if (watchlist.some(v => v.symbol === clean.symbol)) {
+      removeRecentSymbol(clean.symbol); renderRecent(); return false;
+    }
+    recentSymbols = [clean, ...recentSymbols.filter(v => v.symbol !== clean.symbol)].slice(0, 5);
+    saveRecent(); renderRecent(); return true;
+  }
+
+  function hideActionToast() {
+    clearTimeout(actionToastTimer); actionToastTimer = null;
+    const el = document.getElementById('actionToast'); if (!el) return;
+    el.textContent = ''; el.className = ''; delete el.dataset.reason;
+  }
+
+  function showActionToast(text, kind = 'ok', reason = '', duration = 3500) {
+    const el = document.getElementById('actionToast'); if (!el) return;
+    clearTimeout(actionToastTimer);
+    el.textContent = text; el.className = `visible ${kind}`; el.dataset.reason = reason;
+    actionToastTimer = setTimeout(hideActionToast, duration);
+    requestAnimationFrame(reportSize);
+  }
+
+  function clearWatchlistFullToast() {
+    const el = document.getElementById('actionToast');
+    if (watchlist.length < WATCHLIST_MAX && el?.dataset.reason === 'watch-full') hideActionToast();
+  }
+
+  function maybeAutoAddWatch(item) {
+    const clean = sanitizeSymbolItem(item); if (!clean) return false;
+    const existing = watchlist.find(v => v.symbol === clean.symbol);
+    if (existing) {
+      if (clean.name && existing.name !== clean.name) existing.name = clean.name;
+      removeRecentSymbol(clean.symbol); saveWatchlist(); renderSymbolControls(); return true;
+    }
+    if (watchlist.length >= WATCHLIST_MAX) {
+      showActionToast('自选已满 8 个，本次仅查看', 'warn', 'watch-full');
+      return false;
+    }
+    watchlist.push(clean); removeRecentSymbol(clean.symbol); saveWatchlist(); renderSymbolControls();
+    showActionToast(`已加入自选 ${watchlist.length} / ${WATCHLIST_MAX}`, 'ok', 'watch-add');
+    return true;
+  }
+
+  function removeWatchItem(symbol) {
+    const index = watchlist.findIndex(v => v.symbol === symbol); if (index < 0) return;
+    const [item] = watchlist.splice(index, 1); saveWatchlist();
+    clearWatchlistFullToast();
+    if (currentSymbol === symbol) addRecentSymbol(item);
+    renderSymbolControls();
+    lastDeletedWatch = { item, index, expiresAt: Date.now() + 5000 };
+    const toast = document.getElementById('undoToast'); const text = document.getElementById('undoText');
+    if (text) text.textContent = `已移除 ${item.name}`;
+    if (toast) toast.classList.add('visible');
+    clearTimeout(undoTimer); undoTimer = setTimeout(() => { lastDeletedWatch = null; if (toast) toast.classList.remove('visible'); }, 5000);
+    requestAnimationFrame(reportSize);
+  }
+
+  function undoDeleteWatch() {
+    if (!lastDeletedWatch || Date.now() > lastDeletedWatch.expiresAt || watchlist.length >= WATCHLIST_MAX) return;
+    if (!watchlist.some(v => v.symbol === lastDeletedWatch.item.symbol)) {
+      watchlist.splice(Math.min(lastDeletedWatch.index, watchlist.length), 0, lastDeletedWatch.item);
+      removeRecentSymbol(lastDeletedWatch.item.symbol);
+      saveWatchlist(); renderSymbolControls();
+    }
+    lastDeletedWatch = null; clearTimeout(undoTimer);
+    document.getElementById('undoToast')?.classList.remove('visible');
+    requestAnimationFrame(reportSize);
+  }
+
+  function moveWatchItem(fromSymbol, toSymbol) {
+    if (!fromSymbol || !toSymbol || fromSymbol === toSymbol) return;
+    const from = watchlist.findIndex(v => v.symbol === fromSymbol), to = watchlist.findIndex(v => v.symbol === toSymbol);
+    if (from < 0 || to < 0) return;
+    const [item] = watchlist.splice(from, 1); watchlist.splice(to, 0, item);
+    saveWatchlist(); renderSymbolControls();
+  }
+
+  function toggleTickerWatchMenu(force) {
+    const menu = document.getElementById('tickerWatchMenu'); const trigger = document.getElementById('tickerSymbolTrigger');
+    if (!menu || !trigger) return;
+    if (trigger.disabled && force !== false) return;
+    const show = typeof force === 'boolean' ? force : !menu.classList.contains('visible');
+    if (show) toggleSymbolMenu(false);
+    menu.classList.toggle('visible', show); menu.setAttribute('aria-hidden', show ? 'false' : 'true'); trigger.setAttribute('aria-expanded', show ? 'true' : 'false');
+    requestAnimationFrame(reportSize);
+  }
+
+  function toggleSymbolMenu(force) {
+    const menu = document.getElementById('symbolMenu'); const trigger = document.getElementById('symbolTrigger');
+    if (!menu || !trigger) return;
+    const show = typeof force === 'boolean' ? force : !menu.classList.contains('visible');
+    if (show) toggleTickerWatchMenu(false);
+    menu.classList.toggle('visible', show); menu.setAttribute('aria-hidden', show ? 'false' : 'true'); trigger.setAttribute('aria-expanded', show ? 'true' : 'false');
+    requestAnimationFrame(reportSize);
+  }
+
+  function setSearchStatus(text = '', kind = '') {
+    const el = document.getElementById('searchStatus'); if (!el) return;
+    el.textContent = text; el.className = kind;
+  }
+
+  function renderSearchResults(results) {
+    currentSearchResults = Array.isArray(results) ? results : [];
+    const box = document.getElementById('searchResults'); if (!box) return;
+    box.innerHTML = '';
+    for (const item of currentSearchResults) {
+      const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'search-result';
+      btn.innerHTML = `<span></span><code></code>`; btn.querySelector('span').textContent = item.name || item.symbol; btn.querySelector('code').textContent = item.symbol;
+      btn.onclick = () => chooseSearchResult(item);
+      box.appendChild(btn);
+    }
+    box.classList.toggle('visible', currentSearchResults.length > 0);
+    requestAnimationFrame(reportSize);
+  }
+
+  async function performSearch(raw) {
+    const q = String(raw || '').trim(); const seq = ++searchSeq;
+    if (!q) { renderSearchResults([]); setSearchStatus(''); return []; }
+    hideActionToast();
+    setSearchStatus('搜索中…');
+    if (window.__inElectron && typeof require !== 'undefined') {
+      try {
+        const res = await require('electron').ipcRenderer.invoke('search-symbols', q);
+        if (seq !== searchSeq) return [];
+        const results = Array.isArray(res?.results) ? res.results : [];
+        renderSearchResults(results);
+        if (res?.error) setSearchStatus('搜索服务暂时不可用，请检查网络', 'error');
+        else setSearchStatus(results.length ? `${results.length} 个匹配` : '没有找到匹配标的', results.length ? '' : 'warn');
+        return results;
+      } catch (e) {
+        if (seq !== searchSeq) return [];
+        setSearchStatus('搜索服务暂时不可用', 'error'); renderSearchResults([]); return [];
+      }
+    }
+    const sym = normalizeSymbol(q);
+    const results = sym ? [{ symbol: sym, name: sym }] : [];
+    renderSearchResults(results);
+    setSearchStatus(results.length ? '浏览器预览：代码可查；中文搜索请用安装版' : '浏览器预览仅支持代码', results.length ? '' : 'warn');
+    return results;
+  }
+
+  function chooseSearchResult(item) {
+    const clean = sanitizeSymbolItem(item); if (!clean) return;
+    selectSymbol(clean.symbol, { name: clean.name });
+    const inWatch = maybeAutoAddWatch(clean);
+    if (!inWatch && !watchlist.some(v => v.symbol === clean.symbol)) addRecentSymbol(clean);
+    document.getElementById('customSymbol').value = '';
+    renderSearchResults([]); setSearchStatus(''); toggleSymbolMenu(false); toggleTickerWatchMenu(false);
+  }
+
+  function quoteSourceMs(meta = lastQuoteMeta) {
+    if (!meta.quoteDate || !meta.quoteTime) return 0;
+    const t = Date.parse(`${meta.quoteDate}T${meta.quoteTime}+08:00`);
+    return Number.isFinite(t) ? t : 0;
+  }
+
+  function formatClockTime(value) {
+    const d = new Date(value); if (!Number.isFinite(d.getTime())) return '--';
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+  }
+
+  function currentQuoteAgeSeconds() {
+    const ms = quoteSourceMs(); return ms ? Math.max(0, Math.round((Date.now() - ms) / 1000)) : null;
+  }
+
+  function realTradingNow() { return getWorkBuddyPhaseAt(new Date()) === 'trading'; }
+
+  function refreshFeedFreshness() {
+    if (simMode) {
+      lastFreshnessClass = 'sim';
+      feedStatusDot.className = 'sim';
+      document.getElementById('ticker').classList.remove('feed-offline','feed-reconnecting');
+      renderDiagnostics(); return;
+    }
+    const tickerEl = document.getElementById('ticker');
+    const state = lastFeedStatus.state || 'online'; const age = currentQuoteAgeSeconds();
+    let cls = 'idle', label = lastQuoteMeta.quoteTime ? lastQuoteMeta.quoteTime.slice(0,5) : '--:--';
+    if (state === 'offline') { cls = 'offline'; label = lastQuoteMeta.quoteTime ? `断·${lastQuoteMeta.quoteTime.slice(0,5)}` : '中断'; }
+    else if (state === 'reconnecting') { cls = 'reconnecting'; label = lastQuoteMeta.quoteTime ? `连·${lastQuoteMeta.quoteTime.slice(0,5)}` : '重连'; }
+    else if (realTradingNow() && age !== null && age > 20) { cls = 'offline'; label = lastQuoteMeta.quoteTime ? `旧·${lastQuoteMeta.quoteTime.slice(0,5)}` : '稍旧'; }
+    else if (realTradingNow() && age !== null && age > 10) { cls = 'aging'; }
+    else if (realTradingNow()) { cls = 'fresh'; }
+    else { cls = 'idle'; }
+    const previousClass = lastFreshnessClass;
+    lastFreshnessClass = cls;
+    feedStatusDot.className = cls; feedTime.textContent = label;
+    tickerEl.classList.toggle('feed-offline', cls === 'offline');
+    tickerEl.classList.toggle('feed-reconnecting', cls === 'reconnecting');
+    const ageText = age === null ? '未知' : `${age}s`;
+    idxBadge.title = `${cls === 'offline' ? FEED_OFFLINE_LABEL : '行情 ' + cls} · 源 ${lastQuoteMeta.quoteDate || '--'} ${lastQuoteMeta.quoteTime || '--'} · 年龄 ${ageText}`;
+    if (currentPhase === 'trading' && cls === 'offline' && previousClass !== 'offline') {
+      setTheme('rest'); setState('failed'); setSlogan(state === 'offline' ? '行情断线了' : '行情有点旧', '#ff9f0a', 'breathe');
+    } else if (currentPhase === 'trading' && previousClass === 'offline' && (cls === 'fresh' || cls === 'aging')) {
+      setSlogan('行情恢复啦', '#30d158', 'bounce'); playState('waving', () => resumeTrading());
+    }
+    renderDiagnostics();
+  }
+
+  function renderDiagnostics() {
+    const age = currentQuoteAgeSeconds();
+    const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+    set('diagSymbol', currentSymbol || '--');
+    set('diagQuoteTime', lastQuoteMeta.quoteDate && lastQuoteMeta.quoteTime ? `${lastQuoteMeta.quoteDate} ${lastQuoteMeta.quoteTime}` : '--');
+    set('diagReceived', lastQuoteMeta.receivedAt ? formatClockTime(lastQuoteMeta.receivedAt) : '--');
+    set('diagAge', age === null ? '--' : `${age} 秒`);
+    set('diagRequest', `${Number(lastFeedStatus.requestMs || lastQuoteMeta.requestMs || 0)} ms`);
+    set('diagFailures', String(lastFeedStatus.consecutiveFailures || 0));
+    set('diagRefresh', lastFeedStatus.nextRefreshMs ? `${Math.round(lastFeedStatus.nextRefreshMs / 1000)} 秒` : '--');
+    set('diagTransport', lastFeedStatus.transport || lastQuoteMeta.transport || '--');
+  }
+
+  function buildDiagnosticsText() {
+    const age = currentQuoteAgeSeconds();
+    return [
+      '牛来看盘神器 · 行情诊断',
+      `当前标的: ${currentSymbol || '--'}`,
+      '行情源: 新浪',
+      `状态: ${lastFeedStatus.state || '--'}`,
+      `源行情时间: ${lastQuoteMeta.quoteDate || '--'} ${lastQuoteMeta.quoteTime || '--'}`,
+      `最后接收: ${lastQuoteMeta.receivedAt || '--'}`,
+      `数据年龄: ${age === null ? '--' : age + ' 秒'}`,
+      `请求耗时: ${Number(lastFeedStatus.requestMs || lastQuoteMeta.requestMs || 0)} ms`,
+      `连续失败: ${lastFeedStatus.consecutiveFailures || 0}`,
+      `刷新周期: ${lastFeedStatus.nextRefreshMs ? Math.round(lastFeedStatus.nextRefreshMs / 1000) + ' 秒' : '--'}`,
+      `连接方式: ${lastFeedStatus.transport || lastQuoteMeta.transport || '--'}`,
+      `错误: ${lastFeedStatus.error || '--'}`,
+    ].join('\n');
+  }
+
+  // real-data injection from Electron main process
+  window.__pushMarket = (data) => {
+    simMode = false;
+    if (simBtn) simBtn.classList.remove('active');
+    if (realBtn) realBtn.classList.add('active');
+    window.lastMarketName = data.name;
+    lastQuoteMeta = { quoteDate: data.quoteDate || '', quoteTime: data.quoteTime || '', receivedAt: data.receivedAt || new Date().toISOString(), requestMs: Number(data.requestMs) || 0, transport: data.transport || '' };
+    updateSymbolLabel(data.symbol || currentSymbol, data.name);
+    lastPrice = data.price; lastPrevClose = data.prevClose;
+    evaluatePhase();
+    if (!restMode) applyMarket(data.price, data.prevClose, '真实');
+    refreshFeedFreshness();
+  };
+
+  window.__pushFeedStatus = (status) => {
+    const prev = previousFeedState;
+    lastFeedStatus = { ...lastFeedStatus, ...(status || {}) };
+    previousFeedState = lastFeedStatus.state || prev;
+    refreshFeedFreshness();
+  };
+
+  window.__onSystemResume = () => { currentPhase = null; evaluatePhase(); refreshFeedFreshness(); };
+  window.__setSimulated = (val) => { simMode = val; if (simBtn) simBtn.classList.toggle('active', val); if (realBtn) realBtn.classList.toggle('active', !val); refreshFeedFreshness(); };
+
+  // ---- Web 模式（无 Electron）：经本地代理 /api/quote 拉真实行情 ----
+  let webFeedFailures = 0;
+  function webFeedDelay() {
+    if (webFeedFailures) return [5000,10000,20000,30000][Math.min(webFeedFailures-1,3)];
+    const phase = getWorkBuddyPhaseAt(new Date());
+    if (phase === 'trading') return 5000;
+    if (phase === 'preopen' || phase === 'afternoon') return 10000;
+    if (phase === 'lunch') return 30000;
+    if (phase === 'review' || phase === 'close') return 60000;
+    return 180000;
+  }
+  async function fetchReal(symbol) {
+    const started = Date.now();
+    try {
+      const r = await fetch('/api/quote?symbol=' + encodeURIComponent(symbol));
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      webFeedFailures = 0;
+      window.lastMarketName = d.name;
+      lastQuoteMeta = { quoteDate: d.quoteDate || '', quoteTime: d.quoteTime || '', receivedAt: new Date().toISOString(), requestMs: Date.now()-started, transport: 'web-proxy' };
+      updateSymbolLabel(d.symbol || currentSymbol, d.name);
+      lastPrice = d.price; lastPrevClose = d.prevClose;
+      lastFeedStatus = { state:'online', consecutiveFailures:0, nextRefreshMs:webFeedDelay(), requestMs:Date.now()-started, transport:'web-proxy' };
+      evaluatePhase(); if (!restMode) applyMarket(d.price, d.prevClose, '真实'); refreshFeedFreshness();
+    } catch (e) {
+      webFeedFailures += 1;
+      lastFeedStatus = { ...lastFeedStatus, state:webFeedFailures>=3?'offline':'reconnecting', consecutiveFailures:webFeedFailures, nextRefreshMs:webFeedDelay(), requestMs:Date.now()-started, error:e.message };
+      refreshFeedFreshness();
+    }
+  }
+  function scheduleWebFeed(delay) {
+    if (webFeedTimer) clearTimeout(webFeedTimer);
+    webFeedTimer = setTimeout(async () => { await fetchReal(currentSymbol); scheduleWebFeed(webFeedDelay()); }, delay);
+  }
+  function startWebFeed() {
+    simMode = false; webFeedFailures = 0;
+    if (simBtn) simBtn.classList.remove('active'); if (realBtn) realBtn.classList.add('active');
+    if (webFeedTimer) clearTimeout(webFeedTimer);
+    fetchReal(currentSymbol).finally(() => scheduleWebFeed(webFeedDelay()));
+  }
+  function stopWebFeed() { if (webFeedTimer) { clearTimeout(webFeedTimer); webFeedTimer = null; } }
+
+  let lastStep = 0;
+  function loop(now) {
+    if (!lastFrameTime) lastFrameTime = now;
+    if (now - lastFrameTime >= 120/speed) { frameIndex = (frameIndex+1)%currentState.frames; lastFrameTime = now; draw(); }
+    if (simMode && !restMode && now - lastStep > 2000) { stepSimulation(); lastStep = now; }
+    requestAnimationFrame(loop);
+  }
+
+  // UI hooks
+  const simBtn = document.getElementById('simBtn');
+  const realBtn = document.getElementById('realBtn');
+  if (simBtn) simBtn.onclick = () => { stopWebFeed(); window.__setSimulated(true); manualRest = false; evaluatePhase(); };
+  if (realBtn) realBtn.onclick = () => {
+    if (window.__inElectron) { window.__setSimulated(false); manualRest = false; evaluatePhase(); }
+    else { startWebFeed(); manualRest = false; evaluatePhase(); }
+  };
+  const restBtn = document.getElementById('restBtn');
+  if (restBtn) restBtn.onclick = () => { manualRest = !manualRest; evaluatePhase(); };
+
+  // 归一化股票代码：支持 sh600519 / 600519 / 600519.SH / 600519 sh 等常见写法
+  function normalizeSymbol(raw) {
+    if (!raw) return null;
+    let s = String(raw).trim();
+    s = s.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
+    const suffixMatch = s.match(/^(\d{6})(sh|sz)$/);
+    if (suffixMatch) return suffixMatch[2] + suffixMatch[1];
+    if (/^(sh|sz)\d{6}$/.test(s)) return s;
+    if (/^\d{6}$/.test(s)) return (s[0] === '6' ? 'sh' : 'sz') + s;
+    return null;
+  }
+
+  // 更新已保存标的名称（名称来自行情返回），默认六项即使删空也不会被重新塞回来。
+  function updateSymbolLabel(sym, name) {
+    sym = normalizeSymbol(sym); if (!sym || !name) return;
+    let changed = false;
+    for (const list of [watchlist, recentSymbols]) {
+      const item = list.find(v => v.symbol === sym);
+      if (item && item.name !== name) { item.name = name; changed = true; }
+    }
+    if (changed) { saveWatchlist(); saveRecent(); renderSymbolControls(); }
+    if (currentSymbol === sym) { window.lastMarketName = name; renderCurrentSymbol(); }
+  }
+
+  // 切换标的：同步自选 UI，推送 Electron 主进程或浏览器代理拉取真实行情。
+  function selectSymbol(sym, opts = {}) {
+    sym = normalizeSymbol(sym); if (!sym) return;
+    currentSymbol = sym; saveCurrentSymbol();
+    if (opts.name) updateSymbolLabel(sym, opts.name);
+    renderSymbolControls();
+    if (window.__inElectron && typeof require !== 'undefined') {
+      require('electron').ipcRenderer.send('set-symbol', sym); window.__setSimulated(false);
+    } else if (!simMode) {
+      stopWebFeed(); startWebFeed();
+    }
+  }
+
+  const customInput = document.getElementById('customSymbol');
+  const addBtn = document.getElementById('addSymbol');
+  async function queryCustom() {
+    const raw = customInput.value.trim(); if (!raw) return;
+    let results = currentSearchResults;
+    if (!results.length || !results.some(r => r.name.includes(raw) || r.symbol.includes(raw.toLowerCase()))) results = await performSearch(raw);
+    if (results.length) chooseSearchResult(results[0]);
+    else {
+      const sym = normalizeSymbol(raw);
+      if (sym) chooseSearchResult({ symbol: sym, name: sym });
+    }
+  }
+  addBtn.onclick = queryCustom;
+  customInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); queryCustom(); } });
+  customInput.addEventListener('input', () => { clearTimeout(searchTimer); const q = customInput.value.trim(); searchTimer = setTimeout(() => performSearch(q), 260); });
+  customInput.addEventListener('focus', () => { toggleSymbolMenu(false); toggleTickerWatchMenu(false); });
+  document.getElementById('symbolTrigger').addEventListener('click', () => { document.getElementById('marketDiag').classList.remove('visible'); renderSearchResults([]); toggleSymbolMenu(); });
+  document.getElementById('tickerSymbolTrigger').addEventListener('click', e => { e.stopPropagation(); renderTickerWatchlist(); toggleTickerWatchMenu(); });
+  document.getElementById('undoDelete').addEventListener('click', undoDeleteWatch);
+  document.getElementById('diagToggle').addEventListener('click', () => { toggleSymbolMenu(false); toggleTickerWatchMenu(false); renderSearchResults([]); document.getElementById('marketDiag').classList.toggle('visible'); renderDiagnostics(); requestAnimationFrame(reportSize); });
+  document.getElementById('copyDiag').addEventListener('click', async () => {
+    const text = buildDiagnosticsText();
+    try { await navigator.clipboard.writeText(text); showActionToast('诊断信息已复制', 'ok', 'diag-copy'); }
+    catch (_) {
+      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); showActionToast('诊断信息已复制', 'ok', 'diag-copy');
+    }
+  });
+
+  watchlist = sanitizeSymbolList(safeLoadJSON(WATCHLIST_KEY, () => DEFAULT_WATCHLIST), WATCHLIST_MAX);
+  recentSymbols = sanitizeSymbolList(safeLoadJSON(RECENT_KEY, []), 5).filter(r => !watchlist.some(w => w.symbol === r.symbol));
+  saveRecent();
+  const storedCurrent = normalizeSymbol(safeLoadJSON(CURRENT_SYMBOL_KEY, ''));
+  if (storedCurrent) currentSymbol = storedCurrent;
+  else if (watchlist.length) currentSymbol = watchlist[0].symbol;
+  renderSymbolControls();
+  window.__getCurrentSymbol = () => currentSymbol;
+  setInterval(refreshFeedFreshness, 1000);
+
+  const hud = document.getElementById('hud');
+  const HUD_GAP = 12;
+
+  // 纯函数：右侧够放就优先右侧；右侧不够时翻到左侧；两边都不够则选空间较大的一边。
+  function chooseSettingsSide(petCenterScreenX, screenLeft, screenRight, neededWidth) {
+    const rightSpace = screenRight - petCenterScreenX;
+    const leftSpace = petCenterScreenX - screenLeft;
+    if (rightSpace >= neededWidth) return 'right';
+    if (leftSpace >= neededWidth) return 'left';
+    return rightSpace >= leftSpace ? 'right' : 'left';
+  }
+
+  function positionTimeSimulator(windowLeftOverride) {
+    if (!timeSimulator || !timeSimulator.classList.contains('visible')) return;
+    const petRect = petbox.getBoundingClientRect();
+    const panelWidth = timeSimulator.offsetWidth;
+    const petHalfWidth = petRect.width / 2;
+    const safeMargin = 16;
+    const neededWidth = petHalfWidth + HUD_GAP + panelWidth + safeMargin;
+    const screenLeft = Number.isFinite(screen.availLeft) ? screen.availLeft : 0;
+    const screenRight = screenLeft + screen.availWidth;
+    const windowLeft = Number.isFinite(windowLeftOverride) ? windowLeftOverride : window.screenX;
+    const petCenterScreenX = windowLeft + window.innerWidth / 2;
+    const side = chooseSettingsSide(petCenterScreenX, screenLeft, screenRight, neededWidth);
+
+    timeSimulator.classList.toggle('side-left', side === 'left');
+    timeSimulator.dataset.side = side;
+    timeSimulator.style.setProperty('--time-offset', `${Math.ceil(petHalfWidth + HUD_GAP)}px`);
+  }
+
+  function toggleTimeSimulator(force) {
+    if (!timeSimulator) return false;
+    const show = typeof force === 'boolean' ? force : !timeSimulator.classList.contains('visible');
+    timeSimulator.classList.toggle('visible', show);
+    timeSimulator.setAttribute('aria-hidden', show ? 'false' : 'true');
+    if (show) {
+      // 调试面板和普通设置不同时展开，避免两块侧栏互相覆盖。
+      if (hud && hud.classList.contains('visible')) hud.classList.remove('visible');
+      const menu = document.getElementById('petMenu');
+      if (menu) menu.classList.remove('visible');
+      syncTimeSimulatorUI();
+      positionTimeSimulator();
+      requestAnimationFrame(() => {
+        reportSize();
+        requestAnimationFrame(() => positionTimeSimulator());
+      });
+    } else {
+      requestAnimationFrame(reportSize);
+    }
+    return show;
+  }
+  window.__toggleTimeSimulator = toggleTimeSimulator;
+
+  function positionSettingsPanel(windowLeftOverride) {
+    if (!hud || !hud.classList.contains('visible')) return;
+    const petRect = petbox.getBoundingClientRect();
+    const panelWidth = hud.offsetWidth;
+    const petHalfWidth = petRect.width / 2;
+    const safeMargin = 16;
+    const neededWidth = petHalfWidth + HUD_GAP + panelWidth + safeMargin;
+    const screenLeft = Number.isFinite(screen.availLeft) ? screen.availLeft : 0;
+    const screenRight = screenLeft + screen.availWidth;
+    const windowLeft = Number.isFinite(windowLeftOverride) ? windowLeftOverride : window.screenX;
+    const petCenterScreenX = windowLeft + window.innerWidth / 2;
+    const side = chooseSettingsSide(petCenterScreenX, screenLeft, screenRight, neededWidth);
+
+    hud.classList.toggle('side-left', side === 'left');
+    hud.dataset.side = side;
+    hud.style.setProperty('--hud-offset', `${Math.ceil(petHalfWidth + HUD_GAP)}px`);
+  }
+
+  // 第二层完整设置：只由快捷菜单的“更多设置”进入。
+  function toggleSettings(force) {
+    const show = typeof force === 'boolean' ? force : !hud.classList.contains('visible');
+    if (show) toggleTickerWatchMenu(false);
+    if (show && timeSimulator && timeSimulator.classList.contains('visible')) {
+      timeSimulator.classList.remove('visible');
+      timeSimulator.setAttribute('aria-hidden', 'true');
+    }
+    hud.classList.toggle('visible', show);
+    if (show) {
+      // 先决定左右侧，再按真实竖向面板尺寸扩窗。Electron resize 事件触发后会再次定位，避免只露半截。
+      positionSettingsPanel();
+      requestAnimationFrame(() => {
+        reportSize();
+        requestAnimationFrame(() => positionSettingsPanel());
+      });
+    } else {
+      requestAnimationFrame(reportSize);
+    }
+  }
+
+  // Electron 因 HUD 打开、缩放或贴屏幕边缘而改窗口尺寸后，重新判断左右侧。
+  window.addEventListener('resize', () => {
+    if (hud.classList.contains('visible')) positionSettingsPanel();
+    if (timeSimulator && timeSimulator.classList.contains('visible')) positionTimeSimulator();
+  });
+
+  document.querySelectorAll('[data-time-preset]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      setTimePreset(btn.dataset.timePreset);
+    });
+  });
+  if (realTimeBtn) realTimeBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    useRealTime();
+  });
+  const timeSimulatorClose = document.getElementById('timeSimulatorClose');
+  if (timeSimulatorClose) timeSimulatorClose.addEventListener('click', e => {
+    e.stopPropagation();
+    toggleTimeSimulator(false);
+  });
+  // 真实时间模式下让状态行保持走秒；模拟模式固定在所选预设时刻。
+  setInterval(() => {
+    if (timeSimulator && timeSimulator.classList.contains('visible') && !logicalNowOverride) syncTimeSimulatorUI();
+  }, 1000);
+
+  const petMenu = document.getElementById('petMenu');
+  const scalePresets = document.getElementById('scalePresets');
+  const scaleMinus = document.getElementById('scaleMinus');
+  const scaleValue = document.getElementById('scaleValue');
+  const scalePlus = document.getElementById('scalePlus');
+  const moreSettings = document.getElementById('moreSettings');
+  const closePetBtn = document.getElementById('closePet');
+  const uiScaleRange = document.getElementById('uiScaleRange');
+
+  function showPetMenu(x, y) {
+    petMenu.classList.add('visible');
+    scalePresets.classList.remove('visible');
+    syncScaleControls();
+    // 快捷菜单保持紧凑固定尺寸，不随牛放大一起膨胀；OS 缩放仍由 Chromium 自动处理。
+    const menuW = petMenu.offsetWidth;
+    const menuH = petMenu.offsetHeight;
+    const left = Math.max(4, Math.min(x, window.innerWidth - menuW - 4));
+    const top = Math.max(4, Math.min(y, window.innerHeight - menuH - 4));
+    petMenu.style.left = `${left}px`;
+    petMenu.style.top = `${top}px`;
+  }
+  function hidePetMenu() {
+    petMenu.classList.remove('visible');
+    scalePresets.classList.remove('visible');
+  }
+  function openQuickMenu(e) {
+    e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+    showPetMenu(e.clientX, e.clientY);
+  }
+  petbox.addEventListener('contextmenu', openQuickMenu);
+
+  scaleMinus.addEventListener('click', e => {
+    e.stopPropagation();
+    setUIScale(uiScalePercent - 10, { commit: true });
+  });
+  scalePlus.addEventListener('click', e => {
+    e.stopPropagation();
+    setUIScale(uiScalePercent + 10, { commit: true });
+  });
+  scaleValue.addEventListener('click', e => {
+    e.stopPropagation();
+    scalePresets.classList.toggle('visible');
+  });
+  scalePresets.addEventListener('click', e => {
+    const btn = e.target.closest('[data-scale]');
+    if (!btn) return;
+    e.stopPropagation();
+    setUIScale(Number(btn.dataset.scale), { commit: true });
+    scalePresets.classList.remove('visible');
+  });
+  moreSettings.addEventListener('click', e => {
+    e.stopPropagation();
+    hidePetMenu();
+    toggleSettings(true);
+  });
+
+  // 完整设置里的滑杆：拖动时只实时缩放 UI，松手/change 后 Electron 只调整一次窗口尺寸。
+  uiScaleRange.addEventListener('input', e => {
+    setUIScale(Number(e.target.value), { commit: false });
+  });
+  uiScaleRange.addEventListener('change', e => {
+    setUIScale(Number(e.target.value), { commit: true });
+  });
+
+  // Ctrl + 滚轮：连续滚动合并成一次最终窗口 resize。
+  window.addEventListener('wheel', e => {
+    if (!e.ctrlKey) return;
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? 10 : -10;
+    setUIScale(uiScalePercent + delta, { commit: false });
+    scheduleScaleCommit();
+  }, { passive: false });
+
+  // 左键拖牛身 = 移动窗口（牛身是 no-drag，无法用原生拖拽层，故改 JS 手动拖拽经 IPC 下发绝对坐标）
+  let dragging = false, grabOffX = 0, grabOffY = 0, petBottomOffset = 0;
+  petbox.addEventListener('mousedown', e => {
+    if (e.button === 2) return; // 右键由 contextmenu → 快捷菜单处理
+    if (e.button === 0) { // 左键 → 启动拖拽
+      dragging = true;
+      // 记录抓取点，以及牛本体底边相对窗口顶部的实际位置。
+      // 主进程会用 petBottomOffset 对齐当前显示器 workArea 底边，因此最低点正好贴任务栏上沿。
+      grabOffX = e.clientX; grabOffY = e.clientY;
+      petBottomOffset = petbox.getBoundingClientRect().bottom;
+      e.preventDefault();
+    }
+  });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    if (window.__inElectron && typeof require !== 'undefined') {
+      // 新窗口坐标 = 鼠标屏幕坐标 − 抓取偏移，绝对定位与鼠标 1:1。
+      // 同时把牛底偏移交给主进程，窗口本身可以有透明边距，但牛不会钻进任务栏。
+      const nextWindowX = e.screenX - grabOffX;
+      require('electron').ipcRenderer.send(
+        'drag-window',
+        nextWindowX,
+        e.screenY - grabOffY,
+        petBottomOffset
+      );
+      // 侧边面板已打开时实时重算左右侧，不再等到关掉重开或 resize 才识别空间。
+      if (hud.classList.contains('visible')) positionSettingsPanel(nextWindowX);
+      if (timeSimulator && timeSimulator.classList.contains('visible')) positionTimeSimulator(nextWindowX);
+    }
+  });
+  window.addEventListener('mouseup', () => { dragging = false; });
+  // 右键落在牛身之外（窗口空白/拖拽层）也打开同一套快捷菜单。
+  window.addEventListener('contextmenu', e => {
+    if (e.defaultPrevented) return; // 牛身已处理
+    e.preventDefault();
+    showPetMenu(e.clientX, e.clientY);
+  });
+  document.addEventListener('click', e => {
+    if (!petMenu.contains(e.target)) hidePetMenu();
+    if (!document.getElementById('ticker').contains(e.target)) toggleTickerWatchMenu(false);
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') toggleTickerWatchMenu(false); });
+  closePetBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    hidePetMenu();
+    if (window.__inElectron && typeof require !== 'undefined') {
+      require('electron').ipcRenderer.send('close-pet');
+    } else {
+      window.close(); // 浏览器模式：仅关闭自身窗口（脚本打开的才有效）
+    }
+  });
+  // HUD 内「关闭面板」按钮：仅收起设置面板，不退出宠物
+  const closePetInline = document.getElementById('closePetInline');
+  if (closePetInline) closePetInline.addEventListener('click', e => {
+    e.stopPropagation();
+    toggleSettings(false);
+  });
+
+  // Electron injected flag from main.js
+  if (typeof process !== 'undefined' && process.versions && process.versions.electron) {
+    window.__inElectron = true;
+  }
+
+  setUIScale(130, { commit: false }); evaluatePhase();
+  setInterval(evaluatePhase, 15000); // 每 15s 按本地时间重算时段相位，触发开/收盘窗口动画
+
+})();
+</script>
+</body>
+</html>
