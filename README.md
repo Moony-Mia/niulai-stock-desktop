@@ -47,39 +47,7 @@ preload.js           安全通信桥接
 niulai-ticker.html   桌面展示界面
 spritesheet.webp     动画素材
 package.json         项目配置
-memory.md            项目接续记录
-CHANGELOG.md         更新日志
 ```
-
-## 开发环境
-
-### macOS
-
-```
-/Users/naiwy/Developer/Electron开发环境/项目目录/牛看盘
-```
-
-用于：
-
-- macOS 开发
-- 调试
-- npm install
-- npm start
-- macOS 打包
-
-### Windows
-
-```
-E:\Developer\Electron开发环境\项目目录\牛看盘
-```
-
-用于：
-
-- Windows 开发
-- 调试
-- npm install
-- npm start
-- Windows 打包
 
 ## 支持市场规划
 
