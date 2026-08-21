@@ -25,16 +25,17 @@
     width: 210px;
     min-width: 210px;
     max-width: 210px;
-    box-shadow: 0 6px 24px rgba(0,0,0,.45);
-    backdrop-filter: blur(10px);
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     -webkit-app-region: no-drag;
     pointer-events: auto;
     z-index: 5;
   }
-  #ticker .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; }
+  #ticker .top { display: flex; justify-content: space-between; align-items: center; gap: 5px; font-size: 11px; }
   #ticker .name { font-weight: 800; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .ticker-symbol-trigger {
-    min-width: 0; max-width: 112px; padding: 0; border: 0; background: transparent; color: #fff;
+    min-width: 0; max-width: 122px; padding: 0; border: 0; background: transparent; color: #fff;
     display: inline-flex; align-items: center; gap: 4px; cursor: pointer; text-align: left; font: inherit;
   }
   .ticker-symbol-trigger:not(:disabled):hover .name { text-decoration: underline; text-underline-offset: 2px; }
@@ -67,7 +68,7 @@
   #ticker.feed-offline { filter: saturate(.45); }
   #ticker.feed-reconnecting { opacity: .88; }
   #ticker .mid { margin-top: 3px; font-size: 17px; font-weight: 900; font-family: "SF Mono", Consolas, monospace; transition: color .25s ease; }
-  #ticker .bot { margin-top: 2px; font-size: 11px; font-weight: 800; display: flex; gap: 8px; }
+  #ticker .bot { margin-top: 2px; font-size: 11px; font-weight: 800; display: flex; gap: 6px; }
   #ticker .mid.up, #ticker .up { color: #ff453a; }
   #ticker .mid.down, #ticker .down { color: #30d158; }
   #ticker .mid.flat, #ticker .flat { color: #aeaeb2; }
@@ -136,9 +137,9 @@
     pointer-events: auto;
     z-index: 40;
     font-family: "Microsoft YaHei UI", "PingFang SC", "Segoe UI", sans-serif;
-    width: 220px;
-    min-width: 220px;
-    max-width: 220px;
+    width: 190px;
+    min-width: 190px;
+    max-width: 190px;
   }
   #hud.visible { display: block; }
   #hud.side-left {
@@ -429,6 +430,8 @@
 })();
 </script>
 
+<script src="./marketState.js"></script>
+
 <script>
 (() => {
   // 优先用主进程注入的绝对 file:// 路径；fallback 保持相对路径以兼容浏览器直接打开
@@ -592,7 +595,7 @@
   // 计算“以窗口中心为锚点”的最小窗口尺寸。
   // petbox / HUD 都围绕 50% 中心定位，所以不能只用 maxX-minX：
   // 当 HUD 在左侧时，单纯增加窗口宽度只会让左边界每次回收一半，导致面板永远还剩一截在窗口外。
-  function computeCenteredContentSize(rects, viewportWidth, viewportHeight, horizontalMargin = 36, verticalMargin = 44) {
+  function computeCenteredContentSize(rects, viewportWidth, viewportHeight, horizontalMargin = 12, verticalMargin = 20) {
     const centerX = viewportWidth / 2;
     const centerY = viewportHeight / 2;
     let maxHalfWidth = 0, maxHalfHeight = 0;
@@ -629,6 +632,12 @@
     // 幂等去抖：尺寸变化 < 3px 视为同一状态，不再下发 resize，杜绝亚像素偏差引发的反复 setBounds 抖动
     if (lastReported && Math.abs(lastReported.w - w) < 3 && Math.abs(lastReported.h - h) < 3) return;
     lastReported = { w, h };
+    // PER-10: 报告牛本体中心作为窗口缩放锚点，避免 HUD 扩窗导致牛移动。
+    const petAnchorRect = petbox.getBoundingClientRect();
+    require('electron').ipcRenderer.send('set-resize-anchor', {
+      x: window.screenX + petAnchorRect.left + petAnchorRect.width / 2,
+      y: window.screenY + petAnchorRect.top + petAnchorRect.height / 2,
+    });
     require('electron').ipcRenderer.send('resize-to-content', w, h);
   }
   window.reportSize = reportSize; // 供主进程在注入 __inElectron 后显式触发
@@ -791,7 +800,10 @@
     if (restMode) return; // 休市时只看数字，背景和姿态不变
     lastPrice = price; lastPrevClose = prevClose;
     const changePct = ((price - prevClose)/prevClose)*100;
-    const dir = changePct > 0.05 ? 'up' : changePct < -0.05 ? 'down' : 'flat';
+    const marketAction = window.marketStateEngine
+      ? window.marketStateEngine.getAction(changePct)
+      : { dir: changePct > 0.05 ? 'up' : changePct < -0.05 ? 'down' : 'flat' };
+    const dir = marketAction.dir;
     const color = setTheme(dir);
     const now = getLogicalNow();
     const logicalTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
@@ -800,7 +812,40 @@
     if (source === '模拟') { feedStatusDot.className = 'sim'; feedTime.textContent = logicalTime; }
 
     const triggerEffect = shouldTriggerMarketEffect(dir, changePct);
-    if (dir === 'up') {
+    if (marketAction.state === 'surge') {
+
+  setState('jumping');
+  setSlogan('', color);
+
+  if (triggerEffect) {
+    spawnArcParticles('牛来', color);
+  }
+
+} else if (marketAction.state === 'up') {
+
+  setState('waving');
+  setSlogan('', color);
+
+} else if (marketAction.state === 'crash') {
+
+  setState('failed');
+  setSlogan('', color);
+
+  if (triggerEffect) {
+    spawnDropParticles('稳住', color);
+  }
+
+} else if (marketAction.state === 'down') {
+
+  setState('swaying');
+  setSlogan('', color);
+
+} else {
+
+  setState('thinking');
+  setSlogan('再等等…', color, 'breathe');
+
+}if (dir === 'up') {
       setState('jumping'); setSlogan('', color); // 涨：红橙弧形爆字
       if (triggerEffect) spawnArcParticles('牛来', color);
     } else if (dir === 'down') {
@@ -1564,7 +1609,7 @@
   setInterval(refreshFeedFreshness, 1000);
 
   const hud = document.getElementById('hud');
-  const HUD_GAP = 12;
+  const HUD_GAP = 4;
 
   // 纯函数：右侧够放就优先右侧；右侧不够时翻到左侧；两边都不够则选空间较大的一边。
   function chooseSettingsSide(petCenterScreenX, screenLeft, screenRight, neededWidth) {
@@ -1817,6 +1862,18 @@
   if (typeof process !== 'undefined' && process.versions && process.versions.electron) {
     window.__inElectron = true;
   }
+
+  // PER-10: 默认透明区域穿透；进入牛/HUD/菜单时恢复交互。
+  function setMouseInteractive(value) {
+    if (!window.__inElectron || typeof require === 'undefined') return;
+    require('electron').ipcRenderer.send('set-mouse-interactive', value);
+  }
+  const mouseActiveZones = [petbox, document.getElementById('hud'), document.getElementById('petMenu'), document.getElementById('timeSimulator')].filter(Boolean);
+  mouseActiveZones.forEach(zone => {
+    zone.addEventListener('mouseenter', () => setMouseInteractive(true));
+    zone.addEventListener('mouseleave', () => setMouseInteractive(false));
+  });
+  setMouseInteractive(false);
 
   setUIScale(130, { commit: false }); evaluatePhase();
   setInterval(evaluatePhase, 15000); // 每 15s 按本地时间重算时段相位，触发开/收盘窗口动画

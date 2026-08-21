@@ -30,6 +30,9 @@ let lastFeedError = '';
 let lastFeedTransport = '';
 let lastSearchError = '';
 let currentFeedDelay = 5000;
+// PER-10: 透明桌宠窗口锚点与鼠标命中状态
+let resizeAnchor = null;
+let mouseInteractive = true;
 
 const INDEX_NAMES = {
   'sh000001': '上证指数',
@@ -77,6 +80,9 @@ function createWindow() {
   win.webContents.on('did-fail-load', (e, code, desc, url) => {
     logRender(`[did-fail-load] ${code} ${desc} ${url}`);
   });
+
+  // PER-10: 默认允许牛和 HUD 接收鼠标，透明区域由 renderer 根据命中区域切换穿透。
+  win.setIgnoreMouseEvents(false);
 
   win.loadFile(path.join(__dirname, 'niulai-ticker.html'));
 
@@ -436,9 +442,42 @@ function computeResizeBounds(currentBounds, requestedWidth, requestedHeight) {
   };
 }
 
+// PER-10: renderer 提供牛本体锚点，resize 时保持牛的位置不变，而不是保持透明窗口中心。
+ipcMain.on('set-resize-anchor', (e, anchor) => {
+  if (!anchor) return;
+  const x = Number(anchor.x);
+  const y = Number(anchor.y);
+  if (Number.isFinite(x) && Number.isFinite(y)) {
+    resizeAnchor = { x, y };
+  }
+});
+
+// PER-10: 根据 renderer 状态切换透明区域鼠标穿透。
+ipcMain.on('set-mouse-interactive', (e, value) => {
+  if (!win || win.isDestroyed()) return;
+  mouseInteractive = Boolean(value);
+  win.setIgnoreMouseEvents(!mouseInteractive, { forward: true });
+});
+
+function computeResizeBoundsWithAnchor(currentBounds, requestedWidth, requestedHeight) {
+  const width = Math.max(Math.round(Number(requestedWidth) || 0), 160);
+  const height = Math.max(Math.round(Number(requestedHeight) || 0), 160);
+
+  if (resizeAnchor) {
+    return {
+      x: Math.round(resizeAnchor.x - width / 2),
+      y: Math.round(resizeAnchor.y - height / 2),
+      width,
+      height,
+    };
+  }
+
+  return computeResizeBounds(currentBounds, width, height);
+}
+
 ipcMain.on('resize-to-content', (e, w, h) => {
   if (!win) return;
-  const next = computeResizeBounds(win.getBounds(), w, h);
+  const next = computeResizeBoundsWithAnchor(win.getBounds(), w, h);
   win.setBounds(next);
 });
 
