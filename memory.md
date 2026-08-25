@@ -174,6 +174,99 @@ git pull
 4. 双系统独立 node_modules
 5. 双系统独立打包环境
 
+---
+
+## 7. Windows环境同步状态
+
+更新时间：
+
+2026-08-25（Asia/Shanghai）
+
+
+已完成：
+
+1. Windows开发环境同步完成
+2. Windows独立npm环境配置完成
+3. Windows Electron运行测试完成
+4. Windows electron-builder打包测试完成
+
+
+Windows开发目录：
+
+E:\Developer\Electron开发环境\项目目录\牛看盘
+
+
+已验证：
+
+- npm start 正常运行
+- npm run dist:portable 打包成功
+- npm run dist:setup 打包成功
+
+
+生成版本：
+
+- 牛来看盘神器-1.0.0-portable.exe
+- 牛来看盘神器 Setup 1.0.0.exe
+
+
+Windows发布目录：
+
+E:\Moony\MoonyMade\牛来看盘神器Win
+
+
+说明：
+
+- portable版本用于绿色运行测试
+- Setup版本用于正式安装发布
+
+
+---
+
+## 8. Windows图标配置状态
+
+更新时间：
+
+2026-08-25
+
+
+已完成：
+
+- 添加 icon.ico 到源码仓库
+- electron-builder 已正确读取 Windows 图标
+
+
+作用：
+
+Windows：
+
+- exe图标
+- 安装包图标
+
+
+说明：
+
+icon.ico 属于项目源码资源。
+
+
+macOS：
+
+- 保留 icon.ico
+- 不影响 macOS 开发
+- 后续可增加 icon.icns 用于 macOS 应用图标
+
+
+---
+
+## 9. 当前项目待验证事项
+
+待处理：
+
+- Windows安装版安装测试
+- Windows卸载测试
+- 开盘行情动画测试
+- macOS图标配置
+- 后续自动更新方案
+
 ## 核心原则
 
 GitHub 管理代码
