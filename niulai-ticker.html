@@ -72,6 +72,10 @@
   #ticker .mid.up, #ticker .up { color: #ff453a; }
   #ticker .mid.down, #ticker .down { color: #30d158; }
   #ticker .mid.flat, #ticker .flat { color: #aeaeb2; }
+  /* 低调模式保留价格和名称，但弱化方向颜色并隐藏涨跌幅区域内容；占位仍保留以避免布局跳动。 */
+  .low-profile #ticker .mid, .low-profile #ticker .bot span,
+  .low-profile #slogan { color: #c7c7cc !important; }
+  .low-profile #ticker .bot { visibility: hidden; }
 
   #petbox { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.3); display: flex; flex-direction: column; align-items: center; pointer-events: auto; -webkit-app-region: no-drag; transform-origin: center center; }
   #slogan { font-size: 32px; font-weight: 900; letter-spacing: 4px; color: #fff;
@@ -153,6 +157,13 @@
   .hud-label { font-size: var(--hud-label-size); font-weight: 700; line-height: 1.25; color: rgba(255,255,255,.78); }
   .hud-field-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .hud-field-head > span { font-size: var(--hud-meta-size); line-height: 1.25; color: rgba(255,255,255,.62); font-variant-numeric: tabular-nums; }
+  .quiet-mode-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .quiet-mode-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .quiet-mode-description { font-size: var(--hud-meta-size); line-height: 1.35; color: rgba(255,255,255,.55); }
+  .quiet-mode-toggle { flex: 0 0 auto; width: 34px; height: 19px; margin-top: 1px; appearance: none; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; background: rgba(255,255,255,.12); cursor: pointer; position: relative; transition: background .2s ease, border-color .2s ease; }
+  .quiet-mode-toggle::after { content: ''; position: absolute; width: 13px; height: 13px; top: 2px; left: 2px; border-radius: 50%; background: rgba(255,255,255,.82); transition: transform .2s ease; }
+  .quiet-mode-toggle:checked { background: rgba(142,142,147,.55); border-color: rgba(255,255,255,.55); }
+  .quiet-mode-toggle:checked::after { transform: translateX(15px); background: #fff; }
   #hud input[type="range"] { width: 100%; min-width: 0; }
   #hud input[type="text"] { width: 100%; min-width: 0; background: rgba(0,0,0,.45); color: #fff; border: 1px solid rgba(255,255,255,.25); border-radius: 6px; padding: 5px 6px; font-size: var(--hud-main-size); outline: none; }
   #hud input[type="text"]:focus { border-color: rgba(10,132,255,.9); box-shadow: 0 0 0 2px rgba(10,132,255,.15); }
@@ -352,6 +363,13 @@
       </div>
       <input id="uiScaleRange" type="range" min="50" max="200" step="5" value="130" aria-label="界面大小精调" />
     </div>
+    <div class="hud-field quiet-mode-row">
+      <div class="quiet-mode-copy">
+        <label class="hud-label" for="quietModeToggle">低调模式</label>
+        <div class="quiet-mode-description">隐藏明显的涨跌反馈，让牛表现得淡定一点。</div>
+      </div>
+      <input id="quietModeToggle" class="quiet-mode-toggle" type="checkbox" aria-label="低调模式" />
+    </div>
     <div class="hud-field">
       <button id="diagToggle" class="btn" type="button">行情诊断</button>
       <div id="marketDiag" class="diag-panel">
@@ -471,7 +489,7 @@
 
   let currentState = STATES[0];
   let frameIndex = 0, lastFrameTime = 0, speed = 1, uiScalePercent = 130;
-  let simMode = true, restMode = false, currentSymbol = 'sh000001';
+  let simMode = true, restMode = false, currentSymbol = 'sh000001', lowProfileMode = false;
   let simPrice = 3200.00, simPrevClose = 3200.00; // 初始持平，避免启动瞬间先闪涨态红色
   let lastDir = 'flat';
   let lastPrice = simPrice, lastPrevClose = simPrevClose;
@@ -485,6 +503,7 @@
   const WATCHLIST_KEY = 'niulai.watchlist.v1';
   const RECENT_KEY = 'niulai.recentSymbols.v1';
   const CURRENT_SYMBOL_KEY = 'niulai.currentSymbol.v1';
+  const LOW_PROFILE_KEY = 'niulai.lowProfile.v1';
   const DEFAULT_WATCHLIST = [
     { symbol: 'sh000001', name: '上证指数' },
     { symbol: 'sz399001', name: '深证成指' },
@@ -779,9 +798,10 @@
     lastDir = dir;
     bg.className = dir;
     slogan.className = dir;
-    idxPrice.className = 'mid ' + (dir==='up' ? 'up' : dir==='down' ? 'down' : dir==='rest' ? 'flat' : 'flat');
-    const color = dir==='up' ? '#ff453a' : dir==='down' ? '#30d158' : dir==='rest' ? '#0a84ff' : '#aeaeb2';
-    idxChg.className = dir==='up' ? 'up' : dir==='down' ? 'down' : 'flat';
+    const visualDir = lowProfileMode ? 'flat' : dir;
+    idxPrice.className = 'mid ' + (visualDir==='up' ? 'up' : visualDir==='down' ? 'down' : 'flat');
+    const color = lowProfileMode ? '#c7c7cc' : dir==='up' ? '#ff453a' : dir==='down' ? '#30d158' : dir==='rest' ? '#0a84ff' : '#aeaeb2';
+    idxChg.className = visualDir==='up' ? 'up' : visualDir==='down' ? 'down' : 'flat';
     idxAbs.className = idxChg.className;
     return color;
   }
@@ -811,6 +831,12 @@
     const sourceTime = source === '真实' && lastQuoteMeta.quoteTime ? lastQuoteMeta.quoteTime.slice(0,5) : logicalTime;
     setTicker(source==='模拟' ? '上证指数(模拟)' : window.lastMarketName || '上证指数', currentSymbol, price, changePct, sourceTime);
     if (source === '模拟') { feedStatusDot.className = 'sim'; feedTime.textContent = logicalTime; }
+
+    if (lowProfileMode) {
+      if (currentState.id !== 'idle') setState('idle');
+      setSlogan('牛来看盘', color);
+      return;
+    }
 
     const triggerEffect = shouldTriggerMarketEffect(dir, changePct);
     if (marketAction.state === 'surge') {
@@ -1113,6 +1139,15 @@
   function saveWatchlist() { try { localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist)); } catch (_) {} }
   function saveRecent() { try { localStorage.setItem(RECENT_KEY, JSON.stringify(recentSymbols)); } catch (_) {} }
   function saveCurrentSymbol() { try { if (currentSymbol) localStorage.setItem(CURRENT_SYMBOL_KEY, JSON.stringify(currentSymbol)); } catch (_) {} }
+  function saveLowProfileMode() { try { localStorage.setItem(LOW_PROFILE_KEY, JSON.stringify(lowProfileMode)); } catch (_) {} }
+
+  function applyLowProfileMode(enabled) {
+    lowProfileMode = Boolean(enabled);
+    document.body.classList.toggle('low-profile', lowProfileMode);
+    const toggle = document.getElementById('quietModeToggle');
+    if (toggle) toggle.checked = lowProfileMode;
+    if (!restMode) applyMarket(lastPrice, lastPrevClose, simMode ? '模拟' : '真实');
+  }
 
   function itemNameFor(symbol) {
     const item = watchlist.find(v => v.symbol === symbol) || recentSymbols.find(v => v.symbol === symbol);
@@ -1526,6 +1561,7 @@
   // UI hooks
   const simBtn = document.getElementById('simBtn');
   const realBtn = document.getElementById('realBtn');
+  const quietModeToggle = document.getElementById('quietModeToggle');
   if (simBtn) simBtn.onclick = () => { stopWebFeed(); window.__setSimulated(true); manualRest = false; evaluatePhase(); };
   if (realBtn) realBtn.onclick = () => {
     if (window.__inElectron) { window.__setSimulated(false); manualRest = false; evaluatePhase(); }
@@ -1533,6 +1569,10 @@
   };
   const restBtn = document.getElementById('restBtn');
   if (restBtn) restBtn.onclick = () => { manualRest = !manualRest; evaluatePhase(); };
+  if (quietModeToggle) quietModeToggle.onchange = () => {
+    applyLowProfileMode(quietModeToggle.checked);
+    saveLowProfileMode();
+  };
 
   // 归一化股票代码：支持 sh600519 / 600519 / 600519.SH / 600519 sh 等常见写法
   function normalizeSymbol(raw) {
@@ -1605,6 +1645,7 @@
   const storedCurrent = normalizeSymbol(safeLoadJSON(CURRENT_SYMBOL_KEY, ''));
   if (storedCurrent) currentSymbol = storedCurrent;
   else if (watchlist.length) currentSymbol = watchlist[0].symbol;
+  applyLowProfileMode(safeLoadJSON(LOW_PROFILE_KEY, false) === true);
   renderSymbolControls();
   window.__getCurrentSymbol = () => currentSymbol;
   setInterval(refreshFeedFreshness, 1000);
