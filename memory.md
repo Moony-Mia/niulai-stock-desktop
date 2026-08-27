@@ -287,3 +287,15 @@ GitHub 管理代码
 - 未修改行情计算、涨跌判断、行情获取、`node_modules` 或 `dist`。
 
 Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warning。
+
+## 2026-08-27 牛动作系统 V2 播放契约第一阶段
+
+已完成：
+
+- `marketState.js` 保持 `getState(changePct)` 为唯一市场状态接口，未修改原有阈值；`niulai-ticker.html` 不再调用不存在的 `getAction()`。
+- `cowStateMachine.js` 提供正式 `getActionRequest()` 市场状态到真实 action ID 的映射，并保留 `getCowState()` 兼容入口；现有未配套的 V2 素材继续映射到当前 `jumping` / `failed`，未返回不存在的动作。
+- `niulai-ticker.html` 将 11 个现有动作统一为 Action Registry，支持 `segments`、`loop`、`speed`、`priority`、`fallback`、`lowProfileAllowed`。
+- 播放器按实际帧推进处理多 segment 和 `loop:false` 完成、fallback、回调；统一速度为 slow 160ms、normal 120ms、fast 90ms，现有动作均为 normal。
+- `applyMarket()` 已整理为 getState → action request → 低调过滤 → requestAction 的单一路径；时间相位仍使用显式强制切换，不被行情刷新打断。
+
+验证：市场/状态机断言、动作契约静态断言和 `git diff --check` 通过；Windows `npm start` 返回 0。未修改 `spritesheet.webp`、`node_modules`、`dist` 或行情阈值。

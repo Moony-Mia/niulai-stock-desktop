@@ -456,20 +456,23 @@
   // 优先用主进程注入的绝对 file:// 路径；fallback 保持相对路径以兼容浏览器直接打开
   const SPRITESHEET = (typeof window !== 'undefined' && window.__SPRITE_URL) ? window.__SPRITE_URL : './spritesheet.webp';
   const CELL_W = 192, CELL_H = 208;
-  const STATES = [
-    { id: 'idle', name: 'Idle', row: 0, frames: 7 },
-    { id: 'running-right', name: 'Run →', row: 1, frames: 8 },
-    { id: 'running-left', name: 'Run ←', row: 2, frames: 8 },
-    { id: 'waving', name: 'Wave', row: 3, frames: 4 },
-    { id: 'jumping', name: 'Jump', row: 4, frames: 5 },
-    { id: 'failed', name: 'Failed', row: 5, frames: 8 },
-    { id: 'waiting', name: 'Waiting', row: 6, frames: 6 },
-    { id: 'review', name: 'Review', row: 7, frames: 6 },
-    { id: 'thinking', name: 'Thinking', row: 8, frames: 6 },
-    { id: 'swaying', name: 'Swaying', row: 9, frames: 8 },
-    { id: 'turning', name: 'Turning', row: 10, frames: 8 }
+  const ACTION_SPEED_MS = { slow: 160, normal: 120, fast: 90 };
+  const ACTIONS = [
+    { id: 'idle', name: 'Idle', segments: [{ row: 0, frames: 7 }], loop: true, speed: 'normal', priority: 0, fallback: null, lowProfileAllowed: true },
+    { id: 'running-right', name: 'Run →', segments: [{ row: 1, frames: 8 }], loop: true, speed: 'normal', priority: 30, fallback: 'idle', lowProfileAllowed: false },
+    { id: 'running-left', name: 'Run ←', segments: [{ row: 2, frames: 8 }], loop: true, speed: 'normal', priority: 30, fallback: 'idle', lowProfileAllowed: false },
+    { id: 'waving', name: 'Wave', segments: [{ row: 3, frames: 4 }], loop: true, speed: 'normal', priority: 30, fallback: 'idle', lowProfileAllowed: true },
+    { id: 'jumping', name: 'Jump', segments: [{ row: 4, frames: 5 }], loop: true, speed: 'normal', priority: 70, fallback: 'idle', lowProfileAllowed: false },
+    { id: 'failed', name: 'Failed', segments: [{ row: 5, frames: 8 }], loop: true, speed: 'normal', priority: 70, fallback: 'idle', lowProfileAllowed: false },
+    { id: 'waiting', name: 'Waiting', segments: [{ row: 6, frames: 6 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
+    { id: 'review', name: 'Review', segments: [{ row: 7, frames: 6 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
+    { id: 'thinking', name: 'Thinking', segments: [{ row: 8, frames: 6 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
+    { id: 'swaying', name: 'Swaying', segments: [{ row: 9, frames: 8 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
+    { id: 'turning', name: 'Turning', segments: [{ row: 10, frames: 8 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true }
   ];
-  const stateById = Object.fromEntries(STATES.map(s => [s.id, s]));
+  const stateById = Object.fromEntries(ACTIONS.map(action => [action.id, action]));
+  // V1 兼容别名：保留内部调用方对 STATES 的读取，不再维护第二份动作表。
+  const STATES = ACTIONS;
 
   const TIME_PRESETS = [
     { id: 'closed',       label: '休息',     day: 1, hour: 8,  minute: 30 },
@@ -487,8 +490,10 @@
   ];
   const timePresetById = Object.fromEntries(TIME_PRESETS.map(p => [p.id, p]));
 
-  let currentState = STATES[0];
+  let currentState = ACTIONS[0];
   let frameIndex = 0, lastFrameTime = 0, speed = 1, uiScalePercent = 130;
+  let playback = { actionId: 'idle', segmentIndex: 0, frameIndex: 0, elapsedMs: 0, onComplete: null, loopOverride: null };
+  let currentActionPriority = ACTIONS[0].priority;
   let simMode = true, restMode = false, currentSymbol = 'sh000001', lowProfileMode = false;
   let simPrice = 3200.00, simPrevClose = 3200.00; // 初始持平，避免启动瞬间先闪涨态红色
   let lastDir = 'flat';
@@ -563,8 +568,68 @@
     }
   }, 6000);
 
-  function draw() { ctx.clearRect(0,0,CELL_W,CELL_H); if (!img.complete || !img.naturalWidth) return; ctx.drawImage(img, frameIndex*CELL_W, currentState.row*CELL_H, CELL_W, CELL_H, 0, 0, CELL_W, CELL_H); }
-  function setState(id) { if (!stateById[id]) return; currentState = stateById[id]; frameIndex = 0; if (document.getElementById('stateGrid')) renderButtons(); }
+  function draw() {
+    ctx.clearRect(0, 0, CELL_W, CELL_H);
+    if (!img.complete || !img.naturalWidth) return;
+    const segment = currentState.segments[playback.segmentIndex] || currentState.segments[0];
+    ctx.drawImage(img, playback.frameIndex * CELL_W, segment.row * CELL_H, CELL_W, CELL_H, 0, 0, CELL_W, CELL_H);
+  }
+
+  function finishAction() {
+    const completed = currentState;
+    const callback = playback.onComplete;
+    playback.onComplete = null;
+    currentActionPriority = 0;
+    if (completed.fallback && stateById[completed.fallback]) {
+      requestAction(completed.fallback, { force: true });
+    }
+    if (callback) callback(completed.id);
+  }
+
+  function advancePlayback(deltaMs) {
+    const interval = ACTION_SPEED_MS[currentState.speed] || ACTION_SPEED_MS.normal;
+    playback.elapsedMs += Math.max(0, deltaMs);
+    while (playback.elapsedMs >= interval) {
+      playback.elapsedMs -= interval;
+      const segment = currentState.segments[playback.segmentIndex];
+      if (playback.frameIndex + 1 < segment.frames) {
+        playback.frameIndex += 1;
+        continue;
+      }
+      if (playback.segmentIndex + 1 < currentState.segments.length) {
+        playback.segmentIndex += 1;
+        playback.frameIndex = 0;
+        continue;
+      }
+      const shouldLoop = playback.loopOverride === null ? currentState.loop : playback.loopOverride;
+      if (shouldLoop) {
+        playback.segmentIndex = 0;
+        playback.frameIndex = 0;
+        continue;
+      }
+      draw();
+      finishAction();
+      break;
+    }
+    frameIndex = playback.frameIndex;
+  }
+
+  function requestAction(id, options = {}) {
+    const action = stateById[id];
+    if (!action) return false;
+    const requestedPriority = Number.isFinite(options.priority) ? options.priority : action.priority;
+    if (!options.force && requestedPriority < currentActionPriority) return false;
+    if (!options.force && action.id === currentState.id) return true;
+    currentState = action;
+    currentActionPriority = requestedPriority;
+    playback = { actionId: action.id, segmentIndex: 0, frameIndex: 0, elapsedMs: 0, onComplete: options.onComplete || null, loopOverride: options.once === true ? false : null };
+    frameIndex = 0;
+    if (document.getElementById('stateGrid')) renderButtons();
+    return true;
+  }
+
+  // 兼容现有时间/调试调用方：这些调用属于显式状态切换，保留 V1 的强制切换语义。
+  function setState(id) { return requestAction(id, { force: true }); }
   const petbox = document.getElementById('petbox');
   const SCALE_MIN = 50, SCALE_MAX = 200;
   let scaleCommitTimer = null;
@@ -817,14 +882,27 @@
     // 行情文字刷新不改变窗口尺寸：ticker 已固定宽度，避免每次报价触发 Electron setBounds。
   }
 
+  function resolveMarketAction(marketState) {
+    const request = window.cowStateMachine
+      ? window.cowStateMachine.getActionRequest(marketState)
+      : { action: marketState.direction === 'up' ? 'jumping' : marketState.direction === 'down' ? 'failed' : 'idle', priority: 0 };
+    const action = stateById[request.action] || stateById.idle;
+    // 低调模式只过滤行情反馈，不影响 applyPhase 的时间相位动作。
+    if (lowProfileMode && !action.lowProfileAllowed) {
+      return { ...request, action: action.fallback && stateById[action.fallback]?.lowProfileAllowed ? action.fallback : 'idle', priority: 0 };
+    }
+    return { ...request, action: action.id, priority: action.priority };
+  }
+
   function applyMarket(price, prevClose, source='模拟') {
     if (restMode) return; // 休市时只看数字，背景和姿态不变
     lastPrice = price; lastPrevClose = prevClose;
     const changePct = ((price - prevClose)/prevClose)*100;
-    const marketAction = window.marketStateEngine
-      ? window.marketStateEngine.getAction(changePct)
-      : { dir: changePct > 0.05 ? 'up' : changePct < -0.05 ? 'down' : 'flat' };
-    const dir = marketAction.dir;
+    const marketState = window.marketStateEngine
+      ? window.marketStateEngine.getState(changePct)
+      : { state: 'flat', direction: 'flat', changePct };
+    const marketAction = resolveMarketAction(marketState);
+    const dir = marketState.direction;
     const color = setTheme(dir);
     const now = getLogicalNow();
     const logicalTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
@@ -832,55 +910,15 @@
     setTicker(source==='模拟' ? '上证指数(模拟)' : window.lastMarketName || '上证指数', currentSymbol, price, changePct, sourceTime);
     if (source === '模拟') { feedStatusDot.className = 'sim'; feedTime.textContent = logicalTime; }
 
-    if (lowProfileMode) {
-      if (currentState.id !== 'idle') setState('idle');
-      setSlogan('牛来看盘', color);
-      return;
-    }
-
-    const triggerEffect = shouldTriggerMarketEffect(dir, changePct);
-    if (marketAction.state === 'surge') {
-
-  setState('jumping');
-  setSlogan('', color);
-
-  if (triggerEffect) {
-    spawnArcParticles('牛来', color);
-  }
-
-} else if (marketAction.state === 'up') {
-
-  setState('waving');
-  setSlogan('', color);
-
-} else if (marketAction.state === 'crash') {
-
-  setState('failed');
-  setSlogan('', color);
-
-  if (triggerEffect) {
-    spawnDropParticles('稳住', color);
-  }
-
-} else if (marketAction.state === 'down') {
-
-  setState('swaying');
-  setSlogan('', color);
-
-} else {
-
-  setState('thinking');
-  setSlogan('再等等…', color, 'breathe');
-
-}if (dir === 'up') {
-      setState('jumping'); setSlogan('', color); // 涨：红橙弧形爆字
-      if (triggerEffect) spawnArcParticles('牛来', color);
-    } else if (dir === 'down') {
-      setState('failed'); setSlogan('', color); // 跌：绿色文字轻微下沉，不再完全静默
-      if (triggerEffect) spawnDropParticles('稳住', color);
+    requestAction(marketAction.action, { priority: marketAction.priority });
+    if (dir === 'up' || dir === 'down') {
+      setSlogan('', color);
     } else {
-      setState('idle'); setSlogan('再等等…', color, 'breathe');
+      setSlogan('再等等…', color, 'breathe');
     }
+    const triggerEffect = shouldTriggerMarketEffect(dir, changePct);
+    if (!lowProfileMode && triggerEffect && marketState.state === 'strong_up') spawnArcParticles('牛来', color);
+    if (!lowProfileMode && triggerEffect && marketState.state === 'strong_down') spawnDropParticles('稳住', color);
   }
 
   function setSlogan(text, color, effect = '') {
@@ -899,13 +937,12 @@
 
   // 播一个状态，播完后（按帧数*速度估算时长）执行 then
   function playState(id, then) {
-    setState(id);
-    if (then) {
-      const st = stateById[id];
-      const dur = (st.frames * 120 / speed) + 80;
-      clearTimeout(sessionSeqTimer);
-      sessionSeqTimer = setTimeout(then, dur);
-    }
+    clearTimeout(sessionSeqTimer);
+    return requestAction(id, { force: true, once: true, onComplete: then });
+  }
+
+  function actionFrameCount(action) {
+    return action.segments.reduce((total, segment) => total + segment.frames, 0);
   }
 
   // 顺序循环保留给需要明确叙事顺序的状态。
@@ -914,9 +951,9 @@
     let k = 0;
     const stepFn = () => {
       const id = seq[k % seq.length];
-      setState(id);
+      requestAction(id, { force: true, priority: 30 });
       const st = stateById[id];
-      const dur = st.frames * 120 / speed;
+      const dur = actionFrameCount(st) * (ACTION_SPEED_MS[st.speed] || ACTION_SPEED_MS.normal);
       k++;
       sessionSeqTimer = setTimeout(stepFn, dur);
     };
@@ -937,10 +974,10 @@
     let recent = [];
     const stepFn = () => {
       const id = pickNextState(pool, recent);
-      setState(id);
+      requestAction(id, { priority: 10 });
       recent = [id, ...recent].slice(0, 2);
       const st = stateById[id];
-      const dur = st.frames * 120 / speed + 80 + Math.random() * 260;
+      const dur = actionFrameCount(st) * (ACTION_SPEED_MS[st.speed] || ACTION_SPEED_MS.normal) + 80 + Math.random() * 260;
       sessionSeqTimer = setTimeout(stepFn, dur);
     };
     stepFn();
@@ -1553,7 +1590,11 @@
   let lastStep = 0;
   function loop(now) {
     if (!lastFrameTime) lastFrameTime = now;
-    if (now - lastFrameTime >= 120/speed) { frameIndex = (frameIndex+1)%currentState.frames; lastFrameTime = now; draw(); }
+    if (now - lastFrameTime >= 16) {
+      advancePlayback(now - lastFrameTime);
+      lastFrameTime = now;
+      draw();
+    }
     if (simMode && !restMode && now - lastStep > 2000) { stepSimulation(); lastStep = now; }
     requestAnimationFrame(loop);
   }
