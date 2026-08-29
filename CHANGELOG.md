@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 2026-08-30
+
+- `celebration_dance_left_peak_identity_correction_02` 经人工视觉验收，被选定并冻结为 `celebration_dance Left Peak High-Resolution Master`。
+- 新增标准母版文件 `assets/cow-v2/actions/celebration_dance/masters/celebration_dance_left_peak_master_hr.png`；由 Identity Correction 02 原文件直接复制，源文件与 Master 已完成尺寸、RGB 模式、SHA-256 和字节级一致性验证。
+- Left Peak HR Master 现在作为后续右峰值、中间过渡帧、Identity / Surface 一致性检查、192×208 转换及完整 `celebration_dance` 动画帧的主要视觉参考基线。
+- 已记录并锁定正式牛 Identity 与 Left Peak Pose 关系；停止继续生成左峰值候选。下一阶段为 `Right Peak High-Resolution Master`。
+- 当前 Master 保留白色 RGB 背景，尚未透明化；尚未转换到 `192 × 208`，尚未修改正式 spritesheet、Action Registry、状态机或业务逻辑。
+
 ## 2026-08-29
 
 - 当前状态纠正：人工视觉复核确认 `Structure / Occlusion V1` 失败；其后制作的 `Volume Blockout V1`（保留历史提交 `811c0a0`）同样失败。两次失败历史均保留，未进入正式资产或 `Identity Reconstruction`。

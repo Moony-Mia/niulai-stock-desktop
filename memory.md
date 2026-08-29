@@ -2,7 +2,18 @@
 
 > 后续 ChatGPT / Codex / AI 接手本项目时，开始改代码前必须先阅读本文件。每次完成并验证一轮已批准的功能改动后，必须同步更新本文件。
 
-最后更新：2026-08-29（Asia/Shanghai）
+最后更新：2026-08-30（Asia/Shanghai）
+
+## 2026-08-30 celebration_dance 左峰值 HR Master 冻结（当前权威）
+
+- `celebration_dance_left_peak_identity_correction_02.png` 已通过人工视觉验收，并作为 `celebration_dance Left Peak High-Resolution Master` 正式锁定。
+- 权威 Master 文件：`assets/cow-v2/actions/celebration_dance/masters/celebration_dance_left_peak_master_hr.png`。该文件由 Identity Correction 02 原文件直接复制生成，未重新编码、未调整视觉、未裁切、未缩放、未处理 Alpha；源文件与 Master 尺寸均为 `1203 × 1307`，模式均为 `RGB PNG`，SHA-256 均为 `c8fe7910471520316756ff11a5d62a8ce447d5cb7423ee43c7763f951a468b2b`，已完成字节级一致性验证。
+- `Pose Blueprint` ✅；`Silhouette V2` ✅（历史 Pose 研究）；`Silhouette V2.1` ✅（历史 Pose Boundary）；`Structure / Occlusion V1` ❌；`Volume Blockout V1` ❌；`Generative Reconstruction` ✅；`Left Peak Candidate 02` ✅（Pose / Anatomy 基线）；`Identity Correction 02` ✅（人工视觉验收）；`Left Peak High-Resolution Master` ✅（已冻结）。
+- HR Master 锁定后续 `celebration_dance` 的角色 Identity：脸型、muzzle、眼睛、眉形、牛角、耳朵、金黄色毛发、紫灰色手、紫灰色蹄、头身比例、身体粗壮程度、Q 版腿部比例，以及原本略欠、淡定的表情。后续每帧不得重新解释角色 Identity。
+- HR Master 同时锁定 Left Peak Reference 的动作关系：左拳高位举起、右手横腹、左胯向左扭出、下半身偏左、上半身向右反向平衡、左腿主要承重、右腿向右侧伸、双脚接地、头部基本正面。
+- 当前 HR Master 背景为白色、RGB，尚未透明化；背景处理属于后续统一资产处理阶段。当前尚未转为 `192 × 208`，尚未进入正式 spritesheet、Action Registry、状态机或业务逻辑。
+- 不再继续生成左峰值 `Candidate 03`、`Identity Correction 03`、`Left Peak V2` 或 `Left Peak V3`，除非后续发现明确硬伤（例如 192×208 完全不可读、动画一致性出现无法修复的问题或 Anatomy 存在未发现的硬错误）。
+- 下一阶段为 `Right Peak High-Resolution Master`。右峰值应以 Left Peak HR Master 为主要 Identity / 比例 / Surface 参考，建立对应动作关系但不得简单机械镜像；本轮未制作右峰值。
 
 ## 2026-08-29 celebration_left_peak 止损与状态纠正（当前权威）
 
