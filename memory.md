@@ -4,6 +4,19 @@
 
 最后更新：2026-08-29（Asia/Shanghai）
 
+## 2026-08-29 celebration_left_peak 止损与状态纠正（当前权威）
+
+- 当前人工验收状态：`Pose Blueprint` ✅；`Silhouette V2` ✅；`Silhouette V2.1` ✅（Pose / Silhouette Boundary 继续有效）；`Structure / Occlusion V1` ❌；`Volume Blockout V1` ❌。`Identity Reconstruction` 尚未进入，正式 `celebration_dance` 尚未接入。
+- `Volume Blockout V1` 对应历史提交 `811c0a0`（`feat: add celebration volume blockout candidate`）必须保留。该候选仅作为研究和历史参考，不删除、不 revert、不改写为从未发生。
+- 失败的是 `Volume Blockout V1` 的具体资产制作方法，不是 `celebration_dance` 动作设计、V2.1 Pose / Silhouette、左腿承重、右腿侧伸、左胯扭动或拟人搞笑庆祝舞方向。人工复核确认其头颈肩胸连接不自然、手臂和腿部呈几何组件感、腹部与骨盆有装甲块 / 裤片式分区，整体不像完整有机的牛摆出舞姿；这些问题在 192×208 下尤其明显。
+- 根本原因：该候选使用 Python / Pillow / ImageDraw 的 `ellipse`、`polygon`、几何色块、人工坐标肢体块及 alpha mask 直接构造有机角色 Anatomy / Volume，方法不适合当前牛角色所需的连续有机体积。
+- 对 `celebration_dance` 及类似大幅有机形体重建，禁止继续以确定性几何 primitive 作为主要角色绘画方法从零建立胸腔、腹部、骨盆、肩膀、手臂、大腿、小腿、复杂关节或完整角色 Anatomy / Volume。Pillow / ImageDraw / Python 仅可用于裁切、缩放、对齐、alpha、透明背景、像素检查、尺寸转换、Contact Sheet、对比图、spritesheet 拼接及已有素材的确定性工程处理；未来若需局部简单修补，须有人工明确批准。
+- 明确停止 `Volume Blockout V1.1`、`Volume Blockout V1.2`、`Structure / Occlusion V1.1`，不得通过调整 polygon 坐标、ellipse 大小、primitive 叠放顺序或增加几何块继续修复当前失败候选。
+- 下一阶段路线更新为：`Pose Blueprint ✅ → Silhouette V2 ✅ → Silhouette V2.1 ✅（Pose Boundary） → Structure / Occlusion V1 ❌ → Volume Blockout V1 ❌（几何 primitive 制作方法失败） → AI / Generative Volume Reconstruction → 人工验收完整有机身体 → Identity Reconstruction → Surface → 192×208 适配 → 左峰值最终验收 → 右峰值 → 过渡帧 → 完整 celebration_dance → 正式 spritesheet / Registry / 业务接入`。
+- 后续有机体积由图像生成 / 图像编辑模型负责连续体积、自然关节、头颈肩连接、胸腹骨盆和左右腿姿态；Codex / Python 负责文件整理、裁切、比例、尺寸、alpha、对齐、192×208 转换、Contact Sheet、比较图、spritesheet、Registry、状态机、Electron 集成和 Git。不得再次让工程脚本承担有机角色绘画。
+- 人工确认的更优完整牛姿势图定位为 `Volume / Anatomy Reference`，不是正式角色资产，也不是直接进入 spritesheet 的素材。若当前仓库不存在该文件，不得假定路径或伪造来源；未来应结合 V2.1 Pose / Silhouette Boundary、该参考图和正式牛 Identity Reference 进行 AI / Generative Volume Reconstruction。
+- 本轮只纠正文档状态；未制作任何新图片、候选帧、脚本或动画素材，未修改正式 `spritesheet.webp`、Action Registry、`cowStateMachine.js`、行情逻辑、Electron 配置，未进入 `Identity Reconstruction`。
+
 ## 2026-08-29 celebration_left_peak 阶段复核与 Volume Blockout V1
 
 - `Pose Blueprint` ✅；`Silhouette V2` ✅；`Silhouette V2.1` ✅（Pose / 外轮廓基线继续有效）。

@@ -2,6 +2,12 @@
 
 ## 2026-08-29
 
+- 当前状态纠正：人工视觉复核确认 `Structure / Occlusion V1` 失败；其后制作的 `Volume Blockout V1`（保留历史提交 `811c0a0`）同样失败。两次失败历史均保留，未进入正式资产或 `Identity Reconstruction`。
+- `Volume Blockout V1` 的失败根因已定位为使用 PIL / ImageDraw 的 ellipse、polygon、rectangle 等几何 primitive 直接建立有机角色 Anatomy / Volume，导致头颈肩胸、手臂、腹部骨盆、关节和腿部呈几何组件 / 贴片感；当前停止继续修复该候选。
+- 明确停止 `Volume Blockout V1.1`、`Volume Blockout V1.2`、`Structure / Occlusion V1.1`，不通过调整或增加几何 primitive 延续该路线。`Pose Blueprint`、`Silhouette V2`、`Silhouette V2.1` Pose / Silhouette Boundary 仍为有效基线。
+- 下一阶段改为 `AI / Generative Volume Reconstruction`，先完成人工验收的完整有机身体，再进入 `Identity Reconstruction`、`Surface`、192×208 适配和左峰值最终验收；尚未进入正式 `celebration_dance`、spritesheet、Registry 或业务接入。
+- 本轮仅纠正文档状态；未制作新候选图片，未修改正式 `spritesheet.webp`、Action Registry、状态机、行情逻辑或 Electron 配置。
+
 - 后续人工视觉复核确认既有 `Structure / Occlusion V1` 候选未通过：该候选历史保留，但未进入正式资产，也未进入 `Identity Reconstruction`；下一阶段调整为 `Volume Blockout`。
 - 基于已确认的 `celebration_left_peak_silhouette_v2_1` Pose / 外轮廓，新增 `assets/cow-v2/candidates/celebration-dance/volume-blockout-v1/`，制作连续头颈肩胸、宽右臂横腹体块、连续胸腹骨盆和双腿体块的 `Volume Blockout V1` 候选；本轮仍待人工验收。
 - 新增 `celebration_left_peak` Structure / Occlusion 候选：严格基于已锁定 V2.1 外轮廓，加入正式牛头身份锚点、紫灰手/蹄、右臂横胸遮挡结构，以及左承重腿和右膝的最低限度结构明暗。
