@@ -639,6 +639,8 @@
   window.__playIdleBlink = () => playState('idle_blink');
   // Minimal developer trigger for the continuous sleep action; not part of any random pool.
   window.__playSleep = () => setState('sleep');
+  // Minimal developer trigger for one-shot analysis verification; not part of any random pool.
+  window.__playThinking = () => playState('thinking');
   const petbox = document.getElementById('petbox');
   const SCALE_MIN = 50, SCALE_MAX = 200;
   let scaleCommitTimer = null;

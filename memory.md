@@ -4,6 +4,12 @@
 
 最后更新：2026-08-29（Asia/Shanghai）
 
+## 2026-08-29 thinking 动作正式接入
+
+- `thinking` 复用正式 spritesheet row 8、6 帧；Action Registry 保持 `loop: true`、`speed: normal`、`priority: 10`、`fallback: idle`，未修改素材或 Registry 参数。
+- 正式业务触发点为收盘后的 `review` 时间相位：`startRandomStateLoop(['review', 'thinking', 'waiting'])` 将 `thinking` 作为短暂分析/判断状态参与复盘动作池；交易相位行情动作和时间相位动作通过更高优先级或相位切换保护，不由它抢占。
+- 新增开发验证入口 `window.__playThinking()`，使用 `playState('thinking')` 以一次性模式播放，完成后由统一 Registry fallback 回到 `idle`；该入口不加入正式随机调度。
+
 ## 2026-08-29 idle_blink 自动待机接入
 
 - `idle_blink` 已正式接入自动待机逻辑；只在交易相位且当前 action 为 `idle` 时触发，避免打断生活态动作和业务动作。
