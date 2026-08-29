@@ -503,6 +503,8 @@
   let lastMarketEffectDir = null, lastMarketEffectAt = 0;
   const MARKET_EFFECT_COOLDOWN = 30000;
   let sessionSeqTimer = null;
+  let idleBlinkTimer = null;
+  let idleBlinkSchedulerStarted = false;
   let currentPhase = null, manualRest = false;
   let logicalNowOverride = null, activeTimePresetId = null;
   let webFeedTimer = null;
@@ -553,6 +555,7 @@
   img.onload = () => {
     console.log('[pet] spritesheet loaded OK:', SPRITESHEET, 'size', img.naturalWidth + 'x' + img.naturalHeight);
     if (window.__diag) window.__diag('精灵图已加载 OK ' + img.naturalWidth + 'x' + img.naturalHeight);
+    startIdleBlinkScheduler();
     requestAnimationFrame(loop);
   };
   img.onerror = () => {
@@ -946,6 +949,35 @@
     clearTimeout(sessionSeqTimer);
     return requestAction(id, { force: true, once: true, onComplete: then });
   }
+
+  const IDLE_BLINK_MIN_DELAY = 4000;
+  const IDLE_BLINK_MAX_DELAY = 10000;
+
+  function scheduleNextIdleBlink() {
+    clearTimeout(idleBlinkTimer);
+    const delay = IDLE_BLINK_MIN_DELAY + Math.random() * (IDLE_BLINK_MAX_DELAY - IDLE_BLINK_MIN_DELAY);
+    idleBlinkTimer = setTimeout(() => {
+      idleBlinkTimer = null;
+      // Timer 到点只代表重新检查；重要动作、sleep 或非交易生活态都跳过本轮。
+      const canBlink = currentPhase === 'trading' && currentState.id === 'idle' && playback.actionId === 'idle';
+      if (!canBlink) {
+        scheduleNextIdleBlink();
+        return;
+      }
+      playState('idle_blink', () => {
+        // playState 的统一 fallback 已先恢复 idle；只在仍处于正常交易待机时继续排程。
+        scheduleNextIdleBlink();
+      });
+    }, delay);
+  }
+
+  function startIdleBlinkScheduler() {
+    if (idleBlinkSchedulerStarted) return;
+    idleBlinkSchedulerStarted = true;
+    scheduleNextIdleBlink();
+  }
+
+  window.addEventListener('beforeunload', () => clearTimeout(idleBlinkTimer));
 
   function actionFrameCount(action) {
     return action.segments.reduce((total, segment) => total + segment.frames, 0);

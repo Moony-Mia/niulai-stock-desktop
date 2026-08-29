@@ -4,6 +4,14 @@
 
 最后更新：2026-08-29（Asia/Shanghai）
 
+## 2026-08-29 idle_blink 自动待机接入
+
+- `idle_blink` 已正式接入自动待机逻辑；只在交易相位且当前 action 为 `idle` 时触发，避免打断生活态动作和业务动作。
+- 调度使用单一一次性随机 timeout，每次重新随机 `4–10 秒`，不是固定 `setInterval`；页面初始化只启动一套 scheduler，销毁时清理 timer。
+- 触发前再次检查当前 action；running、jumping、failed、sleep、waving 及正在执行的 `idle_blink` 都不会被自动 blink 抢占。高优先级 action 可正常接管，blink 完成回调不会强制覆盖新 action。
+- 复用现有 `playState()` 与非循环 action fallback，blink 完成后恢复 `idle`；手动入口 `window.__playIdleBlink()` 保留。
+- spritesheet 仍为 `1536 × 2704 px`、13 行；row 11 为 `idle_blink`，row 12 为 `sleep`。
+
 ## 2026-08-29 sleep 动作接入
 
 - 正式 `spritesheet.webp` 已扩展为 `1536 × 2704 px`，保持 8 列、单帧 `192 × 208 px`，共 13 行（row 0–12）。

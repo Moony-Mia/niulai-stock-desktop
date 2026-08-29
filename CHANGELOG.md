@@ -2,6 +2,12 @@
 
 ## 2026-08-29
 
+- 正式接入自动 idle blink：仅在交易相位且当前 action 为 `idle` 时，以一次性随机 timeout（4–10 秒）偶尔触发既有 `idle_blink`。
+- blink 触发前会再次检查当前 action，避开 running、jumping、failed、sleep 及其他非 idle 状态；高优先级 action 可正常抢占 blink。
+- 复用现有 `playState()`、Registry 和非循环 action fallback；blink 完成后恢复 `idle`，保留 `window.__playIdleBlink()` 手动开发入口。
+
+## 2026-08-29
+
 - 新增 `sleep` 睡觉动画素材：基于现有正式 `head_down` / 疲惫闭眼帧确定性编排为 8 帧，写入 spritesheet 新增 row 12。
 - Action Registry 新增 `sleep`（8 帧、slow、loop），并与已有 `sleep` state 正式接通，不再回退到 `idle`。
 - 增加开发验证入口 `window.__playSleep()`，仍统一通过现有 Registry / `playState()` 播放体系运行。
