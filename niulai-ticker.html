@@ -468,7 +468,8 @@
     { id: 'review', name: 'Review', segments: [{ row: 7, frames: 6 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
     { id: 'thinking', name: 'Thinking', segments: [{ row: 8, frames: 6 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
     { id: 'swaying', name: 'Swaying', segments: [{ row: 9, frames: 8 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
-    { id: 'turning', name: 'Turning', segments: [{ row: 10, frames: 8 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true }
+    { id: 'turning', name: 'Turning', segments: [{ row: 10, frames: 8 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
+    { id: 'idle_blink', name: 'Idle Blink', segments: [{ row: 11, frames: 5 }], loop: false, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true }
   ];
   const stateById = Object.fromEntries(ACTIONS.map(action => [action.id, action]));
   // V1 兼容别名：保留内部调用方对 STATES 的读取，不再维护第二份动作表。
@@ -630,6 +631,8 @@
 
   // 兼容现有时间/调试调用方：这些调用属于显式状态切换，保留 V1 的强制切换语义。
   function setState(id) { return requestAction(id, { force: true }); }
+  // Minimal developer trigger for one-shot action verification; not part of any random pool.
+  window.__playIdleBlink = () => playState('idle_blink');
   const petbox = document.getElementById('petbox');
   const SCALE_MIN = 50, SCALE_MAX = 200;
   let scaleCommitTimer = null;

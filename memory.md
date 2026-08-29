@@ -299,3 +299,8 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - `applyMarket()` 已整理为 getState → action request → 低调过滤 → requestAction 的单一路径；时间相位仍使用显式强制切换，不被行情刷新打断。
 
 验证：市场/状态机断言、动作契约静态断言和 `git diff --check` 通过；Windows `npm start` 返回 0。未修改 `spritesheet.webp`、`node_modules`、`dist` 或行情阈值。
+# 2026-08-29 idle_blink
+
+- Added `idle_blink` as a deterministic five-frame blink derived from `assets/cow-v2/reference/idle_master.png`; only compact eye/eyelid regions change.
+- Appended it as 0-based spritesheet row 11 with five frames and three transparent cells. The original 11 rows were verified pixel-identical to `origin/main`.
+- Registry configuration: `loop:false`, `speed:'normal'`, `priority:10`, `fallback:'idle'`, `lowProfileAllowed:true`. It is not in the random action pools. Developer trigger: `window.__playIdleBlink()`.

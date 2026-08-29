@@ -48,3 +48,6 @@
 - 更新 memory.md
 - 增加项目接续规则
 - 明确 AI 协作规范
+# 2026-08-29
+
+- feat: add idle_blink as a one-shot low-profile action on spritesheet row 11
