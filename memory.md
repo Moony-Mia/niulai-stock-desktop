@@ -4,11 +4,15 @@
 
 最后更新：2026-08-29（Asia/Shanghai）
 
-## 2026-08-29 celebration_left_peak Structure / Occlusion 候选
+## 2026-08-29 celebration_left_peak 阶段复核与 Volume Blockout V1
 
-- 基于已锁定的 `assets/cow-v2/candidates/celebration-dance/silhouette-v2-1/celebration_left_peak_silhouette_v2_1.png`，新增候选目录 `assets/cow-v2/candidates/celebration-dance/structure-occlusion-v1/`。
-- `celebration_left_peak_structure_occlusion_v1.png` 为 192×208 RGBA 候选：保持 V2.1 外轮廓与 Pose，只增加正式 `idle_master.png` 头部身份锚点、紫灰手/蹄、右臂内部遮挡边界，以及骨盆、承重腿、右膝和接地的最低限度结构明暗。
-- 右臂结构已能在原尺寸读出肩→腋下→上臂→肘→横胸前臂→右手的顺序；右膝转折得到改善。当前阶段仍是 Structure / Occlusion 候选，不修改 `spritesheet.webp`、Action Registry、状态机或业务逻辑，也不等同于正式动作资产。
+- `Pose Blueprint` ✅；`Silhouette V2` ✅；`Silhouette V2.1` ✅（Pose / 外轮廓基线继续有效）。
+- 历史 `Structure / Occlusion V1` 候选确实制作过，但后续人工视觉复核未通过 ❌，未进入正式资产，未进入 `Identity Reconstruction`。失败的是该候选的制作方法，不是 V2.1、Pose 或 `celebration_dance` 设计本身。
+- 主要失败原因：正式牛头与身体存在明显贴片感；头、颈、肩、胸没有形成连续体积；右臂主要依赖结构线解释，没有真正形成粗壮前臂体块；腹部大面积深色区破坏身体连续性；腿部仍依赖 Skeleton / Guide 式线条解释；在 192×208 下没有形成完整可信的身体体积。
+- 当前真正缺失的阶段：`Volume Blockout`。下一步基于 `silhouette-v2-1/celebration_left_peak_silhouette_v2_1.png` 已确认的 Pose / Silhouette Boundary，以及人工确认的 Volume / Anatomy Reference（`reference/idle_master.png` 仅作身份与体型参考，不是直接替换素材），制作 `volume-blockout-v1/`。
+- 本轮新增 `volume-blockout-v1/celebration_left_peak_volume_blockout_v1.png` 及其 4×、V2.1 对比、Volume / identity reference 对比和纯角色预览。主候选为 192×208 RGBA，采用连续头颈肩胸、宽右前臂、连续胸腹骨盆和有体块的双腿；不含 Skeleton / Guide，仍待人工最终验收。
+- 当前流程：`Pose Blueprint ✅ → Silhouette V2 ✅ → Silhouette V2.1 ✅ → Volume Blockout V1（本轮候选，待人工验收） → Structure / Occlusion → Identity Reconstruction → Surface → 左峰值最终验收 → 右峰值 → 动画过渡帧 → 完整 celebration_dance`。暂停 `Identity Reconstruction`。
+- 本轮未修改正式 `spritesheet.webp`、Action Registry、`cowStateMachine.js`、行情业务触发、Electron 配置或任何正式动作接入。
 
 ## 2026-08-29 review 动作审计
 

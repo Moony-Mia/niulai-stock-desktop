@@ -2,6 +2,8 @@
 
 ## 2026-08-29
 
+- 后续人工视觉复核确认既有 `Structure / Occlusion V1` 候选未通过：该候选历史保留，但未进入正式资产，也未进入 `Identity Reconstruction`；下一阶段调整为 `Volume Blockout`。
+- 基于已确认的 `celebration_left_peak_silhouette_v2_1` Pose / 外轮廓，新增 `assets/cow-v2/candidates/celebration-dance/volume-blockout-v1/`，制作连续头颈肩胸、宽右臂横腹体块、连续胸腹骨盆和双腿体块的 `Volume Blockout V1` 候选；本轮仍待人工验收。
 - 新增 `celebration_left_peak` Structure / Occlusion 候选：严格基于已锁定 V2.1 外轮廓，加入正式牛头身份锚点、紫灰手/蹄、右臂横胸遮挡结构，以及左承重腿和右膝的最低限度结构明暗。
 - 候选文件位于 `assets/cow-v2/candidates/celebration-dance/structure-occlusion-v1/`，未修改正式 `spritesheet.webp`、Action Registry、状态机、行情逻辑或 Electron 配置；仍未进入正式动作接入。
 
