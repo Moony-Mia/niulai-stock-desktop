@@ -366,3 +366,12 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - Added `idle_blink` as a deterministic five-frame blink derived from `assets/cow-v2/reference/idle_master.png`; only compact eye/eyelid regions change.
 - Appended it as 0-based spritesheet row 11 with five frames and three transparent cells. The original 11 rows were verified pixel-identical to `origin/main`.
 - Registry configuration: `loop:false`, `speed:'normal'`, `priority:10`, `fallback:'idle'`, `lowProfileAllowed:true`. It is not in the random action pools. Developer trigger: `window.__playIdleBlink()`.
+
+# 2026-08-30 celebration_dance Right Peak HR Master
+
+- 修正冻结任务中的 SHA-256 描述笔误；Right Peak Candidate 02 的正确 SHA-256 为 `62366ae6b12f22d4d5178cff107e7a337640e7eab7e879fb585cc6792caf2727`，错误值不对应需要寻找或恢复的历史文件。
+- Right Peak Candidate 02 已完成人工视觉验收，技术评分 `91 / 100`，`P0 = None`，并已直接冻结为 Right Peak High-Resolution Master：`assets/cow-v2/actions/celebration_dance/masters/celebration_dance_right_peak_master_hr.png`。
+- Right Peak HR Master 为 `1204 × 1306`、`RGB PNG`，SHA-256 为 `62366ae6b12f22d4d5178cff107e7a337640e7eab7e879fb585cc6792caf2727`；Source 与 Master 已通过字节级比较，完全一致。
+- 本次冻结未进行视觉修改、平移、缩放、裁切、重编码或 Alpha 处理；白色背景仍保留，尚未转为 `192 × 208`。此前记录的 bbox / center / baseline 差异及 `X = -14`、`Y = -4` 仅作为未来统一 frame alignment 的参考值，未应用到 HR Master 像素。
+- Left Peak HR Master 保持已冻结状态；Left / Right compatibility review 已通过，左右峰值共同作为后续 `celebration_dance` Intermediate Frames 的 High-Resolution Identity Anchors。
+- 尚未制作 Intermediate Frames，尚未完成完整 8 帧，尚未修改正式 spritesheet、Action Registry、状态机或业务逻辑；下一阶段正式为 `Intermediate Transition Frames`。
