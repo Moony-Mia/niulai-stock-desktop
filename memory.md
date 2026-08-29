@@ -2,7 +2,14 @@
 
 > 后续 ChatGPT / Codex / AI 接手本项目时，开始改代码前必须先阅读本文件。每次完成并验证一轮已批准的功能改动后，必须同步更新本文件。
 
-最后更新：2026-08-27（Asia/Shanghai）
+最后更新：2026-08-29（Asia/Shanghai）
+
+## 2026-08-29 sleep 动作接入
+
+- 正式 `spritesheet.webp` 已扩展为 `1536 × 2704 px`，保持 8 列、单帧 `192 × 208 px`，共 13 行（row 0–12）。
+- 新增 row 12 专用于 `sleep`：8 帧，基于现有正式 `head_down` / 疲惫闭眼帧确定性编排，不重新生成或覆盖旧动作素材。
+- `niulai-ticker.html` Action Registry 已注册 `sleep`：`row: 12`、`frames: 8`、`speed: slow`、`loop: true`；开发入口为 `window.__playSleep()`。
+- `cowStateMachine.js` 原有 `timeState.state === "sleep"` 映射现在可命中真实 Registry，不再 fallback 到 `idle`。
 
 ## 1. 项目定位
 

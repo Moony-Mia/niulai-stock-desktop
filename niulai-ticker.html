@@ -469,7 +469,8 @@
     { id: 'thinking', name: 'Thinking', segments: [{ row: 8, frames: 6 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
     { id: 'swaying', name: 'Swaying', segments: [{ row: 9, frames: 8 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
     { id: 'turning', name: 'Turning', segments: [{ row: 10, frames: 8 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
-    { id: 'idle_blink', name: 'Idle Blink', segments: [{ row: 11, frames: 5 }], loop: false, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true }
+    { id: 'idle_blink', name: 'Idle Blink', segments: [{ row: 11, frames: 5 }], loop: false, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
+    { id: 'sleep', name: 'Sleep', segments: [{ row: 12, frames: 8 }], loop: true, speed: 'slow', priority: 30, fallback: 'idle', lowProfileAllowed: true }
   ];
   const stateById = Object.fromEntries(ACTIONS.map(action => [action.id, action]));
   // V1 兼容别名：保留内部调用方对 STATES 的读取，不再维护第二份动作表。
@@ -633,6 +634,8 @@
   function setState(id) { return requestAction(id, { force: true }); }
   // Minimal developer trigger for one-shot action verification; not part of any random pool.
   window.__playIdleBlink = () => playState('idle_blink');
+  // Minimal developer trigger for the continuous sleep action; not part of any random pool.
+  window.__playSleep = () => setState('sleep');
   const petbox = document.getElementById('petbox');
   const SCALE_MIN = 50, SCALE_MAX = 200;
   let scaleCommitTimer = null;
@@ -1128,7 +1131,10 @@
       const color = setTheme('rest');
       setSlogan('歇着吧\n今日不开盘', '#ffd166', 'weekend');
       spawnSoftParticles('歇', '#ffd166', 3);
-      startRandomStateLoop(['waiting', 'idle', 'swaying', 'turning', 'waving']);
+      const sleepRequest = window.cowStateMachine
+        ? window.cowStateMachine.getActionRequest(null, { state: 'sleep' })
+        : { action: 'sleep', priority: 30 };
+      requestAction(sleepRequest.action, { force: true, priority: sleepRequest.priority });
     } else if (phase === 'evening') {
       const color = setTheme('rest');
       setSlogan('明天见～', '#64d2ff', 'float');

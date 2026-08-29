@@ -5,7 +5,7 @@ window.cowStateMachine = {
 
   getActionRequest(marketState, timeState) {
 
-    // 时间优先：休息和睡眠覆盖行情情绪
+    // 时间优先：休息和睡眠覆盖行情情绪；sleep 由 Registry 正式提供对应素材。
     if (timeState && timeState.state === "sleep") {
       return {
         emotion: "sleep",

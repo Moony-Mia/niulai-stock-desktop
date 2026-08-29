@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2026-08-29
+
+- 新增 `sleep` 睡觉动画素材：基于现有正式 `head_down` / 疲惫闭眼帧确定性编排为 8 帧，写入 spritesheet 新增 row 12。
+- Action Registry 新增 `sleep`（8 帧、slow、loop），并与已有 `sleep` state 正式接通，不再回退到 `idle`。
+- 增加开发验证入口 `window.__playSleep()`，仍统一通过现有 Registry / `playState()` 播放体系运行。
+
 ## 2026-08-27
 
 - 完成牛动作系统 V2 播放契约第一阶段：统一 `getState()` 市场状态接口，建立带 segments、循环、速度、优先级、fallback 和低调模式元数据的动作注册表。
