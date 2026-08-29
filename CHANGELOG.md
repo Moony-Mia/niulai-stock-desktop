@@ -2,6 +2,11 @@
 
 ## 2026-08-29
 
+- 新增 `celebration_left_peak` Structure / Occlusion 候选：严格基于已锁定 V2.1 外轮廓，加入正式牛头身份锚点、紫灰手/蹄、右臂横胸遮挡结构，以及左承重腿和右膝的最低限度结构明暗。
+- 候选文件位于 `assets/cow-v2/candidates/celebration-dance/structure-occlusion-v1/`，未修改正式 `spritesheet.webp`、Action Registry、状态机、行情逻辑或 Electron 配置；仍未进入正式动作接入。
+
+## 2026-08-29
+
 - 经审计确认既有 `review` 已正式用于收盘后复盘动作池；未修改其业务调度、优先级、Registry 或 spritesheet。
 - 增加开发验证入口 `window.__playReview()`，复用统一 `playState()` 和既有 `fallback: idle` 回退机制。
 

@@ -4,6 +4,12 @@
 
 最后更新：2026-08-29（Asia/Shanghai）
 
+## 2026-08-29 celebration_left_peak Structure / Occlusion 候选
+
+- 基于已锁定的 `assets/cow-v2/candidates/celebration-dance/silhouette-v2-1/celebration_left_peak_silhouette_v2_1.png`，新增候选目录 `assets/cow-v2/candidates/celebration-dance/structure-occlusion-v1/`。
+- `celebration_left_peak_structure_occlusion_v1.png` 为 192×208 RGBA 候选：保持 V2.1 外轮廓与 Pose，只增加正式 `idle_master.png` 头部身份锚点、紫灰手/蹄、右臂内部遮挡边界，以及骨盆、承重腿、右膝和接地的最低限度结构明暗。
+- 右臂结构已能在原尺寸读出肩→腋下→上臂→肘→横胸前臂→右手的顺序；右膝转折得到改善。当前阶段仍是 Structure / Occlusion 候选，不修改 `spritesheet.webp`、Action Registry、状态机或业务逻辑，也不等同于正式动作资产。
+
 ## 2026-08-29 review 动作审计
 
 - `review` 已完整正式使用，Action Registry 为 `row: 7`、`frames: 6`、`loop: true`、`speed: normal`、`priority: 10`、`fallback: idle`、`lowProfileAllowed: true`；对应 spritesheet row 7 素材存在且正常，未修改 spritesheet。
