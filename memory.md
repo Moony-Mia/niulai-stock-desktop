@@ -4,6 +4,13 @@
 
 最后更新：2026-08-29（Asia/Shanghai）
 
+## 2026-08-29 review 动作审计
+
+- `review` 已完整正式使用，Action Registry 为 `row: 7`、`frames: 6`、`loop: true`、`speed: normal`、`priority: 10`、`fallback: idle`、`lowProfileAllowed: true`；对应 spritesheet row 7 素材存在且正常，未修改 spritesheet。
+- 正式触发位置是 `review` 时间相位（约 15:10–16:55）：`startRandomStateLoop(['review', 'thinking', 'waiting'])` 将其作为收盘后复盘动作池的一员随机选择。每次动作按 6 帧 × 120ms，再加 80–340ms 随机间隔后切换下一动作；定时器由 `startRandomStateLoop()` 管理，并在相位切换时由现有 `playState()` / `startRandomStateLoop()` / `stopRestLoop()` 清理或替换。
+- `review` 与 `thinking`、`waiting` 的视觉语义分工合理：分别偏查看/检视、思考/分析、中性等待；三者均为复盘生活态 priority 10，不抢占更高优先级行情或时间动作。
+- 新增开发验证入口 `window.__playReview()`，复用 `playState('review')` 以一次性方式播放，完成后由统一 Registry fallback 回到 `idle`；不加入正式随机调度。
+
 ## 2026-08-29 thinking 动作正式接入
 
 - `thinking` 复用正式 spritesheet row 8、6 帧；Action Registry 保持 `loop: true`、`speed: normal`、`priority: 10`、`fallback: idle`，未修改素材或 Registry 参数。

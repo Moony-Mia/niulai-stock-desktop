@@ -2,6 +2,11 @@
 
 ## 2026-08-29
 
+- 经审计确认既有 `review` 已正式用于收盘后复盘动作池；未修改其业务调度、优先级、Registry 或 spritesheet。
+- 增加开发验证入口 `window.__playReview()`，复用统一 `playState()` 和既有 `fallback: idle` 回退机制。
+
+## 2026-08-29
+
 - 正式复用既有 `thinking` 动作作为收盘后“复盘中”随机分析状态，并保留 `priority: 10`，不抢占交易行情、时间相位和其他更高优先级动作。
 - 增加开发验证入口 `window.__playThinking()`：以一次性方式播放现有 `thinking`，完成后通过 Registry 的 `fallback: idle` 回到待机；不新增素材或动作帧。
 
