@@ -2,6 +2,14 @@
 
 ## 2026-08-31
 
+- Added `MARKET_STATE_MAPPING.md` as the authoritative current source for instrument classification, market thresholds, and Market State → Cow Action mapping.
+- Updated `AGENTS.md` so market-state work must read and maintain `MARKET_STATE_MAPPING.md`.
+- Removed stale dynamic market and spritesheet facts from `AGENTS.md` in favor of the proper authority documents.
+- Replaced default `git add .` guidance with precision staging guidance.
+- Updated `memory.md` to reference `MARKET_STATE_MAPPING.md` for current market mapping while retaining implementation and verification status.
+
+## 2026-08-31
+
 - Split market-state thresholds into index and stock profiles, mapped normal `up` states to `celebration_dance`, and reserved `jumping` for `strong_up`.
 - Added centralized symbol classification with an `index`/`stock` model and stock fallback; removed the previous `strong_up` celebration edge trigger and added market-to-market priority release for downward transitions such as `jumping` → `celebration_dance`.
 - Automated boundary and transition validation passed. macOS runtime validation was not executed in this change; Windows, packaging, and release were not executed.

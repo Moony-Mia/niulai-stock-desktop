@@ -79,23 +79,7 @@ build/
 
 修改牛角色、spritesheet、Action Registry 或状态机前，必须先阅读 `memory.md` 的最新动作资产盘点。
 
-当前正式 spritesheet 基线：`1536 × 2704 px`，`8 列 × 13 行`，单帧 `192 × 208 px`。
-
-| row | action |
-|---:|---|
-| 0 | idle |
-| 1 | running-right |
-| 2 | running-left |
-| 3 | waving |
-| 4 | jumping |
-| 5 | failed |
-| 6 | waiting |
-| 7 | review |
-| 8 | thinking |
-| 9 | swaying |
-| 10 | turning |
-| 11 | idle_blink |
-| 12 | sleep |
+修改牛动作、spritesheet、Action Registry 或状态机前，必须读取 `memory.md` 获取当前 spritesheet 尺寸、row 分配、动作数量和资产状态。长期规则不在本文件维护动态 spritesheet 基线或 row 清单。
 
 禁止因为 action 名称不同而重复制作已有视觉。新增动作前必须确认：是否已有视觉、是否已有 Registry action、是否只是尚未接入逻辑、是否可以复用或拆分现有帧。确实不存在时，优先基于正式素材确定性编辑，不重新生成整头牛。
 
@@ -103,15 +87,25 @@ build/
 
 动作统一接入现有 Action Registry、`requestAction()`、`playState()` 和 `ACTIONS`，检查 action id、row、frame 数、loop、speed/FPS、priority、fallback 及状态机调用链。
 
-除非任务明确要求，不得改变已有行情映射：
+当前正式行情阈值和 Market State → Action 映射以仓库根目录 `MARKET_STATE_MAPPING.md` 为准。
 
-```text
-strong_up → jumping
-up → jumping
-down → failed
-strong_down → failed
-flat → idle
-```
+## 行情状态映射规则
+
+涉及以下内容时，必须先读取仓库根目录 `MARKET_STATE_MAPPING.md`：
+
+- `instrumentType`
+- `index` / `stock` 分类
+- 行情涨跌幅阈值
+- `strong_up` / `up` / `flat` / `down` / `strong_down`
+- Market State → Cow Action
+
+`MARKET_STATE_MAPPING.md` 是当前正式行情状态与牛动作映射的权威产品文档。
+
+修改上述任一内容时，必须同步检查并更新 `MARKET_STATE_MAPPING.md`。
+
+`memory.md` 记录当前实现和验证状态，不重复维护完整映射表。
+
+`CHANGELOG.md` 记录历史变化，不作为当前映射规则来源。
 
 ## 代码修改与调试
 
@@ -143,12 +137,14 @@ git status
 git status
 git diff
 git diff --check
-git add .
+git add <本轮相关文件>
 git status
 git commit -m "<appropriate commit message>"
 git push
 git status
 ```
+
+禁止使用 `git add .` 作为默认提交方式。必须采用 precision staging，只精确 stage 本轮相关文件，禁止误 stage 用户原有工作区内容。
 
 提交前确认没有生成目录、依赖、构建缓存、平台成品、临时图片、调试日志或本机环境文件进入 Git。若用户明确要求不要 commit 或 push，以用户指令为准。
 
