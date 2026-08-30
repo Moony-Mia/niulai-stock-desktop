@@ -7,6 +7,7 @@
   "scripts": {
     "start": "electron .",
     "qa:market": "node scripts/run-market-qa.js",
+    "qa:watch-alert": "node scripts/run-watch-alert-qa.js",
     "dist:portable": "npx --yes electron-builder@26.15.6 --win portable --x64",
     "dist:setup": "npx --yes electron-builder@26.15.6 --win nsis --x64",
     "dist:all": "npx --yes electron-builder@26.15.6 --win nsis portable --x64"

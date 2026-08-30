@@ -2,6 +2,13 @@
 
 ## 2026-08-31
 
+- 新增 Developer-only Watchlist Alert QA Harness：`npm run qa:watch-alert -- --suite all`，支持 `logic` / `interaction` / `visual`、合成 quote、真实 DOM 点击和 80% / 130% / 160% visual hold。
+- Alert QA 仅在未打包且显式 `NIULAI_ALERT_QA=1` 时启用，并与 `NIULAI_MARKET_QA=1` 互斥；QA synthetic quote 只进入正式 Alert detector，不触碰 current Market State / Cow Action 链，也不发起真实 watchlist 或 current feed 网络请求。
+- Alert QA logic 已覆盖 baseline、同一 strong 不重复、退出重入、双向、multi-symbol、head badge / row marker 交互、删除撤销、跨交易日和 Cow isolation。
+- Alert QA `logic` / `interaction` / `visual` / `all` suite 已通过，logic 重复 3/3；Market QA all suite 及普通启动 smoke 通过。视觉 hold 已在 macOS Electron 实际窗口运行并观察到 badge，Windows Runtime、Packaging、Release 未执行。
+
+## 2026-08-31
+
 - 新增 Watchlist Big-Move Alert Badge V1：仅监控非当前自选的后台批量新浪行情，复用 `marketStateEngine.getState()` 的 `strong_up` / `strong_down`，首次行情只建立 baseline。
 - 牛头右上显示独立红色圆形 `!`，点击只打开现有自选快速菜单；菜单行增加静态小 `!`，统一由 `selectSymbol()` 清除对应未读状态。
 - 后台提醒链不调用 `__pushMarket()`、`applyMarket()`、`requestAction()` 或 `setState()`；Market QA 环境禁用后台监控。支持退出强区重新触发、反向触发、删除清理、撤销后重新 baseline 与跨交易日重置。

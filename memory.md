@@ -612,3 +612,10 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - Alert Runtime 独立于 Market State/Cow Action：后台 quote 不进入 `__pushMarket`、`applyMarket`、`requestAction`、`setState`，不会驱动牛动作。Market QA 环境禁用后台 monitor；current symbol 排除后台请求。
 - UI 为 `#stage` 内独立红色圆形白色 `!` 与自选快速菜单行末静态小 `!`。大 `!` 点击只打开现有菜单并清 global unseen，symbol pending 保留；正式 `selectSymbol()` 只清被点击 symbol。删除清理 state，Undo 恢复后重新 baseline，跨 `quoteDate` 清除旧日 pending/unread 并重置追踪。
 - 本轮未修改 `marketState.js`、`cowStateMachine.js`、`timeState.js`、`MARKET_STATE_MAPPING.md`、spritesheet、Action Registry 或 assets。Market QA all suite 已通过；macOS 可见窗口的 badge 多倍率人工检查仍需记录，Windows Runtime、Packaging、Release 未执行。
+
+# 2026-08-31 Developer-only Watchlist Alert QA Harness
+
+- `WATCHLIST_ALERT_QA=AVAILABLE`：使用 `npm run qa:watch-alert -- --suite all`，通过 `NIULAI_ALERT_QA=1` + `niulaiAlertQa=1` 显式启用；仅未打包环境可启用，且与 `NIULAI_MARKET_QA=1` 互斥。
+- QA API 为 `window.__niulaiWatchAlertQA`，只在 Alert QA query 下存在，负责 configure、synthetic quote、snapshot、真实 DOM badge/menu/symbol click 与 setScale；synthetic quote 复用正式 `processWatchQuote()` / `alertZone()` / `watchAlertStates` / `refreshWatchAlertUI()`，未复制阈值或 Alert 实现。
+- QA 期间关闭真实 watchlist quote polling、current feed refresh 和 Market QA runner；Alert QA 不调用 `__pushMarket()`、`applyMarket()`、`requestAction()` 或 `setState()`。逻辑和交互 suite 通过，逻辑重复运行 3/3；visual suite 完成 Electron 80/130/160 hold，截图观察到红色 head badge，视觉 PASS 仍以人工逐项检查为准。
+- `logic`、`interaction`、`visual`、`all` suite 均通过；logic 重复运行 3/3 通过。视觉 suite 在 macOS Electron 实际窗口完成 80/130/160 hold，并观察到 head badge；DOM click 交互通过，物理鼠标逐项点击与透明 hit-test 仍需人工复核。`npm run qa:market -- --suite all --hold 1200` 通过；普通 `npm start` smoke 启动成功。Windows Runtime、Packaging、Release 未执行，未修改 market/state/spritesheet/asset authority。

@@ -21,6 +21,7 @@ const { URL } = require('url');
 let win = null;
 let tray = null;
 const marketQaEnabled = !app.isPackaged && process.env.NIULAI_MARKET_QA === '1';
+const alertQaEnabled = !app.isPackaged && process.env.NIULAI_ALERT_QA === '1' && !marketQaEnabled;
 let currentSymbol = 'sh000001'; // 上证指数
 let feedTimer = null;
 let consecutiveFeedFailures = 0;
@@ -86,7 +87,8 @@ function createWindow() {
   win.setIgnoreMouseEvents(false);
 
   const qaEnabled = marketQaEnabled;
-  win.loadFile(path.join(__dirname, 'niulai-ticker.html'), qaEnabled ? { query: { niulaiQa: '1' } } : undefined);
+  const qaQuery = qaEnabled ? { niulaiQa: '1' } : alertQaEnabled ? { niulaiAlertQa: '1' } : undefined;
+  win.loadFile(path.join(__dirname, 'niulai-ticker.html'), qaQuery ? { query: qaQuery } : undefined);
 
   win.webContents.on('did-finish-load', () => {
     logRender('[boot] page did-finish-load OK, visible=' + win.isVisible());
@@ -94,13 +96,19 @@ function createWindow() {
       .then((rendererSymbol) => {
         const normalized = normalizeAshareSymbol(rendererSymbol);
         if (normalized) currentSymbol = normalized;
-        if (!qaEnabled) startMarketFeed();
+        if (!qaEnabled && !alertQaEnabled) startMarketFeed();
       })
-      .catch((e) => { bootLog('[boot] renderer symbol handoff failed: ' + e.message); if (!qaEnabled) startMarketFeed(); });
+      .catch((e) => { bootLog('[boot] renderer symbol handoff failed: ' + e.message); if (!qaEnabled && !alertQaEnabled) startMarketFeed(); });
     if (qaEnabled) {
       const runner = require('./scripts/market-qa-runner');
       runner.run(win).then(pass => setTimeout(() => app.exit(pass ? 0 : 1), 0)).catch(error => {
         console.error('[MARKET_QA] RUNNER_ERROR', error);
+        app.exit(1);
+      });
+    } else if (alertQaEnabled) {
+      const runner = require('./scripts/watch-alert-qa-runner');
+      runner.run(win).then(pass => setTimeout(() => app.exit(pass ? 0 : 1), 0)).catch(error => {
+        console.error('[WATCH_ALERT_QA] RUNNER_ERROR', error);
         app.exit(1);
       });
     }
@@ -413,7 +421,7 @@ ipcMain.on('set-symbol', (event, symbol) => {
     console.log('switch symbol ->', currentSymbol);
   }
   if (feedTimer) clearTimeout(feedTimer);
-  if (!marketQaEnabled) refreshMarketFeed('symbol-change');
+  if (!marketQaEnabled && !alertQaEnabled) refreshMarketFeed('symbol-change');
 });
 
 ipcMain.handle('search-symbols', async (_event, keyword) => {

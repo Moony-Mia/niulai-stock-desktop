@@ -1181,6 +1181,7 @@
   window.__useRealTime = useRealTime;
 
   const marketQaEnabled = new URLSearchParams(location.search).get('niulaiQa') === '1';
+  const alertQaEnabled = new URLSearchParams(location.search).get('niulaiAlertQa') === '1' && !marketQaEnabled;
 
   // WorkBuddy 工作日状态。全部使用电脑本地时间；这里只判断周一到周五，不额外维护法定节假日表。
   // 时间段：09:25准备开盘 / 09:30-11:30交易 / 11:30午饭提示 / 11:40午休 /
@@ -1705,6 +1706,30 @@
           qaEnabled: true
         };
       }
+    };
+  }
+
+  if (alertQaEnabled) {
+    window.__niulaiWatchAlertQA = {
+      configure({ currentSymbol: nextCurrent = 'sh000001', watchlist: nextWatchlist = [], scale = 130 } = {}) {
+        currentSymbol = normalizeSymbol(nextCurrent) || 'sh000001';
+        watchlist = sanitizeSymbolList(nextWatchlist, WATCHLIST_MAX);
+        watchAlertStates.clear(); watchlist.forEach(item => seedWatchAlert(item.symbol));
+        manualRest = false; setUIScale(scale, { commit: false }); renderSymbolControls(); refreshWatchAlertUI();
+        return true;
+      },
+      pushQuote(input) {
+        if (!input || typeof input.symbol !== 'string' || normalizeSymbol(input.symbol) === currentSymbol) return false;
+        processWatchQuote({ ...input, symbol: normalizeSymbol(input.symbol) }); renderTickerWatchlist(); refreshWatchAlertUI(); return true;
+      },
+      snapshot() {
+        const watchAlerts = Object.fromEntries([...watchAlertStates].map(([symbol, state]) => [symbol, { ...state }]));
+        const rowMarkers = Object.fromEntries(watchlist.map(item => [item.symbol, Boolean(watchAlertStates.get(item.symbol)?.pending)]));
+        return { currentSymbol, headBadgeVisible: Boolean(marketAlertBadge && !marketAlertBadge.hidden), tickerMenuVisible: document.getElementById('tickerWatchMenu')?.classList.contains('visible') || false, watchAlerts, rowMarkers, scale: uiScalePercent, currentAction: currentState.id, playbackSequenceId };
+      },
+      clickHeadBadge() { marketAlertBadge?.click(); return true; },
+      clickWatchSymbol(symbol) { const row = [...document.querySelectorAll('.ticker-watch-item')].find(el => el.dataset.symbol === normalizeSymbol(symbol)); if (!row) return false; row.click(); return true; },
+      setScale(percent) { setUIScale(percent, { commit: false }); return uiScalePercent; }
     };
   }
 
