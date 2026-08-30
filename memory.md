@@ -412,6 +412,15 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 当前正式 HR Anchors 已形成：F1 Left Peak ✅ → F2 Left Release ✅ → F3 Near Center A ✅ → F4 Right Anticipation ✅ → F5 Right Peak ✅ → F6 Right Release ✅。F7 Near Center B、F8 Left Anticipation 尚未生成，完整 8 帧尚未完成；Alpha、192×208、alignment、canvas normalization、spritesheet、Action Registry、状态机和业务逻辑均未进入。
 - F6 Freeze 后下一阶段记录为 `F7 Near Center B / Return Arm Exchange Candidate Generation`，仅记录阶段，不在本轮执行。F7 必须体现 `Right → Left` 的运动历史，不得复制或机械镜像 F3。
 
+# 2026-08-30 celebration_dance F7 Near Center B / Return Arm Exchange HR Master 冻结
+
+- F7 `Near Center B / Return Arm Exchange` 已完成人工视觉验收，正式选择 Candidate 01：`assets/cow-v2/actions/celebration_dance/celebration_dance_f7_candidate_01.png`。选择依据为 F6 → F7 continuity 正确，Near Center Position 合理，保留 Right → Left Motion History，Hip Centering 合理，Right-leg Weight Release 清楚，Left-leg Weight Gain 已开始，Weight Exchange 仍有动态感，Left Fist Rising / Right Fist Lowering 清楚，Return Arm Exchange 明确，Torso 接近中心但没有静态锁死，与 F3 属于不同运动历史、非 F3 copy、非 F3 mirror，并为 F8 保留充分空间；未判定为 `IDLE_COLLAPSE`。
+- F7 High-Resolution Master 已由 Candidate 01 原文件直接复制冻结：`assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f7_master_hr.png`。Source 与 Master 均为 PNG、`1199 × 1312`、`RGB`、3 通道、无 Alpha、`1,572,923 bytes`，SHA-256 均为 `bb9ac32ad2022b5b38d12a64350fd6c47139a03bdd1827babef3c6a9e47f64a7`；`SHA256_MATCH=YES`、`BYTE_IDENTICAL=YES`，并已通过 `cmp` 字节级比较。
+- Candidate 02：`assets/cow-v2/actions/celebration_dance/celebration_dance_f7_candidate_02.png` 未选作 Master，继续保留为历史 Candidate；其更接近静态中轴，双腿平均站立感更强，Weight Exchange 动态读感较弱，`IDLE_COLLAPSE` 风险高于 Candidate 01。不删除、不修改、不移动。Candidate 01 Source 也继续保留。
+- 本次冻结未进行视觉修改、重新编码、resize、crop、translation、alignment、canvas normalization 或 Alpha 处理；白色 RGB 背景仍保留，尚未转为 `192 × 208`。
+- 当前正式 HR 序列已形成：F1 Left Peak ✅ → F2 Left Release ✅ → F3 Near Center A ✅ → F4 Right Anticipation ✅ → F5 Right Peak ✅ → F6 Right Release ✅ → F7 Near Center B ✅。F8 Left Anticipation 尚未生成，完整 8 帧尚未完成，Loop Seam 尚未正式验收；Alpha、192×208、alignment、canvas normalization、spritesheet、Action Registry、状态机和业务逻辑均未进入。
+- F7 Freeze 后下一阶段记录为 `F8 Left Anticipation / Pre-Peak / Loop Seam Candidate Generation`，仅记录阶段，不在本轮执行。F8 后续需同时参考 F7 → F8 与 F8 → F1，并以 F2 检查 F8 → F1 → F2 的自然 Peak 进入与释放。
+
 # 2026-08-30 celebration_dance F7 Near Center B / Return Arm Exchange Candidates
 
 - 已生成两张 F7 `Near Center B / Return Arm Exchange` High-Resolution Candidate：`assets/cow-v2/actions/celebration_dance/celebration_dance_f7_candidate_01.png` 与 `assets/cow-v2/actions/celebration_dance/celebration_dance_f7_candidate_02.png`，等待人工视觉验收；F7 Master 尚未选择、尚未冻结。

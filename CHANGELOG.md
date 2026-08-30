@@ -2,6 +2,9 @@
 
 ## 2026-08-30
 
+- F7 Candidate 01 已完成人工视觉验收并被选定为 `Near Center B / Return Arm Exchange` HR Master 来源；Candidate 02 未采用但继续保留，其更接近静态中轴，Weight Exchange 动态读感较弱，`IDLE_COLLAPSE` 风险更高。
+- F7 HR Master 已由 Candidate 01 原文件直接复制冻结为 `assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f7_master_hr.png`；Source / Master 均为 PNG、`1199 × 1312`、`RGB`、3 通道、无 Alpha、`1,572,923 bytes`，SHA-256 为 `bb9ac32ad2022b5b38d12a64350fd6c47139a03bdd1827babef3c6a9e47f64a7`，`SHA256_MATCH=YES`、`BYTE_IDENTICAL=YES`，`cmp` 已通过。
+- F1/F2/F3/F4/F5/F6/F7 已成为正式 HR Master；F8 尚未生成，完整 8 帧尚未完成，Loop Seam 尚未正式验收，Alpha、192×208、alignment、canvas normalization、spritesheet、Registry、状态机和业务逻辑均未执行。下一阶段为 `F8 Left Anticipation / Pre-Peak / Loop Seam Candidate Generation`。
 - 已生成两张 `celebration_dance` F7 `Near Center B / Return Arm Exchange` High-Resolution Candidate：Candidate 01（`Continuity First / Right Residual Near Center`）与 Candidate 02（`Direction Change First / Stronger Return Exchange`），等待人工视觉验收；F7 Master 尚未选择、尚未冻结。
 - 两张 Candidate 均完成 F6 → F7 的回程双臂交换：左拳继续上升、右拳继续下降，Hip 接近中心、Weight 进入交换区、双脚接地；Candidate 02 的 Right → Left 方向变化更强。两张都未自动选择，且需人工重点复核是否避免普通站姿风险。
 - F7 Candidate 01 为 `1199 × 1312` RGB PNG、3 通道、无 Alpha、`1,572,923 bytes`、SHA-256 `bb9ac32ad2022b5b38d12a64350fd6c47139a03bdd1827babef3c6a9e47f64a7`；Candidate 02 为 `1204 × 1306` RGB PNG、3 通道、无 Alpha、`1,649,905 bytes`、SHA-256 `0c3ddd0a59f5e93d8e0665f6de8a694a0a55c8dead0fd83c8fb4864c48feab88`。
