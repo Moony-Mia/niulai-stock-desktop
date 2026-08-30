@@ -4,6 +4,7 @@
 
 - Hardened Market QA Harness assertions for stock priority downgrade transitions and time-priority market-action restoration.
 - Separated Market QA decision snapshots from visual hold sampling to remove ambient-action timing flakes.
+- Completed macOS visible Market Runtime validation for stock profile actions, market downgrade transitions, symbol switching, and time-priority restoration. Windows runtime remains unverified; packaging and release were not executed.
 - Added a developer-only Market QA Harness with deterministic stock, symbol-switch, no-restart, and time-priority suites driven from the terminal.
 - Added a read-only runtime observer and playback sequence tracking for market-action transition and same-state restart assertions.
 - QA requires development mode plus an explicit flag, remains disabled for normal startup and packaged execution, and does not change Market Profile rules or claim remaining macOS runtime validation.
