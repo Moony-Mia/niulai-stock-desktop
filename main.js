@@ -223,6 +223,23 @@ function parseSina(buf, symbol) {
   };
 }
 
+function parseSinaBatch(buf, symbols) {
+  const text = new TextDecoder('gbk').decode(buf || Buffer.alloc(0));
+  const wanted = new Set(symbols);
+  const quotes = [];
+  for (const symbol of wanted) {
+    const match = text.match(new RegExp(`var hq_str_${symbol}="([^"]*)";`));
+    if (!match) continue;
+    const parts = match[1].split(',');
+    if (parts.length < 4) continue;
+    const prevClose = parseFloat(parts[2]);
+    const price = parseFloat(parts[3]);
+    if (!Number.isFinite(price) || !Number.isFinite(prevClose) || prevClose === 0) continue;
+    quotes.push({ symbol, name: parts[0] || INDEX_NAMES[symbol] || symbol, price, prevClose, quoteDate: parts[30] || '', quoteTime: parts[31] || '' });
+  }
+  return quotes;
+}
+
 function normalizeAshareSymbol(raw) {
   if (!raw) return null;
   let s = String(raw).trim().toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
@@ -402,6 +419,24 @@ ipcMain.on('set-symbol', (event, symbol) => {
 ipcMain.handle('search-symbols', async (_event, keyword) => {
   const results = await searchSymbols(keyword);
   return { results, error: lastSearchError || '' };
+});
+
+ipcMain.handle('fetch-watchlist-quotes', async (_event, symbols) => {
+  if (marketQaEnabled) return { quotes: [], disabled: true };
+  const requested = [...new Set((Array.isArray(symbols) ? symbols : [])
+    .map(normalizeAshareSymbol).filter(Boolean))]
+    .filter(symbol => symbol !== currentSymbol);
+  if (!requested.length) return { quotes: [], disabled: false };
+  const url = `https://hq.sinajs.cn/list=${requested.join(',')}`;
+  try {
+    const started = Date.now();
+    const { buf, transport } = await fetchBuffer(url, 'fetchWatchlistQuotes');
+    const quotes = parseSinaBatch(buf, requested).map(q => ({ ...q, transport, requestMs: Date.now() - started }));
+    return { quotes, failedSymbols: requested.filter(symbol => !quotes.some(q => q.symbol === symbol)) };
+  } catch (e) {
+    console.warn('[fetchWatchlistQuotes] failed:', e && e.message ? e.message : e);
+    return { quotes: [], error: e && e.message ? e.message : String(e) };
+  }
 });
 
 ipcMain.on('close-pet', () => {

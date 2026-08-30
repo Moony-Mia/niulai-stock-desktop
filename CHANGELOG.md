@@ -2,6 +2,13 @@
 
 ## 2026-08-31
 
+- 新增 Watchlist Big-Move Alert Badge V1：仅监控非当前自选的后台批量新浪行情，复用 `marketStateEngine.getState()` 的 `strong_up` / `strong_down`，首次行情只建立 baseline。
+- 牛头右上显示独立红色圆形 `!`，点击只打开现有自选快速菜单；菜单行增加静态小 `!`，统一由 `selectSymbol()` 清除对应未读状态。
+- 后台提醒链不调用 `__pushMarket()`、`applyMarket()`、`requestAction()` 或 `setState()`；Market QA 环境禁用后台监控。支持退出强区重新触发、反向触发、删除清理、撤销后重新 baseline 与跨交易日重置。
+- macOS 代码级与现有 Market QA 回归已执行；Windows Runtime、Packaging、Release 未执行。
+
+## 2026-08-31
+
 - Hardened Market QA Harness assertions for stock priority downgrade transitions and time-priority market-action restoration.
 - Separated Market QA decision snapshots from visual hold sampling to remove ambient-action timing flakes.
 - Completed macOS visible Market Runtime validation for stock profile actions, market downgrade transitions, symbol switching, and time-priority restoration. Windows runtime remains unverified; packaging and release were not executed.

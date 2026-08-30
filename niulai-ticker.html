@@ -49,7 +49,7 @@
   #tickerWatchItems { display: flex; flex-direction: column; gap: 2px; }
   .ticker-watch-item {
     width: 100%; min-height: 24px; padding: 3px 5px; border: 1px solid transparent; border-radius: 4px;
-    background: transparent; color: #fff; cursor: pointer; display: grid; grid-template-columns: 12px minmax(0,1fr) auto;
+    background: transparent; color: #fff; cursor: pointer; display: grid; grid-template-columns: 12px minmax(0,1fr) auto 14px;
     align-items: center; gap: 4px; text-align: left; font-family: "Microsoft YaHei UI", "PingFang SC", "Segoe UI", sans-serif;
   }
   .ticker-watch-item:hover { background: rgba(255,255,255,.08); }
@@ -57,6 +57,9 @@
   .ticker-watch-check { font-size: 9px; color: #64d2ff; text-align: center; }
   .ticker-watch-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; font-weight: 750; }
   .ticker-watch-code { font-size: 9px; opacity: .55; font-family: "SF Mono", Consolas, monospace; }
+  .ticker-watch-alert, .ticker-watch-alert::before { width: 12px; height: 12px; }
+  .ticker-watch-alert { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #ff3b30; color: #fff; font-size: 9px; font-weight: 900; line-height: 1; }
+  .ticker-watch-alert[aria-hidden="true"] { visibility: hidden; }
   #ticker .badge { flex: 0 0 auto; white-space: nowrap; font-size: 9px; padding: 1px 5px; border-radius: 3px; background: rgba(255,255,255,.22); font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
   #feedStatusDot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; background: #8e8e93; box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
   #feedStatusDot.fresh { background: #30d158; box-shadow: 0 0 6px rgba(48,209,88,.8); }
@@ -97,6 +100,12 @@
   #slogan.rest { color: #0a84ff; }
   #slogan.flat { color: #aeaeb2; }
   #stage { position: relative; width: 192px; height: 208px; }
+  #marketAlertBadge { position: absolute; left: calc(68% - 4px); top: 2px; width: 30px; height: 30px; border-radius: 50%; background: transparent; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; line-height: 1; border: 0; padding: 0; cursor: pointer; z-index: 20; -webkit-app-region: no-drag; pointer-events: auto; }
+  #marketAlertBadge::before { content: ""; position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #ff3b30; z-index: -1; }
+  #marketAlertBadge[hidden] { display: none; }
+  #marketAlertBadge.alert-enter { animation: marketAlertEnter .28s ease-out both, marketAlertFloat 1.4s ease-in-out .28s infinite; }
+  @keyframes marketAlertEnter { 0% { transform: scale(.6); } 65% { transform: scale(1.15); } 100% { transform: scale(1); } }
+  @keyframes marketAlertFloat { 0%,100% { translate: 0 0; } 50% { translate: 0 -4px; } }
   canvas { display: block; width: 192px; height: 208px; }
 
   /* 涨态截图动效：文字沿弧形环绕牛头，再向外飘散；用 Web Animations API 控制，避免 CSS var 在 keyframes 里失效 */
@@ -319,7 +328,7 @@
       <div class="bot"><span id="idxChg" class="flat">--%</span><span id="idxAbs" class="flat">--</span></div>
     </div>
     <div id="slogan" class="flat">牛来看盘</div>
-    <div id="stage"><canvas id="pet" width="192" height="208"></canvas></div>
+    <div id="stage"><canvas id="pet" width="192" height="208"></canvas><button id="marketAlertBadge" type="button" aria-label="自选有大异动" hidden>!</button></div>
   </div>
 
   <div id="hud" aria-label="更多设置">
@@ -527,6 +536,10 @@
     { symbol: 'sh000905', name: '中证500' },
   ];
   let watchlist = [];
+  const watchAlertStates = new Map();
+  let watchAlertTimer = null;
+  let watchAlertPollInFlight = false;
+  let hasUnseenWatchAlert = false;
   let recentSymbols = [];
   let lastDeletedWatch = null;
   let undoTimer = null;
@@ -554,6 +567,65 @@
   const timeSimulator = document.getElementById('timeSimulator');
   const timeSimulatorStatus = document.getElementById('timeSimulatorStatus');
   const realTimeBtn = document.getElementById('realTimeBtn');
+  const marketAlertBadge = document.getElementById('marketAlertBadge');
+
+  function alertZone(quote) {
+    const changePct = ((Number(quote.price) - Number(quote.prevClose)) / Number(quote.prevClose)) * 100;
+    if (!Number.isFinite(changePct) || Number(quote.prevClose) <= 0) return null;
+    const state = window.marketStateEngine?.getState(changePct, { symbol: quote.symbol });
+    return state?.state === 'strong_up' || state?.state === 'strong_down' ? state.state : 'normal';
+  }
+  function refreshWatchAlertUI() {
+    const wasVisible = hasUnseenWatchAlert;
+    const pending = new Set([...watchAlertStates].filter(([, v]) => v.pending).map(([s]) => s));
+    hasUnseenWatchAlert = [...watchAlertStates.values()].some(v => v.unseen);
+    if (marketAlertBadge) {
+      marketAlertBadge.hidden = !hasUnseenWatchAlert;
+      if (hasUnseenWatchAlert && !wasVisible) { marketAlertBadge.classList.remove('alert-enter'); void marketAlertBadge.offsetWidth; marketAlertBadge.classList.add('alert-enter'); }
+    }
+    const menu = document.getElementById('tickerWatchItems');
+    menu?.querySelectorAll('.ticker-watch-item').forEach(row => {
+      const marker = row.querySelector('.ticker-watch-alert');
+      const visible = pending.has(row.dataset.symbol);
+      if (marker) marker.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    });
+  }
+  function seedWatchAlert(symbol) { watchAlertStates.set(symbol, { lastZone: null, quoteDate: '', pending: false, unseen: false, initialized: false }); }
+  function processWatchQuote(quote) {
+    const symbol = normalizeSymbol(quote?.symbol); if (!symbol) return;
+    const zone = alertZone(quote); const date = String(quote.quoteDate || ''); if (!zone) return;
+    let entry = watchAlertStates.get(symbol); if (!entry) { seedWatchAlert(symbol); entry = watchAlertStates.get(symbol); }
+    if (entry.initialized && entry.quoteDate && date && entry.quoteDate !== date) {
+      entry.pending = false; entry.unseen = false; entry.lastZone = null; entry.initialized = false;
+      console.log('[watch-alert] reset-day symbol=' + symbol);
+    }
+    if (!entry.initialized) { entry.lastZone = zone; entry.quoteDate = date; entry.initialized = true; return; }
+    if (zone !== entry.lastZone && zone !== 'normal' && (entry.lastZone === 'normal' || entry.lastZone === null)) {
+      entry.pending = true; entry.unseen = true; console.log(`[watch-alert] trigger symbol=${symbol} state=${zone}`);
+    }
+    entry.lastZone = zone; if (date) entry.quoteDate = date;
+  }
+  function resetWatchAlertBaselines() {
+    for (const entry of watchAlertStates.values()) { entry.initialized = false; entry.pending = false; entry.unseen = false; entry.lastZone = null; }
+    refreshWatchAlertUI();
+  }
+  function scheduleWatchAlertPoll(delay = 5000) {
+    clearTimeout(watchAlertTimer); watchAlertTimer = null;
+    if (marketQaEnabled || manualRest || simMode || !realTradingNow() || !watchlist.some(v => v.symbol !== currentSymbol)) return;
+    watchAlertTimer = setTimeout(pollWatchAlerts, delay);
+  }
+  async function pollWatchAlerts() {
+    if (watchAlertPollInFlight) return scheduleWatchAlertPoll();
+    const symbols = watchlist.filter(v => v.symbol !== currentSymbol).map(v => v.symbol);
+    if (!symbols.length || marketQaEnabled || manualRest || simMode || !realTradingNow()) return scheduleWatchAlertPoll(15000);
+    watchAlertPollInFlight = true;
+    try {
+      const result = await require('electron').ipcRenderer.invoke('fetch-watchlist-quotes', symbols);
+      for (const quote of (result?.quotes || [])) processWatchQuote(quote);
+      renderTickerWatchlist(); refreshWatchAlertUI();
+    } catch (e) { console.warn('[watch-alert] poll failed:', e.message); }
+    finally { watchAlertPollInFlight = false; scheduleWatchAlertPoll(); }
+  }
 
   const img = new Image(); img.src = SPRITESHEET;
   console.log('[pet] SPRITESHEET =', SPRITESHEET);
@@ -1333,8 +1405,9 @@
     for (const item of watchlist) {
       const btn = document.createElement('button');
       btn.className = 'ticker-watch-item' + (item.symbol === currentSymbol ? ' current' : '');
+      btn.dataset.symbol = item.symbol;
       btn.type = 'button';
-      btn.innerHTML = `<span class="ticker-watch-check"></span><span class="ticker-watch-name"></span><span class="ticker-watch-code"></span>`;
+      btn.innerHTML = `<span class="ticker-watch-check"></span><span class="ticker-watch-name"></span><span class="ticker-watch-code"></span><span class="ticker-watch-alert" aria-hidden="true">!</span>`;
       btn.querySelector('.ticker-watch-check').textContent = item.symbol === currentSymbol ? '✓' : '';
       btn.querySelector('.ticker-watch-name').textContent = item.name;
       btn.querySelector('.ticker-watch-code').textContent = item.symbol;
@@ -1342,6 +1415,7 @@
       box.appendChild(btn);
     }
     if (!hasWatch) toggleTickerWatchMenu(false);
+    refreshWatchAlertUI();
   }
 
   function renderSymbolControls() { renderWatchlist(); renderRecent(); renderTickerWatchlist(); }
@@ -1392,14 +1466,14 @@
       showActionToast('自选已满 8 个，本次仅查看', 'warn', 'watch-full');
       return false;
     }
-    watchlist.push(clean); removeRecentSymbol(clean.symbol); saveWatchlist(); renderSymbolControls();
+    watchlist.push(clean); seedWatchAlert(clean.symbol); removeRecentSymbol(clean.symbol); saveWatchlist(); renderSymbolControls(); scheduleWatchAlertPoll();
     showActionToast(`已加入自选 ${watchlist.length} / ${WATCHLIST_MAX}`, 'ok', 'watch-add');
     return true;
   }
 
   function removeWatchItem(symbol) {
     const index = watchlist.findIndex(v => v.symbol === symbol); if (index < 0) return;
-    const [item] = watchlist.splice(index, 1); saveWatchlist();
+    const [item] = watchlist.splice(index, 1); watchAlertStates.delete(symbol); saveWatchlist(); refreshWatchAlertUI();
     clearWatchlistFullToast();
     if (currentSymbol === symbol) addRecentSymbol(item);
     renderSymbolControls();
@@ -1415,6 +1489,7 @@
     if (!lastDeletedWatch || Date.now() > lastDeletedWatch.expiresAt || watchlist.length >= WATCHLIST_MAX) return;
     if (!watchlist.some(v => v.symbol === lastDeletedWatch.item.symbol)) {
       watchlist.splice(Math.min(lastDeletedWatch.index, watchlist.length), 0, lastDeletedWatch.item);
+      seedWatchAlert(lastDeletedWatch.item.symbol);
       removeRecentSymbol(lastDeletedWatch.item.symbol);
       saveWatchlist(); renderSymbolControls();
     }
@@ -1707,7 +1782,7 @@
     else { startWebFeed(); manualRest = false; evaluatePhase(); }
   };
   const restBtn = document.getElementById('restBtn');
-  if (restBtn) restBtn.onclick = () => { manualRest = !manualRest; evaluatePhase(); };
+  if (restBtn) restBtn.onclick = () => { manualRest = !manualRest; if (manualRest) resetWatchAlertBaselines(); evaluatePhase(); scheduleWatchAlertPoll(1000); };
   if (quietModeToggle) quietModeToggle.onchange = () => {
     applyLowProfileMode(quietModeToggle.checked);
     saveLowProfileMode();
@@ -1740,7 +1815,13 @@
   // 切换标的：同步自选 UI，推送 Electron 主进程或浏览器代理拉取真实行情。
   function selectSymbol(sym, opts = {}) {
     sym = normalizeSymbol(sym); if (!sym) return;
+    const previous = currentSymbol;
+    if (previous && previous !== sym && watchlist.some(v => v.symbol === previous)) {
+      const previousZone = alertZone({ symbol: previous, price: lastPrice, prevClose: lastPrevClose });
+      if (previousZone) watchAlertStates.set(previous, { ...(watchAlertStates.get(previous) || {}), lastZone: previousZone, quoteDate: lastQuoteMeta.quoteDate || '', initialized: true, pending: false, unseen: false });
+    }
     currentSymbol = sym; saveCurrentSymbol();
+    const read = watchAlertStates.get(sym); if (read?.pending) { read.pending = false; read.unseen = false; console.log('[watch-alert] read symbol=' + sym); }
     if (opts.name) updateSymbolLabel(sym, opts.name);
     renderSymbolControls();
     if (window.__inElectron && typeof require !== 'undefined') {
@@ -1748,6 +1829,7 @@
     } else if (!simMode) {
       stopWebFeed(); startWebFeed();
     }
+    refreshWatchAlertUI(); scheduleWatchAlertPoll();
   }
 
   const customInput = document.getElementById('customSymbol');
@@ -1768,6 +1850,9 @@
   customInput.addEventListener('focus', () => { toggleSymbolMenu(false); toggleTickerWatchMenu(false); });
   document.getElementById('symbolTrigger').addEventListener('click', () => { document.getElementById('marketDiag').classList.remove('visible'); renderSearchResults([]); toggleSymbolMenu(); });
   document.getElementById('tickerSymbolTrigger').addEventListener('click', e => { e.stopPropagation(); renderTickerWatchlist(); toggleTickerWatchMenu(); });
+  if (marketAlertBadge) marketAlertBadge.addEventListener('click', e => {
+    e.stopPropagation(); for (const entry of watchAlertStates.values()) entry.unseen = false; renderTickerWatchlist(); toggleTickerWatchMenu(true); refreshWatchAlertUI();
+  });
   document.getElementById('undoDelete').addEventListener('click', undoDeleteWatch);
   document.getElementById('diagToggle').addEventListener('click', () => { toggleSymbolMenu(false); toggleTickerWatchMenu(false); renderSearchResults([]); document.getElementById('marketDiag').classList.toggle('visible'); renderDiagnostics(); requestAnimationFrame(reportSize); });
   document.getElementById('copyDiag').addEventListener('click', async () => {
@@ -1779,6 +1864,7 @@
   });
 
   watchlist = sanitizeSymbolList(safeLoadJSON(WATCHLIST_KEY, () => DEFAULT_WATCHLIST), WATCHLIST_MAX);
+  watchlist.forEach(item => seedWatchAlert(item.symbol));
   recentSymbols = sanitizeSymbolList(safeLoadJSON(RECENT_KEY, []), 5).filter(r => !watchlist.some(w => w.symbol === r.symbol));
   saveRecent();
   const storedCurrent = normalizeSymbol(safeLoadJSON(CURRENT_SYMBOL_KEY, ''));
@@ -1786,6 +1872,8 @@
   else if (watchlist.length) currentSymbol = watchlist[0].symbol;
   applyLowProfileMode(safeLoadJSON(LOW_PROFILE_KEY, false) === true);
   renderSymbolControls();
+  refreshWatchAlertUI();
+  scheduleWatchAlertPoll(1500);
   window.__getCurrentSymbol = () => currentSymbol;
   setInterval(refreshFeedFreshness, 1000);
 
@@ -2057,7 +2145,7 @@
   setMouseInteractive(false);
 
   setUIScale(130, { commit: false }); evaluatePhase();
-  setInterval(evaluatePhase, 15000); // 每 15s 按本地时间重算时段相位，触发开/收盘窗口动画
+  setInterval(() => { evaluatePhase(); scheduleWatchAlertPoll(); }, 15000); // 每 15s 重算相位，并在真实交易时维持后台监控
 
 })();
 </script>

@@ -604,3 +604,11 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 从已提交的 `alpha_hr/` 唯一输入按精确 `1/7` 进行 premultiplied-alpha-safe resize，源 `1344x1456`，目标 `192x208`，LANCZOS，F1→F8 顺序保持不变。
 - 新增正式 production engineering frame 目录 `assets/cow-v2/actions/celebration_dance/production_192/`，八帧均为 RGBA PNG；未修改 `spritesheet.webp`、Action Registry、状态机或 Runtime。
 - 192×208 Technical QA：尺寸、Alpha、透明背景、背景岛回归、白边/黑边、轮廓与帧序均通过；QA-only Contact Sheet 与 Gray/Checkerboard Loop 位于 `/tmp/celebration-dance-production-192.m4u4afwa/`。本轮未执行 spritesheet、Runtime、打包或发布。
+
+# 2026-08-31 Watchlist Big-Move Alert Badge V1
+
+- 当前真实功能：只监控 `watchlist` 中 `symbol !== currentSymbol` 的标的；后台主进程批量复用现有 `fetchBuffer`、Sina headers、proxy/direct fallback 与 parser 约定，renderer 只接收窄字段 quote。
+- Alert 通过正式 `marketStateEngine.getState(changePct, { symbol })` 归一为 `normal` / `strong_up` / `strong_down`，没有复制阈值。首次后台 quote 只 baseline；normal→strong_up/down 才触发，退出强区后可重新触发，反向方向是新事件。
+- Alert Runtime 独立于 Market State/Cow Action：后台 quote 不进入 `__pushMarket`、`applyMarket`、`requestAction`、`setState`，不会驱动牛动作。Market QA 环境禁用后台 monitor；current symbol 排除后台请求。
+- UI 为 `#stage` 内独立红色圆形白色 `!` 与自选快速菜单行末静态小 `!`。大 `!` 点击只打开现有菜单并清 global unseen，symbol pending 保留；正式 `selectSymbol()` 只清被点击 symbol。删除清理 state，Undo 恢复后重新 baseline，跨 `quoteDate` 清除旧日 pending/unread 并重置追踪。
+- 本轮未修改 `marketState.js`、`cowStateMachine.js`、`timeState.js`、`MARKET_STATE_MAPPING.md`、spritesheet、Action Registry 或 assets。Market QA all suite 已通过；macOS 可见窗口的 badge 多倍率人工检查仍需记录，Windows Runtime、Packaging、Release 未执行。
