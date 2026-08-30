@@ -55,26 +55,32 @@ function assertSequenceIncrement(before, after, assertion, step) {
 async function runStep(win, [id, symbol, price, expectedState, expectedAction]) {
   const input = { symbol, prevClose: 100, price };
   log('STEP_START', { step: id, ...input });
-  const result = await win.webContents.executeJavaScript(
-    `window.__niulaiMarketQA.pushQuote(${JSON.stringify(input)})`
-  );
-  await sleep(holdMs);
-  const snapshot = await win.webContents.executeJavaScript('window.__niulaiMarketQA.snapshot()');
+  const decisionSnapshot = await win.webContents.executeJavaScript(`(() => {
+    window.__niulaiMarketQA.pushQuote(${JSON.stringify(input)});
+    return window.__niulaiMarketQA.snapshot();
+  })()`);
   const actual = {
-    instrumentType: snapshot.instrumentType,
-    marketState: snapshot.marketState,
-    currentAction: snapshot.currentAction,
-    priority: snapshot.currentActionPriority,
-    category: snapshot.currentActionCategory,
-    frameIndex: snapshot.playback.frameIndex,
-    playbackSequenceId: snapshot.playbackSequenceId,
-    currentSymbol: snapshot.currentSymbol
+    instrumentType: decisionSnapshot.instrumentType,
+    marketState: decisionSnapshot.marketState,
+    currentAction: decisionSnapshot.currentAction,
+    priority: decisionSnapshot.currentActionPriority,
+    category: decisionSnapshot.currentActionCategory,
+    playbackSequenceId: decisionSnapshot.playbackSequenceId,
+    currentSymbol: decisionSnapshot.currentSymbol
   };
   const pass = actual.marketState === expectedState && actual.currentAction === expectedAction;
-  log('SNAPSHOT', { suite: process.env.NIULAI_MARKET_QA_SUITE, step: id, ...input, changePct: price - 100, expected: { marketState: expectedState, action: expectedAction }, actual, pass });
+  log('DECISION_SNAPSHOT', { suite: process.env.NIULAI_MARKET_QA_SUITE, step: id, ...input, changePct: price - 100, expected: { marketState: expectedState, action: expectedAction }, actual, pass });
   if (!pass) log('ASSERT_FAIL', { step: id, expected: { marketState: expectedState, action: expectedAction }, actual });
   else log('ASSERT_PASS', { step: id });
-  return { pass, snapshot, actual, expectedState, expectedAction, id };
+  await sleep(holdMs);
+  const postHoldSnapshot = await win.webContents.executeJavaScript('window.__niulaiMarketQA.snapshot()');
+  log('POST_HOLD_SNAPSHOT', {
+    step: id,
+    currentAction: postHoldSnapshot.currentAction,
+    frameIndex: postHoldSnapshot.playback.frameIndex,
+    playbackSequenceId: postHoldSnapshot.playbackSequenceId
+  });
+  return { pass, decisionSnapshot, postHoldSnapshot, actual, expectedState, expectedAction, id };
 }
 
 async function runSuite(win, suiteName) {
@@ -98,8 +104,8 @@ async function runSuite(win, suiteName) {
       const prior = results[index - 1];
       const current = results[index];
       const incremented = assertSequenceIncrement(
-        prior.snapshot.playbackSequenceId,
-        current.snapshot.playbackSequenceId,
+        prior.decisionSnapshot.playbackSequenceId,
+        current.decisionSnapshot.playbackSequenceId,
         assertion,
         stepId
       );
@@ -111,12 +117,12 @@ async function runSuite(win, suiteName) {
       const prior = results[i - 1];
       const current = results[i];
       if (prior.expectedState === current.expectedState && prior.expectedAction === current.expectedAction) {
-        const stable = prior.snapshot.playbackSequenceId === current.snapshot.playbackSequenceId;
-        log(stable ? 'ASSERT_PASS' : 'ASSERT_FAIL', { step: current.id, assertion: 'same-action-sequence-id-stable', before: prior.snapshot.playbackSequenceId, after: current.snapshot.playbackSequenceId });
+        const stable = prior.decisionSnapshot.playbackSequenceId === current.decisionSnapshot.playbackSequenceId;
+        log(stable ? 'ASSERT_PASS' : 'ASSERT_FAIL', { step: current.id, assertion: 'same-action-sequence-id-stable', before: prior.decisionSnapshot.playbackSequenceId, after: current.decisionSnapshot.playbackSequenceId });
         allPass = allPass && stable;
       } else if (prior.expectedAction !== current.expectedAction) {
-        const incremented = current.snapshot.playbackSequenceId > prior.snapshot.playbackSequenceId;
-        log(incremented ? 'ASSERT_PASS' : 'ASSERT_FAIL', { step: current.id, assertion: 'action-transition-sequence-id-increment', before: prior.snapshot.playbackSequenceId, after: current.snapshot.playbackSequenceId });
+        const incremented = current.decisionSnapshot.playbackSequenceId > prior.decisionSnapshot.playbackSequenceId;
+        log(incremented ? 'ASSERT_PASS' : 'ASSERT_FAIL', { step: current.id, assertion: 'action-transition-sequence-id-increment', before: prior.decisionSnapshot.playbackSequenceId, after: current.decisionSnapshot.playbackSequenceId });
         allPass = allPass && incremented;
       }
     }

@@ -11,6 +11,7 @@
 - QA observer 提供 currentSymbol、instrumentType、marketState、marketDirection、currentAction、priority/category、playback frameIndex/elapsedMs、manualRest、restMode、lowProfileMode 与 `playbackSequenceId`。sequence id 只在真正初始化 playback 时递增；同 action dedupe 不递增，纯观察不影响行为。QA API 只接受 symbol、prevClose、price，并不提供 force action 或 force market state 能力。
 - 当前已完成工具验收：stock、no-restart、symbol-switch、all suites 的结构化断言通过，time-priority 已覆盖 sleep/restMode 与交易时段恢复；正常启动 QA 默认关闭；本次建设不是完整 macOS 可见业务回归，`MACOS_BUSINESS_VISIBLE_RUNTIME=NOT VERIFIED` 保持不变。Windows Runtime 未验证，Packaging/Release 未执行。现有 ambient helper 使用强制动作语义，未作为正常 arbitration QA 入口提供。
 - Stock priority downgrade transitions now assert both expected action and `playbackSequenceId` increment; time-priority restore now asserts the expected market action after returning to trading time using the current immediate formal restore semantics.
+- Market QA Harness now separates immediate decision assertions from visual-hold snapshots; ambient actions such as `idle_blink` during the hold no longer cause false Market Decision failures. Repeat stability verification passed: `symbol-switch` 5/5 and `all` 3/3. `MACOS_BUSINESS_VISIBLE_RUNTIME=NOT VERIFIED` remains unchanged.
 
 ## 2026-08-31 Index / Stock Market Profiles and Up Action Re-layering
 
