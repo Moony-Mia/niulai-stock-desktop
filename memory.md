@@ -412,6 +412,16 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 当前正式 HR Anchors 已形成：F1 Left Peak ✅ → F2 Left Release ✅ → F3 Near Center A ✅ → F4 Right Anticipation ✅ → F5 Right Peak ✅ → F6 Right Release ✅。F7 Near Center B、F8 Left Anticipation 尚未生成，完整 8 帧尚未完成；Alpha、192×208、alignment、canvas normalization、spritesheet、Action Registry、状态机和业务逻辑均未进入。
 - F6 Freeze 后下一阶段记录为 `F7 Near Center B / Return Arm Exchange Candidate Generation`，仅记录阶段，不在本轮执行。F7 必须体现 `Right → Left` 的运动历史，不得复制或机械镜像 F3。
 
+# 2026-08-30 celebration_dance F7 Near Center B / Return Arm Exchange Candidates
+
+- 已生成两张 F7 `Near Center B / Return Arm Exchange` High-Resolution Candidate：`assets/cow-v2/actions/celebration_dance/celebration_dance_f7_candidate_01.png` 与 `assets/cow-v2/actions/celebration_dance/celebration_dance_f7_candidate_02.png`，等待人工视觉验收；F7 Master 尚未选择、尚未冻结。
+- Candidate 01 定位为 `Continuity First / Right Residual Near Center`：更保留 F6 的右侧运动历史，Hip 接近中心但留有轻微右侧残余，Weight 进入交换区，双臂回程交换继续推进，并为 F8 左侧进入保留更多空间。
+- Candidate 02 定位为 `Direction Change First / Stronger Return Exchange`：比 Candidate 01 更明确表现 Right → Left 的方向转换，Hip 更接近中心，左腿接管趋势和 Return Arm Exchange 更强，但仍未进入 F8 Left Anticipation。
+- 两张候选均以 F6 Right Release HR Master 为第一参考、F5 Right Peak HR Master 为运动历史参考、F1 Left Peak HR Master 为远端左向目标上下文、F3 Near Center A HR Master 为空间尺度参考；未使用 F3 作为姿态模板，未进行 F3 复制或机械水平镜像。
+- Candidate 01：`1199 × 1312`、`RGB PNG`、3 通道、无 Alpha、`1,572,923 bytes`、SHA-256 `bb9ac32ad2022b5b38d12a64350fd6c47139a03bdd1827babef3c6a9e47f64a7`。Candidate 02：`1204 × 1306`、`RGB PNG`、3 通道、无 Alpha、`1,649,905 bytes`、SHA-256 `0c3ddd0a59f5e93d8e0665f6de8a694a0a55c8dead0fd83c8fb4864c48feab88`。两张均已通过 PNG 可读取检查。
+- Candidate 级视觉 QA：两张均通过 Identity、F6 → F7 Continuity、Near-center Position、Hip Centering、Right-leg Weight Release、Left-leg Weight Gain、Weight Exchange、Right Fist Lowering、Left Fist Rising、Return Arm Exchange、Arm Separation、Arm Anatomy、Torso Centering、Head / Expression、Camera / Scale、Surface / Lighting、F8 Remaining Space；双脚接地，未发现 `F6_TOO_CLOSE`、`F3_COPY_FAIL`、`F3_MIRROR_FAIL`、`F8_TOO_CLOSE` 或 `ARM_EXCHANGE_FUSION`。`IDLE_COLLAPSE` 未判定为硬失败，但普通站姿风险与 Right → Left 运动历史仍需人工重点复核。
+- 本轮未进行 Alpha、192×208、resize、crop、translation、alignment、canvas normalization、spritesheet assembly、Action Registry、状态机或业务逻辑修改；F8 未生成，完整 8 帧尚未完成。
+
 # 2026-08-30 celebration_dance F6 Right Release / Early Return Candidates
 
 - 已生成两张 F6 `Right Release / Early Return` High-Resolution Candidate：`assets/cow-v2/actions/celebration_dance/celebration_dance_f6_candidate_01.png` 与 `assets/cow-v2/actions/celebration_dance/celebration_dance_f6_candidate_02.png`，等待人工视觉验收；F6 Master 尚未选择、尚未冻结。
