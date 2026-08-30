@@ -2,6 +2,14 @@
 
 ## 2026-08-30
 
+- `celebration_dance_f2_candidate_01.png` 已通过人工验收并被选定为 F2 Source；`celebration_dance_f2_candidate_02.png` 未选用为 Master，继续保留。
+- F2 `Left Release / Early Transition` 已冻结为 `assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f2_master_hr.png`；Source 与 Master 字节级一致，SHA-256 均为 `19821889a5b4d00dc5ac0c97e277ef69f3ba6e274eedcc4258a4b1e47c846f7b`。
+- F2 保持白色 RGB 背景，未进行视觉修改、resize、crop、translation 或 alignment，未处理 Alpha，未转 `192 × 208`。
+- 当前正式 HR Anchors 为 F1 Left Peak、F2 Left Release、F5 Right Peak；F3/F4/F6/F7/F8 尚未生成，完整 8 帧尚未完成，未修改 spritesheet、Registry、状态机或业务逻辑。
+- 下一阶段为 `F3 Near Center A / Arm Exchange Candidate Generation`；F2 将作为 F3 最重要的局部连续性参考。
+
+## 2026-08-30
+
 - 修正冻结任务中的 SHA-256 描述笔误；实际核验 `celebration_dance_right_peak_candidate_02.png` 通过，正确 SHA-256 为 `62366ae6b12f22d4d5178cff107e7a337640e7eab7e879fb585cc6792caf2727`。
 - Right Peak Candidate 02 技术验收记录为 `91 / 100`，人工视觉验收通过，未发现 `P0`，并直接冻结为 `assets/cow-v2/actions/celebration_dance/masters/celebration_dance_right_peak_master_hr.png`。
 - Source 与 Right Peak HR Master 字节级一致；Left / Right HR Peak 均已建立，左右峰值 compatibility review 已通过。

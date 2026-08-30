@@ -375,3 +375,12 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 本次冻结未进行视觉修改、平移、缩放、裁切、重编码或 Alpha 处理；白色背景仍保留，尚未转为 `192 × 208`。此前记录的 bbox / center / baseline 差异及 `X = -14`、`Y = -4` 仅作为未来统一 frame alignment 的参考值，未应用到 HR Master 像素。
 - Left Peak HR Master 保持已冻结状态；Left / Right compatibility review 已通过，左右峰值共同作为后续 `celebration_dance` Intermediate Frames 的 High-Resolution Identity Anchors。
 - 尚未制作 Intermediate Frames，尚未完成完整 8 帧，尚未修改正式 spritesheet、Action Registry、状态机或业务逻辑；下一阶段正式为 `Intermediate Transition Frames`。
+
+# 2026-08-30 celebration_dance F2 HR Master
+
+- `celebration_dance_f2_candidate_01.png` 已通过人工验收并被选定为 F2 Source；`celebration_dance_f2_candidate_02.png` 未采用为 Master，继续保留为历史候选。
+- F2 `Left Release / Early Transition` 已直接冻结为 `assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f2_master_hr.png`。Master 为 `1202 × 1308`、`RGB PNG`、`1,604,028 bytes`，SHA-256 为 `19821889a5b4d00dc5ac0c97e277ef69f3ba6e274eedcc4258a4b1e47c846f7b`；Source 与 Master 已通过 `cmp` 和字节级比较，完全一致。
+- F2 正式职责：仍明显处于动作左侧；左胯从 F1 最大左极值开始回中；左腿仍为主要承重腿；右腿从最大右侧伸开始回收；左拳从最高位开始下降；右手从横腹开始向外 / 向上释放；上身仍向右反平衡但比 F1 减弱；双脚接地；头部基本正面；表情保持不变。F2 不是 Center，也不是 Peak Copy，而是 Left Peak 刚开始释放的第一张过渡帧。
+- F1 Left Peak、F2 Left Release、F5 Right Peak 当前已成为 `celebration_dance` 正式 HR Anchors。F3 `Near Center A / Arm Exchange`、F4、F6、F7、F8 尚未生成，完整 8 帧尚未完成。
+- 本次冻结未修改 F2 视觉，未 resize、crop、translation 或 alignment；白色 RGB 背景保留，Alpha 未处理，尚未转为 `192 × 208`。尚未修改正式 spritesheet、Action Registry、状态机或业务逻辑。
+- 下一阶段为 `F3 Near Center A / Arm Exchange Candidate Generation`。F3 参考优先级为：F1 Left Peak HR Master、F2 Left Release HR Master、F5 Right Peak HR Master；F2 是 F3 最重要的局部连续性参考。F3 重点为接近中线、接近交换重心、左拳继续下降、右手继续上升、两腿接近交换、上身接近正中且双脚接地；不得变成普通站姿、双臂融合或 Identity 漂移。
