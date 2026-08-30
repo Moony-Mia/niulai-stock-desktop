@@ -2,6 +2,9 @@
 
 ## 2026-08-30
 
+- 人工视觉验收正式选择 `celebration_dance_f3_candidate_01.png` 作为 F3 `Near Center A / Arm Exchange` HR Master 来源：其 F2 → F3 连续性、左侧惯性、接近中心的 Hip、尚未完成的 Weight Exchange、清楚的 Arm Exchange 以及为 F4 保留的动作空间均符合 F3 职责；Candidate 02 保留但不选。
+- F3 HR Master 已由 Candidate 01 原文件直接复制冻结为 `assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f3_master_hr.png`；Source / Master 均为 `1203 × 1307`、`RGB PNG`、`1,629,213 bytes`，SHA-256 为 `bbd352979d221ed65fbc4d047755ff1eeaee1f18a7a5214cad2f1c33e583a38b`，并已通过字节级一致性验证。
+- 本次仅完成 F3 Master Freeze，未生成 F4/F6/F7/F8，未完成完整 8 帧，未处理 Alpha、192×208、alignment、canvas normalization、spritesheet、Registry、状态机或业务逻辑；下一阶段为 `F4 Right Anticipation / Pre-Peak Candidate Generation`。
 - 已生成两张 `celebration_dance` F3 `Near Center A / Arm Exchange` High-Resolution Candidate：Candidate 01（`Continuity First`）与 Candidate 02（`Exchange First`），等待人工验收，尚未选择或冻结 F3 Master。
 - F3 候选以 F2 Left Release HR Master 为第一参考，F1 Left Peak HR Master 为第二参考，F5 Right Peak HR Master 为第三参考；未使用旧候选或历史失败路线。
 - 两张 F3 候选均保留白色 RGB 背景，未处理 Alpha、未转 `192 × 208`、未 alignment，未修改 F1/F2/F5 Master、spritesheet、Registry、状态机或业务逻辑；F4/F6/F7/F8 与完整 8 帧尚未生成。

@@ -385,6 +385,15 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 本次冻结未修改 F2 视觉，未 resize、crop、translation 或 alignment；白色 RGB 背景保留，Alpha 未处理，尚未转为 `192 × 208`。尚未修改正式 spritesheet、Action Registry、状态机或业务逻辑。
 - 下一阶段为 `F3 Near Center A / Arm Exchange Candidate Generation`。F3 参考优先级为：F1 Left Peak HR Master、F2 Left Release HR Master、F5 Right Peak HR Master；F2 是 F3 最重要的局部连续性参考。F3 重点为接近中线、接近交换重心、左拳继续下降、右手继续上升、两腿接近交换、上身接近正中且双脚接地；不得变成普通站姿、双臂融合或 Identity 漂移。
 
+# 2026-08-30 celebration_dance F3 Near Center A HR Master 冻结
+
+- F3 `Near Center A / Arm Exchange` 已完成人工视觉验收，正式选择 Candidate 01：`assets/cow-v2/actions/celebration_dance/celebration_dance_f3_candidate_01.png`。选择依据为 F2 → F3 continuity 更好、保留轻微左侧惯性、Hip 接近中心但未提前右偏、左腿仍承担部分重量、右腿正在回收、Arm Exchange 已清楚且双臂分离、未提前进入 F4，并为 F4 保留充足动作空间。
+- F3 High-Resolution Master 已由 Candidate 01 原文件直接复制冻结：`assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f3_master_hr.png`。Source 与 Master 均为 `1203 × 1307`、`RGB PNG`、`1,629,213 bytes`，SHA-256 均为 `bbd352979d221ed65fbc4d047755ff1eeaee1f18a7a5214cad2f1c33e583a38b`，并已通过 `cmp` 字节级一致性验证。
+- Candidate 02：`assets/cow-v2/actions/celebration_dance/celebration_dance_f3_candidate_02.png` 未选作 Master，继续保留为历史 Candidate，不删除、不修改、不移动。Candidate 01 Source 也继续保留。
+- 本次冻结未进行视觉修改、重新编码、resize、crop、translation、alignment、canvas normalization 或 Alpha 处理；白色 RGB 背景仍保留，尚未转为 `192 × 208`。未生成 F4。
+- 当前 `celebration_dance` HR Anchor 状态：F1 Left Peak ✅；F2 Left Release ✅；F3 Near Center A ✅；F5 Right Peak ✅。F4 Right Anticipation、F6 Right Release、F7 Near Center B、F8 Left Anticipation 尚未生成，完整 8 帧尚未完成；Alpha、192×208、spritesheet、Action Registry、状态机和业务逻辑均未进入。
+- F3 Freeze 后下一阶段记录为 `F4 Right Anticipation / Pre-Peak Candidate Generation`，仅记录阶段，不在本轮执行。
+
 # 2026-08-30 celebration_dance F3 Candidates
 
 - 已生成两张 F3 `Near Center A / Arm Exchange` High-Resolution Candidate：`assets/cow-v2/actions/celebration_dance/celebration_dance_f3_candidate_01.png` 与 `assets/cow-v2/actions/celebration_dance/celebration_dance_f3_candidate_02.png`；均等待人工验收，F3 Master 尚未选择、尚未冻结。
