@@ -176,6 +176,11 @@
 - 明确 AI 协作规范
 # 2026-08-29
 
+- `celebration_dance` 已完成 Spritesheet Integration：F1–F8 production `192×208 RGBA` 按 F1→F8 写入正式 `spritesheet.webp` 新增 row 13，sheet 从 `1536×2704` 扩展为 `1536×2912`，8列与 cell 尺寸保持不变；旧 row 0–12 坐标保持不动。
+- 坐标：F1 `(0,2704)`、F2 `(192,2704)`、F3 `(384,2704)`、F4 `(576,2704)`、F5 `(768,2704)`、F6 `(960,2704)`、F7 `(1152,2704)`、F8 `(1344,2704)`，每帧 `192×208`。
+- Production 输入 SHA-256 已重新核验并与既有记录一致；`PRODUCTION_192_MUTATION=NO`。使用当前正式 WebP 无损编码方式。解码后旧区域 alpha>0 像素与目标 cell 可见像素/Alpha exact；透明隐藏 RGB 因 WebP codec 规范化而变化，未将其误报为全 RGBA exact。
+- Extracted region、White/Gray/Black/Checkerboard/Magenta contact sheet、8 actual frames / 100ms / infinite loop QA 通过；背景岛、白边、黑边、Alpha erosion 与 frame order / loop seam 回归通过。Action Registry、状态机、Runtime、npm start、打包与发布未执行。
+
 - feat: add idle_blink as a one-shot low-profile action on spritesheet row 11
 - 修正 `celebration_dance` Alpha Background Islands：确认问题帧为 F1/F5/F8，采用统一两阶段背景检测、corrected mask application，并防止 edge treatment 将 removed island core 写回 Alpha；从 aligned HR RGB 重建 F1–F8 `1344×1456 RGBA` Alpha HR。Technical Corrected Alpha QA 完成，Human Corrected Alpha Acceptance 仍 pending；未执行 192×208。
 - `celebration_dance` Corrected Alpha HR 已完成人工最终验收；从已提交 Alpha HR 按精确 `1/7`、LANCZOS、premultiplied-alpha-safe pipeline 生成八张 `192×208 RGBA` production frames，写入 `assets/cow-v2/actions/celebration_dance/production_192/`。192×208 Technical QA 通过；未修改 spritesheet、Registry、Runtime、打包或发布。

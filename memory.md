@@ -4,6 +4,15 @@
 
 最后更新：2026-08-30（Asia/Shanghai）
 
+## 2026-08-30 celebration_dance Spritesheet Integration
+
+- `assets/cow-v2/actions/celebration_dance/production_192/` F1–F8 已按只读输入整合进正式 `spritesheet.webp`；八个输入文件尺寸均为 `192×208 RGBA`，SHA-256 与 production commit `cbfd899819d9a9699050b9f853c20d9ea2082b69` 记录一致，`PRODUCTION_192_MUTATION=NO`。
+- 当前 sheet 从 `1536×2704`（8列×13行）扩展为 `1536×2912`（8列×14行），cell 仍为 `192×208`；旧 row 0–12 坐标保持不动，新增 row 13 专用于 `celebration_dance`，无需修改既有 layout manifest（仓库不存在独立 manifest）。
+- `celebration_dance` 坐标为 row 13、columns 0–7：F1–F8 的 `(x,y,w,h)` 分别为 `(0,2704,192,208)`、`(192,2704,192,208)`、`(384,2704,192,208)`、`(576,2704,192,208)`、`(768,2704,192,208)`、`(960,2704,192,208)`、`(1152,2704,192,208)`、`(1344,2704,192,208)`。
+- 使用当前正式 WebP 的无损编码方式写入。解码后旧区域所有 alpha>0 像素保持 exact；WebP 编码器规范化了 alpha=0 像素的隐藏 RGB（因此不宣称全 RGBA exact）。八个目标 cell 的可见像素与 Alpha exact，extracted-cell QA、五背景 QA 与 8帧/100ms/无限循环 QA 通过。
+- `F1/F5/F8_BACKGROUND_ISLAND_REGRESSION=NO`、`WHITE_HALO=NO`、`DARK_HALO=NO`、`ALPHA_EROSION=NO`；`FRAME_ORDER=F1→F8`、`F8→F1→F2 LEFT_PEAK_CONTINUITY=PASS`、`F4→F5→F6 RIGHT_PEAK_CONTINUITY=PASS`、`LOOP_SEAM=PASS`。
+- 本轮未修改 production、HR Master、aligned、alpha_hr、Action Registry、状态机或 Runtime；Runtime、npm start、打包和发布均未执行。QA-only 文件位于 `/tmp/celebration_dance_spritesheet_qa_0830/`。
+
 ## 2026-08-30 celebration_dance Alpha HR Preparation（技术通过，等待人工验收）
 
 - F1–F8 正式 HR Master 与 aligned HR RGB source 的 SHA-256 已重新核验并与权威记录一致；`HR_MASTER_MUTATION=NO`、`ALIGNED_SOURCE_MUTATION=NO`。
