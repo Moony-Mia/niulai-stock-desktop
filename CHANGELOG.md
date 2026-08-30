@@ -2,6 +2,12 @@
 
 ## 2026-08-30
 
+- 完成 `celebration_dance` 状态机触发接入：复用现有 `marketState.state === 'strong_up'`（`changePct >= 1.5`）正向事件，仅在进入该状态的边沿通过现有 `requestAction()` 触发，不加入随机动作池。
+- 保持 `celebration_dance` Registry priority=10、loop/fallback/low-profile 语义不变；连续相同行情状态不会重复重播，离开 `strong_up` 后由现有市场动作 priority 机制接管。
+- macOS Runtime 已启动并通过 QA-only 业务事件注入验证完整触发入口，确认 spritesheet `1536×2912`、row 13、8 帧、120ms；重复状态未重触发，负向状态可退出庆祝动作。临时注入已删除；Windows、打包和发布未执行，未进行人工逐帧视觉回归。
+
+## 2026-08-30
+
 - 完成 `celebration_dance Alpha Preparation / Background Removal Engineering`：新增八张 `1344 × 1456 RGBA` Alpha HR engineering copies及 `alpha_manifest.json`。
 - 使用边界连通近白背景分割（4-connectivity，边界中位 RGB，容差 20），仅处理画布边界连通背景；执行 edge-only 抗锯齿 Alpha 与 white-matte 去污染，未 resize、crop、translate、rotate，未修改 Master 或 aligned source。
 - 技术 Alpha QA 通过：画布、背景透明、位置、比例、opaque core RGB、内部透明洞和轮廓侵蚀均符合要求；QA-only 接触表与 8 帧 100ms 无限循环 GIF 位于 `/tmp/celebration_dance_alpha_qa/`。`WHITE_MATTE_HALO=WATCH` 留待人工验收。

@@ -4,6 +4,14 @@
 
 最后更新：2026-08-30（Asia/Shanghai）
 
+## 2026-08-30 celebration_dance State Machine Trigger Integration
+
+- 已找到并接入项目已有的单义正向事件：`marketState.state === 'strong_up'`，其真实条件为 `changePct >= 1.5`，既有语义为强势上涨 / `excited`，原有动作仍为 `jumping`。
+- `niulai-ticker.html` 在 `applyMarket()` 中增加 `lastMarketState` 边沿记录；仅在非 `strong_up` → `strong_up` 时通过现有 `requestAction()` 触发 `celebration_dance`，未加入随机池、未新增业务阈值或独立 event bus。连续相同状态刷新不会重启动作；离开 `strong_up` 后现有市场动作按原 priority 接管。
+- 保持 Registry `priority: 10`、`loop: true`、`fallback: 'idle'`、`lowProfileAllowed: true` 不变。显式事件入口使用 `force` 启动 priority 10 的庆祝动作；后续 `jumping` / `failed` 等更高优先级行情动作仍可抢占，未改既有 priority 体系。
+- macOS Runtime 已实际启动并加载 `1536×2912` spritesheet。QA-only 注入通过 `__setTimePreset('am-trading')` → `__pushMarket()` → `marketState` → `applyMarket` → `requestAction`，确认 trigger 命中、row 13、8 帧、120ms；同值重复更新未产生第二次 trigger，随后负向状态更新可离开庆祝动作。QA 注入与临时诊断已删除，未进入提交。
+- 本轮未修改 `cowStateMachine.js`、`marketState.js`、`timeState.js`、spritesheet、production_192、corrected alpha、aligned source 或 HR Master；Windows Runtime、packaging 与 release 未执行。未提交截图，人工逐帧视觉 QA 未单独执行。
+
 ## 2026-08-30 celebration_dance Action Registry Integration
 
 - `niulai-ticker.html` Action Registry 新增 `celebration_dance`：`segments: [{ row: 13, frames: 8 }]`、`loop: true`、`speed: 'normal'`、`priority: 10`、`fallback: 'idle'`、`lowProfileAllowed: true`。沿用既有 `CELL_W=192`、`CELL_H=208` 与 `ACTION_SPEED_MS.normal=120ms`，实际约 `8.33 FPS`；未新造独立 timing 系统。

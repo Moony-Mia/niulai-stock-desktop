@@ -500,6 +500,7 @@
   let simMode = true, restMode = false, currentSymbol = 'sh000001', lowProfileMode = false;
   let simPrice = 3200.00, simPrevClose = 3200.00; // 初始持平，避免启动瞬间先闪涨态红色
   let lastDir = 'flat';
+  let lastMarketState = null;
   let lastPrice = simPrice, lastPrevClose = simPrevClose;
   let lastMarketEffectDir = null, lastMarketEffectAt = 0;
   const MARKET_EFFECT_COOLDOWN = 30000;
@@ -917,6 +918,8 @@
       : { state: 'flat', direction: 'flat', changePct };
     const marketAction = resolveMarketAction(marketState);
     const dir = marketState.direction;
+    const enteredStrongUp = marketState.state === 'strong_up' && lastMarketState !== 'strong_up';
+    lastMarketState = marketState.state;
     const color = setTheme(dir);
     const now = getLogicalNow();
     const logicalTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
@@ -925,6 +928,11 @@
     if (source === '模拟') { feedStatusDot.className = 'sim'; feedTime.textContent = logicalTime; }
 
     requestAction(marketAction.action, { priority: marketAction.priority });
+    // strong_up 是现有市场状态的边沿事件；只在进入时触发，避免行情刷新反复重播。
+    // 显式事件可启动低优先级庆祝动作；后续更高优先级行情动作仍可正常抢占。
+    if (enteredStrongUp) {
+      requestAction('celebration_dance', { force: true, priority: stateById.celebration_dance.priority });
+    }
     if (dir === 'up' || dir === 'down') {
       setSlogan('', color);
     } else {
