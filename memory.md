@@ -421,6 +421,14 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 当前正式 HR 序列已形成：F1 Left Peak ✅ → F2 Left Release ✅ → F3 Near Center A ✅ → F4 Right Anticipation ✅ → F5 Right Peak ✅ → F6 Right Release ✅ → F7 Near Center B ✅。F8 Left Anticipation 尚未生成，完整 8 帧尚未完成，Loop Seam 尚未正式验收；Alpha、192×208、alignment、canvas normalization、spritesheet、Action Registry、状态机和业务逻辑均未进入。
 - F7 Freeze 后下一阶段记录为 `F8 Left Anticipation / Pre-Peak / Loop Seam Candidate Generation`，仅记录阶段，不在本轮执行。F8 后续需同时参考 F7 → F8 与 F8 → F1，并以 F2 检查 F8 → F1 → F2 的自然 Peak 进入与释放。
 
+# 2026-08-30 celebration_dance Human Full-Loop Acceptance
+
+- `celebration_dance` Human Full-Loop Acceptance 已完成。人工实际观看 `celebration_dance_human_review_10fps` 的 F1 → F8、约 10 FPS、无 interpolation / optical flow / morph / tween 的完整循环预览，最终结果为：`A. HUMAN FULL-LOOP ACCEPTED`。
+- 人工结论：Overall Dance Readability PASS，动作读作快速左右扭胯庆祝舞；Rhythm PASS，左右节奏成立；Left Peak PASS，F8 → F1 → F2 的 Approach → Peak → Release 成立；Right Peak PASS，F4 → F5 → F6 的 Peak 节奏成立；Loop Seam PASS，F8 → F1 自然；Identity PASS，八帧整体像同一头牛；Surface / Lighting 差异在完整播放中可接受；无 HR Frame Rework required。
+- P0 BLOCKER：None。上一阶段记录的 F8 → F1 Peak Separation、Loop rhythm、Surface / Lighting playback consistency 经人工完整循环观看后均未形成 HR 返工阻塞，不再标记为 pending human acceptance。P2 仍保留为工程事项：original canvas size differences、framing drift、baseline drift、minor center drift、padding / placement requirements。
+- 当前状态：F1–F8 八个 HR Master ✅；Technical Sequence QA ✅；Human Review Package ✅；Human Full-Loop Acceptance ✅；HR choreography and human full-loop acceptance completed。不得将此状态描述为已完成 Alignment、正式 Sprite、Runtime 接入或发布。
+- Alpha、192×208、alignment、baseline normalization、canvas normalization、spritesheet、Action Registry、状态机、业务逻辑、npm start、打包、发布、macOS 动画运行验证和 Windows 验证仍未执行。下一阶段正式记录为 `celebration_dance HR Alignment / Canvas / Baseline Engineering`，仅记录阶段，不在本轮执行。
+
 # 2026-08-30 celebration_dance Full 8-Frame HR Sequence Technical QA
 
 - 已核验正式 `celebration_dance` F1–F8 八个 High-Resolution Master：文件均存在、为可读取的 RGB PNG、无 Alpha，冻结记录中的 SHA-256 全部一致；`HR_MASTER_MUTATION=NO`。本轮未修改、重存、resize、crop、translation、alignment 或重新生成任何 HR Master。

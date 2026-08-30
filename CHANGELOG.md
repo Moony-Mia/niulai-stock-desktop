@@ -2,6 +2,12 @@
 
 ## 2026-08-30
 
+- `celebration_dance` Human Full-Loop Acceptance 已完成；人工实际观看 Normal 10 FPS F1 → F8 完整循环，最终结果为 `A. HUMAN FULL-LOOP ACCEPTED`。
+- Overall Dance Readability、Rhythm、Left Peak、Right Peak、Loop Seam、Identity 均通过人工验收；F8 → F1 → F2 的 Approach → Peak → Release、F4 → F5 → F6 的 Peak 节奏均成立。Surface / Lighting 差异在完整播放中可接受，无 HR Frame Rework required。
+- P0 = None。上一阶段 P1 观察项经人工完整循环复核后未形成 HR 返工阻塞；P2 的 canvas size、framing、baseline、minor center drift 和 padding / placement 仍属于后续工程处理，不是 HR Pose 问题。
+- F1–F8 八个 HR Master、Technical Sequence QA、Human Review Package 与 Human Full-Loop Acceptance 均已完成；准确表述为 `HR choreography and human full-loop acceptance completed`，不代表已完成 Alignment、Sprite、Runtime 接入或发布。
+- 下一阶段为 `celebration_dance HR Alignment / Canvas / Baseline Engineering`。本轮未执行 Alpha、192×208、alignment、baseline normalization、canvas normalization、spritesheet、Action Registry、状态机、业务逻辑、npm start、打包、发布、macOS 动画运行验证或 Windows 验证。
+
 - 已完成 `celebration_dance` F1–F8 正式 HR Master 的技术序列 QA；八个 Master 的文件、PNG 可读取状态、尺寸、模式、Alpha 与 SHA-256 均核验通过，`HR_MASTER_MUTATION=NO`。
 - 已生成 QA-only 临时 Contact Sheet、约 10 FPS 六次循环预览和每帧 400 ms 两次循环慢速预览，统一 QA Canvas 仅使用白色 padding，不修改任何正式 Master；预览路径位于 `/tmp/celebration-dance-qa.Zmm4ZG/`，未加入项目资产。
 - F1–F8 动作职责、Hip / Weight / Legs / Arms / Torso 轨迹、Head / Identity 稳定性、Horizontal Motion、F4 → F5 → F6 及 F8 → F1 → F2 Peak 结构均通过技术检查；F7 → F8 → F1 Loop 方向成立，未发现 P0 Anatomy、Identity、方向反转或 Peak 时序阻塞。
