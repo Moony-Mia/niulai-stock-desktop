@@ -907,7 +907,7 @@
     if (lowProfileMode && !action.lowProfileAllowed) {
       return { ...request, action: action.fallback && stateById[action.fallback]?.lowProfileAllowed ? action.fallback : 'idle', priority: 0 };
     }
-    return { ...request, action: action.id, priority: action.priority };
+    return { ...request, action: action.id, priority: Number.isFinite(request.priority) ? request.priority : action.priority };
   }
 
   function applyMarket(price, prevClose, source='模拟') {
@@ -928,7 +928,10 @@
     setTicker(source==='模拟' ? '上证指数(模拟)' : window.lastMarketName || '上证指数', currentSymbol, price, changePct, sourceTime);
     if (source === '模拟') { feedStatusDot.className = 'sim'; feedTime.textContent = logicalTime; }
 
-    requestAction(marketAction.action, { priority: marketAction.priority });
+    // 市场状态离开 strong_down 时允许 crying 释放给较低 priority 的目标动作；
+    // strong_down 持续刷新仍走同 action 去重，不会反复重置 crying 到 F1。
+    const leavingCrying = currentState.id === 'crying' && marketAction.action !== 'crying';
+    requestAction(marketAction.action, { priority: marketAction.priority, force: leavingCrying });
     // strong_up 是现有市场状态的边沿事件；只在进入时触发，避免行情刷新反复重播。
     // 显式事件可启动低优先级庆祝动作；后续更高优先级行情动作仍可正常抢占。
     if (enteredStrongUp) {

@@ -4,6 +4,15 @@
 
 最后更新：2026-08-31（Asia/Shanghai）
 
+## 2026-08-31 strong_down → crying Business Integration（macOS PASS）
+
+- 当前产品规则为指数当日涨跌幅：`strong_down <= -3.00%`（包含边界）；`down <= -0.50% 且 > -3.00%`；`up >= +0.50%`；`strong_up >= +1.50%` 保持不变。此前 `strong_down=-1.5%` 已替换为 `-3.0%`，不是证券市场通用定义。
+- `marketState.js` 将 strong_down 阈值改为 `pct <= -3.0`；`cowStateMachine.js` 将 `strong_down` action 从 `failed` 改为已注册的 `crying`，保留 `emotion: panic`、`priority: 70`、`category: market`。普通 `down` 继续为 `failed`。
+- 为修复真实阻塞，`niulai-ticker.html` 的市场动作解析保留 State Machine 请求 priority；离开 crying 时允许较低优先级目标动作释放 crying，持续 strong_down 同 action 仍去重，不会每次 quote refresh 重置 F1。未修改 Registry 字段、spritesheet 或 market/state 文件以外的业务规则。
+- 确定性边界测试通过：`-2.99→down→failed`、`-3.00→strong_down→crying`、`-3.01→strong_down→crying`；同时覆盖上涨边界、NaN、sleep/rest 时间优先。
+- macOS Electron 真实业务链通过：fresh QA quote 逐项验证 `-2/-2.99` failed、`-3/-3.5` crying、连续 `-3.2/-3.1/-4` crying 持续推进、`-3.2→-2` failed、`-3.2→0` idle、`-3.2→+1` jumping、`-3.2→+2` celebration_dance 后 jumping；spritesheet 加载 `1536×3120`，无本轮错误。临时注入已删除。
+- 时间优先仍由 `cowStateMachine` 的 sleep/rest 分支保护；offline/stale/invalid quote 处理链未修改，未将异常行情映射到 crying。当前为 `CRYING BUSINESS INTEGRATION ON MACOS=PASS`；Windows Runtime 未验证，Packaging/Release 未执行。
+
 ## 2026-08-31 crying Spritesheet + Action Registry Integration（业务触发仍未接入）
 
 - `crying` F1–F8 批准 HR 源和 `production_192/` 八帧已重新核验，Production Human Review=PASS；Production 文件未修改。

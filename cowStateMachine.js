@@ -58,8 +58,7 @@ window.cowStateMachine = {
       case "strong_down":
         return {
           emotion: "panic",
-          // V2 的 panic 素材尚未加入；沿用当前实际展示的 failed。
-          action: "failed", priority: 70, category: "market"
+          action: "crying", priority: 70, category: "market"
         };
 
       default:

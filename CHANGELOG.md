@@ -2,6 +2,11 @@
 
 ## 2026-08-31
 
+- Changed the index strong-down threshold from -1.5% to -3.0% and mapped `strong_down` to the registered `crying` action.
+- Ordinary `down` remains `failed`; the `strong_up` threshold and celebration-dance edge behavior remain unchanged. macOS business-trigger runtime validation passed; Windows, packaging, and release were not executed.
+
+## 2026-08-31
+
 - Integrated the approved crying production frames into spritesheet row 14 and registered the crying action for independent playback.
 - Preserved existing rows and action definitions; did not connect crying to `strong_down`, packaging, or release.
 

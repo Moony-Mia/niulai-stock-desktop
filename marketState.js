@@ -24,7 +24,7 @@ window.marketStateEngine = {
       };
     }
 
-    if (pct <= -1.5) {
+    if (pct <= -3.0) {
       return {
         state: "strong_down",
         direction: "down",
