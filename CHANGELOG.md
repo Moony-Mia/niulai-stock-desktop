@@ -177,3 +177,4 @@
 # 2026-08-29
 
 - feat: add idle_blink as a one-shot low-profile action on spritesheet row 11
+- 修正 `celebration_dance` Alpha Background Islands：确认问题帧为 F1/F5/F8，采用统一两阶段背景检测、corrected mask application，并防止 edge treatment 将 removed island core 写回 Alpha；从 aligned HR RGB 重建 F1–F8 `1344×1456 RGBA` Alpha HR。Technical Corrected Alpha QA 完成，Human Corrected Alpha Acceptance 仍 pending；未执行 192×208。

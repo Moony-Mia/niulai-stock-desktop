@@ -514,3 +514,9 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - Candidate 01 定位为 `Continuity First`：优先承接 F2，保留少量左侧惯性，交换较保守并为 F4 留出空间。Candidate 02 定位为 `Exchange First`：中心与左右手交换更明确，但仍不得进入 F4 Right Anticipation。两张候选都不是 F4、F5、idle 或普通站姿。
 - 两张候选均以 F2 Left Release HR Master 为第一参考、F1 Left Peak HR Master 为第二参考、F5 Right Peak HR Master 为第三参考；未使用旧候选、silhouette、Structure / Occlusion、Volume Blockout 或其他非正式研究素材。
 - F3 候选保持白色 RGB 背景，未处理 Alpha，未转 `192 × 208`，未做 alignment、canvas normalization 或 spritesheet 接入；F1、F2、F5 HR Master 未修改。未生成 F4/F6/F7/F8，完整 8 帧尚未完成。
+# 2026-08-30 celebration_dance Correct Alpha Background Islands
+
+- 人工确认的三个问题是 F1、F5、F8 三个 Frame，不是 F1 内三个 pocket。旧 border-connected-only pipeline 漏掉 enclosed islands，且 edge pass 曾将 removed core 写回 partial alpha。
+- 已从 aligned HR RGB 按统一 corrected-v2 临时 pipeline 重建 F1–F8 Alpha HR：Pass 1 tolerance 20 / 4-connectivity；Pass 2 strict seed 6 / 8-connectivity / growth 20 / minimum seed area 100 / mean distance <=6；edge mask 明确排除 removed mask。
+- F1/F5/F8 各检测并移除 1 个 enclosed island；八帧均为 1344×1456 RGBA，边界 Alpha=0，removed island core 不再 reopaque。QA-only corrected contact sheet 与 Gray/Checkerboard 600px loop 位于 `/tmp/celebration-dance-alpha-final.wgnmbp37/`。
+- HR Master 与 aligned source 未改变；192×208、spritesheet、Registry、Runtime、打包和发布均未执行。Technical Corrected Alpha QA 已完成；Human Corrected Alpha Acceptance 仍 pending。

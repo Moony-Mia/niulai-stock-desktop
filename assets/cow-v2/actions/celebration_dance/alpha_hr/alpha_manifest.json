@@ -3,18 +3,17 @@
   "source_stage": "aligned_hr",
   "canvas": "1344x1456",
   "mode": "RGBA",
-  "background_method": "border-connected near-white segmentation",
-  "connectivity": 4,
+  "background_method": "Pass 1 border-connected near-white background + Pass 2 strict-white seeded enclosed component growth",
+  "connectivity": {
+    "pass1": 4,
+    "pass2": 8
+  },
   "parameters": {
-    "border_reference": "per-frame border median RGB",
-    "metric": "max absolute RGB distance",
-    "tolerance": 20,
-    "edge_alpha": "clamp(6*(255-min(RGB)),32,254)",
-    "edge_method": "edge-only white-matte unmix",
-    "resize": false,
-    "crop": false,
-    "translation": false,
-    "rotation": false
+    "pass1_tolerance": 20,
+    "strict_seed_tolerance": 6,
+    "growth_tolerance": 20,
+    "minimum_seed_area": 100,
+    "max_mean_distance": 6
   },
   "deterministic": true,
   "qa_only_outputs": [
@@ -28,7 +27,7 @@
       "source_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f1_aligned_hr.png",
       "source_sha256": "b4a52eabe973bea2b345a83b28e3217534b444cb603a1bb087dc36bd943df900",
       "output_path": "assets/cow-v2/actions/celebration_dance/alpha_hr/celebration_dance_f1_alpha_hr.png",
-      "output_sha256": "5ef9754f29271e9b2d56f9da62d6b4ab8b98d20640797117b4b590fcde98a242",
+      "output_sha256": "754aa1aeb7bb733fa674d7f2f13611a18e9667c2612d954d1815ce5ea70b7bcd",
       "width": 1344,
       "height": 1456,
       "alpha_present": true,
@@ -49,14 +48,19 @@
       "scale_change": false,
       "internal_alpha_hole": false,
       "alpha_erosion": false,
-      "white_matte_halo": "WATCH"
+      "white_matte_halo": "WATCH",
+      "opaque_background_island": false,
+      "removed_islands_detected": 1,
+      "removed_islands": 1,
+      "partial_background_residue_pixels": 2,
+      "removed_island_core_reopaque": false
     },
     {
       "frame": "F2",
       "source_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f2_aligned_hr.png",
       "source_sha256": "f3057e051511b34722a758ae36ff731e602b97b711d49c7935e5b79077556c0c",
       "output_path": "assets/cow-v2/actions/celebration_dance/alpha_hr/celebration_dance_f2_alpha_hr.png",
-      "output_sha256": "7b9f61b3ebb2a6412292fdb1b58378fd19a28cf0dbb6b6f4bdadb54d54a34053",
+      "output_sha256": "91f11dcf35ffd0b97a241f3703e86ac48b154470ad65b4fae1a7101028e82f3c",
       "width": 1344,
       "height": 1456,
       "alpha_present": true,
@@ -77,14 +81,19 @@
       "scale_change": false,
       "internal_alpha_hole": false,
       "alpha_erosion": false,
-      "white_matte_halo": "WATCH"
+      "white_matte_halo": "WATCH",
+      "opaque_background_island": false,
+      "removed_islands_detected": 0,
+      "removed_islands": 0,
+      "partial_background_residue_pixels": 1,
+      "removed_island_core_reopaque": false
     },
     {
       "frame": "F3",
       "source_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f3_aligned_hr.png",
       "source_sha256": "4744ece0beede0e9d85fde63bc8926b2924679cea2ac2b1c19ebd7963bc27403",
       "output_path": "assets/cow-v2/actions/celebration_dance/alpha_hr/celebration_dance_f3_alpha_hr.png",
-      "output_sha256": "2ebe85ea3c3dca3f6d2dd431142def7f5589a4a5ea41268e441c6c54df7b73f5",
+      "output_sha256": "f18ab595e9969517dbc45883df9f079371bebf13adea693a62190bbcb697a963",
       "width": 1344,
       "height": 1456,
       "alpha_present": true,
@@ -105,14 +114,19 @@
       "scale_change": false,
       "internal_alpha_hole": false,
       "alpha_erosion": false,
-      "white_matte_halo": "WATCH"
+      "white_matte_halo": "WATCH",
+      "opaque_background_island": false,
+      "removed_islands_detected": 0,
+      "removed_islands": 0,
+      "partial_background_residue_pixels": 4,
+      "removed_island_core_reopaque": false
     },
     {
       "frame": "F4",
       "source_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f4_aligned_hr.png",
       "source_sha256": "0fc665fa52b671bfc81a223bd9a0d4008821ec17ea7493679419fe9fffc399fa",
       "output_path": "assets/cow-v2/actions/celebration_dance/alpha_hr/celebration_dance_f4_alpha_hr.png",
-      "output_sha256": "1728574b949711502f238a9ddbe54b8d117c8652a3b39b0a0df6ab8cc2266098",
+      "output_sha256": "37173b024fd59f0fa1c4892c90f640b8e172d4c2c463df5304620f915b51f9f3",
       "width": 1344,
       "height": 1456,
       "alpha_present": true,
@@ -133,14 +147,19 @@
       "scale_change": false,
       "internal_alpha_hole": false,
       "alpha_erosion": false,
-      "white_matte_halo": "WATCH"
+      "white_matte_halo": "WATCH",
+      "opaque_background_island": false,
+      "removed_islands_detected": 0,
+      "removed_islands": 0,
+      "partial_background_residue_pixels": 6,
+      "removed_island_core_reopaque": false
     },
     {
       "frame": "F5",
       "source_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f5_aligned_hr.png",
       "source_sha256": "3f5935ac61ab08c8211aa500bb9862a222e863ccfb227f4f1257c6aa7fc1e5c2",
       "output_path": "assets/cow-v2/actions/celebration_dance/alpha_hr/celebration_dance_f5_alpha_hr.png",
-      "output_sha256": "a89ea805e7d5577d9136e4a47761c64f61caeca1961b0ea50de2994e4651daaf",
+      "output_sha256": "64d165529f74b97ac0b14bab69972f1b2961056ff5cedb2cd7fc7c25d2060734",
       "width": 1344,
       "height": 1456,
       "alpha_present": true,
@@ -161,14 +180,19 @@
       "scale_change": false,
       "internal_alpha_hole": false,
       "alpha_erosion": false,
-      "white_matte_halo": "WATCH"
+      "white_matte_halo": "WATCH",
+      "opaque_background_island": false,
+      "removed_islands_detected": 1,
+      "removed_islands": 1,
+      "partial_background_residue_pixels": 4,
+      "removed_island_core_reopaque": false
     },
     {
       "frame": "F6",
       "source_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f6_aligned_hr.png",
       "source_sha256": "69f2f21dd1c2e8079cfd0ffea7616cd76796be468b3e67088a9721f695c47c60",
       "output_path": "assets/cow-v2/actions/celebration_dance/alpha_hr/celebration_dance_f6_alpha_hr.png",
-      "output_sha256": "11f2279ec12c16879be483169e9456101d49ec6ce33a33dbaa75098189203e85",
+      "output_sha256": "3936183453f36a100e1a97e5224b7f99cd6ea124dd16fd5364c625a12a254e8d",
       "width": 1344,
       "height": 1456,
       "alpha_present": true,
@@ -189,14 +213,19 @@
       "scale_change": false,
       "internal_alpha_hole": false,
       "alpha_erosion": false,
-      "white_matte_halo": "WATCH"
+      "white_matte_halo": "WATCH",
+      "opaque_background_island": false,
+      "removed_islands_detected": 0,
+      "removed_islands": 0,
+      "partial_background_residue_pixels": 18,
+      "removed_island_core_reopaque": false
     },
     {
       "frame": "F7",
       "source_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f7_aligned_hr.png",
       "source_sha256": "8be57c7f5dcfa22831d8fa4c56ef47a74fb224eccc641c4d1522dbb027617c5f",
       "output_path": "assets/cow-v2/actions/celebration_dance/alpha_hr/celebration_dance_f7_alpha_hr.png",
-      "output_sha256": "ef33bfe599e137b57477dfb58d2eb914c49c41faed957245603212d67733dab1",
+      "output_sha256": "aea8066b9d47985e21985bd406f42a85084c5cabaa33275ef435f7c1a32c1acd",
       "width": 1344,
       "height": 1456,
       "alpha_present": true,
@@ -217,14 +246,19 @@
       "scale_change": false,
       "internal_alpha_hole": false,
       "alpha_erosion": false,
-      "white_matte_halo": "WATCH"
+      "white_matte_halo": "WATCH",
+      "opaque_background_island": false,
+      "removed_islands_detected": 0,
+      "removed_islands": 0,
+      "partial_background_residue_pixels": 13,
+      "removed_island_core_reopaque": false
     },
     {
       "frame": "F8",
       "source_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f8_aligned_hr.png",
       "source_sha256": "9245dc05e14636edc58691fb74dec9aae653fc80eef181dfdcd1272052cdfff1",
       "output_path": "assets/cow-v2/actions/celebration_dance/alpha_hr/celebration_dance_f8_alpha_hr.png",
-      "output_sha256": "77eb0be56221a43f8054ec0276490722965ef66240c7cc98fa82e6a06bda2165",
+      "output_sha256": "f159edd31b320f5e1408a0beed96b78532598379fc1e5cf7915130c142556f5d",
       "width": 1344,
       "height": 1456,
       "alpha_present": true,
@@ -245,7 +279,27 @@
       "scale_change": false,
       "internal_alpha_hole": false,
       "alpha_erosion": false,
-      "white_matte_halo": "WATCH"
+      "white_matte_halo": "WATCH",
+      "opaque_background_island": false,
+      "removed_islands_detected": 1,
+      "removed_islands": 1,
+      "partial_background_residue_pixels": 6,
+      "removed_island_core_reopaque": false
     }
-  ]
+  ],
+  "pipeline_version": "alpha-background-correction-v2",
+  "previous_issue": [
+    "border-connected-only segmentation missed enclosed islands",
+    "edge treatment could reopaque removed island core"
+  ],
+  "known_bad_frames": [
+    "F1",
+    "F5",
+    "F8"
+  ],
+  "edge_method": "edge-only white-matte unmix; edge mask excludes removed island",
+  "removed_island_core_reopaque": false,
+  "partial_background_residue_qa": true,
+  "qa_source_dir": "/tmp/celebration-dance-alpha-final.wgnmbp37",
+  "human_corrected_alpha_acceptance": "pending"
 }
