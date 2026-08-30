@@ -2,6 +2,12 @@
 
 ## 2026-08-30
 
+- 已完成 `celebration_dance` F1–F8 正式 HR Master 的技术序列 QA；八个 Master 的文件、PNG 可读取状态、尺寸、模式、Alpha 与 SHA-256 均核验通过，`HR_MASTER_MUTATION=NO`。
+- 已生成 QA-only 临时 Contact Sheet、约 10 FPS 六次循环预览和每帧 400 ms 两次循环慢速预览，统一 QA Canvas 仅使用白色 padding，不修改任何正式 Master；预览路径位于 `/tmp/celebration-dance-qa.Zmm4ZG/`，未加入项目资产。
+- F1–F8 动作职责、Hip / Weight / Legs / Arms / Torso 轨迹、Head / Identity 稳定性、Horizontal Motion、F4 → F5 → F6 及 F8 → F1 → F2 Peak 结构均通过技术检查；F7 → F8 → F1 Loop 方向成立，未发现 P0 Anatomy、Identity、方向反转或 Peak 时序阻塞。
+- 当前技术结论为 `PASS WITH HR VISUAL REVIEW RECOMMENDED`：无 P0；保留 P1 完整循环人工复核，重点确认 F8 → F1 Peak Separation 与 Surface / Lighting 连续性。原始 HR 画布与 framing 的小幅差异列为 P2 `ENGINEERING_ALIGNMENT_WATCH`，不得在本轮修正。
+- `Full 8-frame HR Sequence Final Acceptance` 与 `Loop Seam Final Acceptance` 仍为 pending；下一阶段建议为 `celebration_dance HR Alignment / Canvas / Baseline Engineering`，需在人工完整循环复核后进入。本轮未执行 Alpha、192×208、alignment、canvas normalization、spritesheet、Registry、状态机、业务逻辑、npm start、打包、发布或运行时验证。
+
 - F8 Candidate 02 已完成人工视觉验收并被选定为 `Left Anticipation / Pre-Peak / Loop Seam` HR Master 来源；Candidate 01 未采用但继续保留，其更接近 F1 Peak，`F1_TOO_CLOSE` 风险更高。
 - F8 HR Master 已由 Candidate 02 原文件直接复制冻结为 `assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f8_master_hr.png`；Source / Master 均为 PNG、`1200 × 1311`、`RGB`、3 通道、无 Alpha、`1,604,905 bytes`，SHA-256 为 `f9a8bc92ed049e522fe8bd1820b9baa08156b6619a4de19cb12e2da5246e2947`，`SHA256_MATCH=YES`、`BYTE_IDENTICAL=YES`，`cmp` 已通过。
 - F7 → F8 continuity、F8 → F1 Loop Continuity 与 F8 → F1 → F2 的 Approach → Peak → Release 节奏经候选级人工验收确认；F1 Peak Separation 合理，未发现 F1 Clone、Loop Direction Reversal、Mechanical Symmetry 或 Arm Belly Occlusion。

@@ -421,6 +421,15 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 当前正式 HR 序列已形成：F1 Left Peak ✅ → F2 Left Release ✅ → F3 Near Center A ✅ → F4 Right Anticipation ✅ → F5 Right Peak ✅ → F6 Right Release ✅ → F7 Near Center B ✅。F8 Left Anticipation 尚未生成，完整 8 帧尚未完成，Loop Seam 尚未正式验收；Alpha、192×208、alignment、canvas normalization、spritesheet、Action Registry、状态机和业务逻辑均未进入。
 - F7 Freeze 后下一阶段记录为 `F8 Left Anticipation / Pre-Peak / Loop Seam Candidate Generation`，仅记录阶段，不在本轮执行。F8 后续需同时参考 F7 → F8 与 F8 → F1，并以 F2 检查 F8 → F1 → F2 的自然 Peak 进入与释放。
 
+# 2026-08-30 celebration_dance Full 8-Frame HR Sequence Technical QA
+
+- 已核验正式 `celebration_dance` F1–F8 八个 High-Resolution Master：文件均存在、为可读取的 RGB PNG、无 Alpha，冻结记录中的 SHA-256 全部一致；`HR_MASTER_MUTATION=NO`。本轮未修改、重存、resize、crop、translation、alignment 或重新生成任何 HR Master。
+- 已生成 QA-only 临时预览（均位于 `/tmp/celebration-dance-qa.Zmm4ZG/`，不属于项目资产）：Contact Sheet `celebration_dance_f1_f8_contact_sheet_qa.png`；约 10 FPS、6 次循环 `celebration_dance_f1_f8_loop_10fps_qa.gif`；每帧 400 ms、2 次循环 `celebration_dance_f1_f8_loop_slow_400ms_qa.gif`。预览采用最大 `1205 × 1312` 统一 QA Canvas，仅做白色 padding，不做 resize、crop、逐帧 subject alignment 或动态 translation；`QA Canvas padding ≠ Production alignment`。
+- Technical HR Sequence QA：八帧角色身份、动作职责、左右 Hip trajectory、Weight transfer、Leg trajectory、Arm trajectory、Torso counterbalance、Head stability、Horizontal Motion 主导关系及左右 Peak 的 `Approach → Peak → Release` 结构均成立；F3 / F7 均为 Near Center，但运动历史不同，未发现 Center Frame duplication、明显 Anatomy blocker、方向反转或 Peak flattening。
+- Loop QA：F7 → F8 的左向进入、F8 → F1 的 Loop Seam、F1 → F2 的 Peak release 方向成立；F8 → F1 → F2 的节奏可读。由于本轮未进行完整人工播放确认与正式工程对齐，`Loop Seam Final Acceptance` 记录为 pending，技术结论为 `PASS WITH HR VISUAL REVIEW RECOMMENDED`，无 P0。
+- P1 Visual Watch：需要人工在 QA loop 播放中复核 F8 → F1 的 Peak Separation、整体 Surface / Lighting 是否存在可接受的小幅闪烁，以及八帧作为连续动作而非独立图片的最终读感。P2 Engineering Alignment：各 HR Master 原始尺寸、framing、baseline 和 approximate subject bbox 存在小幅差异，后续可在专门的 alignment / canvas / baseline 工程阶段处理；本轮不修正。
+- 本轮未执行 Full 8-frame HR Sequence Final Acceptance、Loop Seam Final Acceptance、Alpha、192×208、alignment、baseline normalization、canvas normalization、spritesheet、Action Registry、状态机、业务逻辑、npm start、打包、发布或运行时验证。下一阶段建议为 `celebration_dance HR Alignment / Canvas / Baseline Engineering`，但应先完成人工完整循环复核并关闭 P1 决策。
+
 # 2026-08-30 celebration_dance F8 Left Anticipation / Pre-Peak / Loop Seam HR Master 冻结
 
 - F8 `Left Anticipation / Pre-Peak / Loop Seam` 已完成人工视觉验收，正式选择 Candidate 02：`assets/cow-v2/actions/celebration_dance/celebration_dance_f8_candidate_02.png`。其 F7 → F8 continuity、左侧 Hip Shift、Left-leg Weight Gain、Right-leg Release、左拳高位、右手 Belly / Cross-belly Entry、Torso Right Counterbalance 与 Leftward Motion Direction 均成立；F8 → F1 Loop Continuity、F1 Peak Separation 及 F8 → F1 → F2 的 Approach → Peak → Release 节奏合理，未发现明显 F1 Clone、Loop Direction Reversal、Mechanical Symmetry 或 Arm Belly Occlusion。
