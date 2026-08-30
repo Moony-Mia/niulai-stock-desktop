@@ -46,6 +46,12 @@ function log(event, data = {}) {
   console.log('[MARKET_QA]', event, JSON.stringify(data));
 }
 
+function assertSequenceIncrement(before, after, assertion, step) {
+  const pass = after > before;
+  log(pass ? 'ASSERT_PASS' : 'ASSERT_FAIL', { step, assertion, before, after });
+  return pass;
+}
+
 async function runStep(win, [id, symbol, price, expectedState, expectedAction]) {
   const input = { symbol, prevClose: 100, price };
   log('STEP_START', { step: id, ...input });
@@ -81,6 +87,24 @@ async function runSuite(win, suiteName) {
     const result = await runStep(win, step);
     results.push(result);
     allPass = allPass && result.pass;
+  }
+  if (suiteName === 'stock') {
+    const transitions = [
+      ['stock-strong-up-to-up', 'stock-strong-up-to-up-sequence-id-increment'],
+      ['stock-strong-down-to-down', 'stock-strong-down-to-down-sequence-id-increment']
+    ];
+    for (const [stepId, assertion] of transitions) {
+      const index = results.findIndex(result => result.id === stepId);
+      const prior = results[index - 1];
+      const current = results[index];
+      const incremented = assertSequenceIncrement(
+        prior.snapshot.playbackSequenceId,
+        current.snapshot.playbackSequenceId,
+        assertion,
+        stepId
+      );
+      allPass = allPass && incremented;
+    }
   }
   if (suiteName === 'no-restart') {
     for (let i = 1; i < results.length; i++) {
@@ -122,8 +146,8 @@ async function run(win) {
         await win.webContents.executeJavaScript("window.__niulaiMarketQA.setTimePreset('am-trading')");
         await sleep(400);
         const restored = await win.webContents.executeJavaScript('window.__niulaiMarketQA.snapshot()');
-        const restorePass = restored.restMode === false;
-        log(restorePass ? 'ASSERT_PASS' : 'ASSERT_FAIL', { step: 'time-trading-restore', expected: { restMode: false }, actual: { action: restored.currentAction, restMode: restored.restMode } });
+        const restorePass = restored.currentAction === 'jumping' && restored.restMode === false;
+        log(restorePass ? 'ASSERT_PASS' : 'ASSERT_FAIL', { step: 'time-trading-restore', assertion: 'time-priority-restore-action', expected: { action: 'jumping', restMode: false }, actual: { action: restored.currentAction, restMode: restored.restMode } });
         pass = pass && restorePass;
       }
     }
