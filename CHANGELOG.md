@@ -2,6 +2,12 @@
 
 ## 2026-08-30
 
+- 已生成两张 `celebration_dance` F8 `Left Anticipation / Pre-Peak / Loop Seam` High-Resolution Candidate：Candidate 01（`Continuity First / Moderate Left Pre-Peak`）与 Candidate 02（`Loop Seam First / Strong Left Pre-Peak`），等待人工视觉验收；F8 Master 尚未选择、尚未冻结。
+- Candidate 01 为 `1199 × 1312` RGB PNG、3 通道、无 Alpha、`1,596,015 bytes`、SHA-256 `3a45f1049920571f1ea87241330b9c491ef9f36541dd96fda9481c2149ac1bad`；Candidate 02 为 `1200 × 1311` RGB PNG、3 通道、无 Alpha、`1,604,905 bytes`、SHA-256 `f9a8bc92ed049e522fe8bd1820b9baa08156b6619a4de19cb12e2da5246e2947`，两张均已通过 PNG 可读取检查。
+- Candidate 01 优先保证 F7 → F8 continuity 并保护 F1 Peak 空间；Candidate 02 更强调 F8 → F1 Loop Seam，整体更靠近 F1 但仍保留最后进入动作。候选级 QA 未发现 F7 过近、F1 clone、方向反转、机械对称、腹部遮挡、垂直运动过强或普通站姿塌缩；Candidate 02 存在 `F1_TOO_CLOSE` WATCH，未做 alignment / canvas normalization，保留 `LOOP_CAMERA_SCALE_WATCH`。
+- 本轮只完成 F8 两张 Candidate 生成、技术检查与候选级 Loop Seam QA，未进行完整 8 帧正式验收；F8 Human Acceptance pending，F8 Master 尚未冻结。F1/F2/F3/F4/F5/F6/F7 已为正式 HR Master，F8 仍为 Candidate only；F8 → F1 → F2 正式 Loop Seam 验收尚未完成。
+- 本轮未执行 Alpha、192×208、alignment、canvas normalization、spritesheet、Action Registry、状态机、业务逻辑、npm start、打包或运行时验证。下一阶段为 `F8 Human Acceptance / Loop Seam Final Acceptance`。
+
 - F7 Candidate 01 已完成人工视觉验收并被选定为 `Near Center B / Return Arm Exchange` HR Master 来源；Candidate 02 未采用但继续保留，其更接近静态中轴，Weight Exchange 动态读感较弱，`IDLE_COLLAPSE` 风险更高。
 - F7 HR Master 已由 Candidate 01 原文件直接复制冻结为 `assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f7_master_hr.png`；Source / Master 均为 PNG、`1199 × 1312`、`RGB`、3 通道、无 Alpha、`1,572,923 bytes`，SHA-256 为 `bb9ac32ad2022b5b38d12a64350fd6c47139a03bdd1827babef3c6a9e47f64a7`，`SHA256_MATCH=YES`、`BYTE_IDENTICAL=YES`，`cmp` 已通过。
 - F1/F2/F3/F4/F5/F6/F7 已成为正式 HR Master；F8 尚未生成，完整 8 帧尚未完成，Loop Seam 尚未正式验收，Alpha、192×208、alignment、canvas normalization、spritesheet、Registry、状态机和业务逻辑均未执行。下一阶段为 `F8 Left Anticipation / Pre-Peak / Loop Seam Candidate Generation`。

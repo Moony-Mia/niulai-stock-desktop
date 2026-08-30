@@ -421,6 +421,17 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 当前正式 HR 序列已形成：F1 Left Peak ✅ → F2 Left Release ✅ → F3 Near Center A ✅ → F4 Right Anticipation ✅ → F5 Right Peak ✅ → F6 Right Release ✅ → F7 Near Center B ✅。F8 Left Anticipation 尚未生成，完整 8 帧尚未完成，Loop Seam 尚未正式验收；Alpha、192×208、alignment、canvas normalization、spritesheet、Action Registry、状态机和业务逻辑均未进入。
 - F7 Freeze 后下一阶段记录为 `F8 Left Anticipation / Pre-Peak / Loop Seam Candidate Generation`，仅记录阶段，不在本轮执行。F8 后续需同时参考 F7 → F8 与 F8 → F1，并以 F2 检查 F8 → F1 → F2 的自然 Peak 进入与释放。
 
+# 2026-08-30 celebration_dance F8 Left Anticipation / Pre-Peak / Loop Seam Candidates
+
+- 已生成两张 F8 `Left Anticipation / Pre-Peak / Loop Seam` High-Resolution Candidate：`assets/cow-v2/actions/celebration_dance/celebration_dance_f8_candidate_01.png` 与 `assets/cow-v2/actions/celebration_dance/celebration_dance_f8_candidate_02.png`，等待人工视觉验收；F8 Master 尚未选择、尚未冻结。
+- Candidate 01 定位为 `Continuity First / Moderate Left Pre-Peak`：从 F7 Near Center B 明显进入左侧，左腿开始主要承重、右腿开始向右释放，左拳进入高位、右手进入腹部方向，保持 F7 → F8 连续性并为 F1 Peak 保留更多空间。
+- Candidate 02 定位为 `Loop Seam First / Strong Left Pre-Peak`：比 Candidate 01 更靠近 F1，左侧 Weight、右向 Torso Counterbalance、左拳高位和右手腹部进入更强，强调 F8 → F1 loop continuity，但仍保留进入 F1 的最后动作空间。
+- 两张候选均以 F7 Near Center B HR Master 为第一参考、F1 Left Peak HR Master 为 Loop Seam 目标、F2 Left Release HR Master 为 F8 → F1 → F2 节奏上下文、F3 仅为空间尺度上下文；未使用 F3 作为姿态模板，未进行机械复制、水平镜像或旧失败素材构造。
+- Candidate 01：`1199 × 1312`、`RGB PNG`、3 通道、无 Alpha、`1,596,015 bytes`、SHA-256 `3a45f1049920571f1ea87241330b9c491ef9f36541dd96fda9481c2149ac1bad`。Candidate 02：`1200 × 1311`、`RGB PNG`、3 通道、无 Alpha、`1,604,905 bytes`、SHA-256 `f9a8bc92ed049e522fe8bd1820b9baa08156b6619a4de19cb12e2da5246e2947`。两张均已通过 PNG 可读取检查。
+- Candidate 级视觉 QA：两张均表现 F7 → F8 的左向连续性、左侧 Hip Shift、左腿 Weight Gain、右腿 Release、左拳 Rising、右手 Belly Entry、Torso Right Counterbalance、F1 Direction Readability 与双臂分离；未发现 `F7_TOO_CLOSE`、`F1_CLONE_FAIL`、`LOOP_DIRECTION_REVERSAL`、`MECHANICAL_SYMMETRY_FAIL`、`ARM_BELLY_OCCLUSION`、`VERTICAL_MOTION_TOO_STRONG` 或 `IDLE_COLLAPSE`。Candidate 02 更接近 F1，存在 `F1_TOO_CLOSE` WATCH；两张因尚未做 alignment / canvas normalization，均保留 `LOOP_CAMERA_SCALE_WATCH`。
+- 本轮只完成候选生成和候选级 Loop Seam QA，未进行完整 8 帧正式验收；F8 Human Acceptance pending，F8 Master 尚未冻结。未进行 Alpha、192×208、resize、crop、translation、alignment、canvas normalization、spritesheet assembly、Action Registry、状态机或业务逻辑修改。
+- 当前正式状态为 F1 ✅、F2 ✅、F3 ✅、F4 ✅、F5 ✅、F6 ✅、F7 ✅、F8 Candidate only；完整 8 帧 HR Master Sequence、Loop Seam Final Acceptance、Alpha、192×208、alignment、canvas normalization、spritesheet、Registry、状态机和业务逻辑均未完成。下一阶段为 `F8 Human Acceptance / Loop Seam Final Acceptance`，仅记录阶段，不在本轮执行。
+
 # 2026-08-30 celebration_dance F7 Near Center B / Return Arm Exchange Candidates
 
 - 已生成两张 F7 `Near Center B / Return Arm Exchange` High-Resolution Candidate：`assets/cow-v2/actions/celebration_dance/celebration_dance_f7_candidate_01.png` 与 `assets/cow-v2/actions/celebration_dance/celebration_dance_f7_candidate_02.png`，等待人工视觉验收；F7 Master 尚未选择、尚未冻结。
