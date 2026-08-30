@@ -520,3 +520,9 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 已从 aligned HR RGB 按统一 corrected-v2 临时 pipeline 重建 F1–F8 Alpha HR：Pass 1 tolerance 20 / 4-connectivity；Pass 2 strict seed 6 / 8-connectivity / growth 20 / minimum seed area 100 / mean distance <=6；edge mask 明确排除 removed mask。
 - F1/F5/F8 各检测并移除 1 个 enclosed island；八帧均为 1344×1456 RGBA，边界 Alpha=0，removed island core 不再 reopaque。QA-only corrected contact sheet 与 Gray/Checkerboard 600px loop 位于 `/tmp/celebration-dance-alpha-final.wgnmbp37/`。
 - HR Master 与 aligned source 未改变；192×208、spritesheet、Registry、Runtime、打包和发布均未执行。Technical Corrected Alpha QA 已完成；Human Corrected Alpha Acceptance 仍 pending。
+# 2026-08-30 celebration_dance 192x208 Production Frame Preparation
+
+- `celebration_dance` Corrected Alpha HR 已完成人工最终验收：`Human Corrected Alpha Acceptance = ACCEPTED`，验收依据 commit `146fee80408fcc30d2122c19d6d7bf9f926de0b6`。
+- 从已提交的 `alpha_hr/` 唯一输入按精确 `1/7` 进行 premultiplied-alpha-safe resize，源 `1344x1456`，目标 `192x208`，LANCZOS，F1→F8 顺序保持不变。
+- 新增正式 production engineering frame 目录 `assets/cow-v2/actions/celebration_dance/production_192/`，八帧均为 RGBA PNG；未修改 `spritesheet.webp`、Action Registry、状态机或 Runtime。
+- 192×208 Technical QA：尺寸、Alpha、透明背景、背景岛回归、白边/黑边、轮廓与帧序均通过；QA-only Contact Sheet 与 Gray/Checkerboard Loop 位于 `/tmp/celebration-dance-production-192.m4u4afwa/`。本轮未执行 spritesheet、Runtime、打包或发布。
