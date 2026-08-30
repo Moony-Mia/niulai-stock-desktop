@@ -2,6 +2,13 @@
 
 ## 2026-08-31
 
+- Added a developer-only Market QA Harness with deterministic stock, symbol-switch, no-restart, and time-priority suites driven from the terminal.
+- Added a read-only runtime observer and playback sequence tracking for market-action transition and same-state restart assertions.
+- QA requires development mode plus an explicit flag, remains disabled for normal startup and packaged execution, and does not change Market Profile rules or claim remaining macOS runtime validation.
+- Added deterministic time-priority coverage and persisted-setting restoration; QA remains separate from normal live-feed behavior.
+
+## 2026-08-31
+
 - Added `MARKET_STATE_MAPPING.md` as the authoritative current source for instrument classification, market thresholds, and Market State → Cow Action mapping.
 - Updated `AGENTS.md` so market-state work must read and maintain `MARKET_STATE_MAPPING.md`.
 - Removed stale dynamic market and spritesheet facts from `AGENTS.md` in favor of the proper authority documents.

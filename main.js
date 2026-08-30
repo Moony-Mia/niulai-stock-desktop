@@ -20,6 +20,7 @@ const { URL } = require('url');
 
 let win = null;
 let tray = null;
+const marketQaEnabled = !app.isPackaged && process.env.NIULAI_MARKET_QA === '1';
 let currentSymbol = 'sh000001'; // 上证指数
 let feedTimer = null;
 let consecutiveFeedFailures = 0;
@@ -84,7 +85,8 @@ function createWindow() {
   // PER-10: 默认允许牛和 HUD 接收鼠标，透明区域由 renderer 根据命中区域切换穿透。
   win.setIgnoreMouseEvents(false);
 
-  win.loadFile(path.join(__dirname, 'niulai-ticker.html'));
+  const qaEnabled = marketQaEnabled;
+  win.loadFile(path.join(__dirname, 'niulai-ticker.html'), qaEnabled ? { query: { niulaiQa: '1' } } : undefined);
 
   win.webContents.on('did-finish-load', () => {
     logRender('[boot] page did-finish-load OK, visible=' + win.isVisible());
@@ -92,9 +94,16 @@ function createWindow() {
       .then((rendererSymbol) => {
         const normalized = normalizeAshareSymbol(rendererSymbol);
         if (normalized) currentSymbol = normalized;
-        startMarketFeed();
+        if (!qaEnabled) startMarketFeed();
       })
-      .catch((e) => { bootLog('[boot] renderer symbol handoff failed: ' + e.message); startMarketFeed(); });
+      .catch((e) => { bootLog('[boot] renderer symbol handoff failed: ' + e.message); if (!qaEnabled) startMarketFeed(); });
+    if (qaEnabled) {
+      const runner = require('./scripts/market-qa-runner');
+      runner.run(win).then(pass => setTimeout(() => app.exit(pass ? 0 : 1), 0)).catch(error => {
+        console.error('[MARKET_QA] RUNNER_ERROR', error);
+        app.exit(1);
+      });
+    }
   });
 
   win.webContents.on('did-fail-load', (e, code, desc, url) => {
@@ -387,7 +396,7 @@ ipcMain.on('set-symbol', (event, symbol) => {
     console.log('switch symbol ->', currentSymbol);
   }
   if (feedTimer) clearTimeout(feedTimer);
-  refreshMarketFeed('symbol-change');
+  if (!marketQaEnabled) refreshMarketFeed('symbol-change');
 });
 
 ipcMain.handle('search-symbols', async (_event, keyword) => {

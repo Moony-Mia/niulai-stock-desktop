@@ -497,6 +497,7 @@
   let currentState = ACTIONS[0];
   let frameIndex = 0, lastFrameTime = 0, speed = 1, uiScalePercent = 130;
   let playback = { actionId: 'idle', segmentIndex: 0, frameIndex: 0, elapsedMs: 0, onComplete: null, loopOverride: null };
+  let playbackSequenceId = 0;
   let currentActionPriority = ACTIONS[0].priority;
   let currentActionCategory = 'default';
   let simMode = true, restMode = false, currentSymbol = 'sh000001', lowProfileMode = false;
@@ -633,6 +634,7 @@
     currentActionPriority = requestedPriority;
     currentActionCategory = options.category || 'default';
     playback = { actionId: action.id, segmentIndex: 0, frameIndex: 0, elapsedMs: 0, onComplete: options.onComplete || null, loopOverride: options.once === true ? false : null };
+    playbackSequenceId += 1;
     frameIndex = 0;
     if (document.getElementById('stateGrid')) renderButtons();
     return true;
@@ -1105,6 +1107,8 @@
 
   window.__setTimePreset = setTimePreset;
   window.__useRealTime = useRealTime;
+
+  const marketQaEnabled = new URLSearchParams(location.search).get('niulaiQa') === '1';
 
   // WorkBuddy 工作日状态。全部使用电脑本地时间；这里只判断周一到周五，不额外维护法定节假日表。
   // 时间段：09:25准备开盘 / 09:30-11:30交易 / 11:30午饭提示 / 11:40午休 /
@@ -1592,6 +1596,42 @@
     if (!restMode) applyMarket(data.price, data.prevClose, '真实');
     refreshFeedFreshness();
   };
+
+  if (marketQaEnabled) {
+    window.__niulaiMarketQA = {
+      pushQuote(input) {
+        if (!input || typeof input.symbol !== 'string') throw new Error('QA quote requires symbol');
+        selectSymbol(input.symbol, { name: input.symbol });
+        window.__pushMarket({ symbol: input.symbol, name: input.symbol, price: input.price, prevClose: input.prevClose, quoteDate: 'QA', quoteTime: '10:00:00', transport: 'developer-qa' });
+        return true;
+      },
+      setTimePreset,
+      setLowProfile(enabled) { applyLowProfileMode(Boolean(enabled)); },
+      configure({ timePreset = 'am-trading', lowProfile = false } = {}) {
+        setTimePreset(timePreset);
+        applyLowProfileMode(Boolean(lowProfile));
+        return true;
+      },
+      snapshot() {
+        const marketState = window.marketStateEngine?.getState(((lastPrice - lastPrevClose) / lastPrevClose) * 100, { symbol: currentSymbol });
+        return {
+          currentSymbol,
+          instrumentType: marketState?.instrumentType || null,
+          marketState: lastMarketState,
+          marketDirection: marketState?.direction || null,
+          currentAction: currentState.id,
+          currentActionPriority,
+          currentActionCategory,
+          playback: { frameIndex: playback.frameIndex, elapsedMs: playback.elapsedMs, actionId: playback.actionId },
+          playbackSequenceId,
+          manualRest,
+          restMode,
+          lowProfileMode,
+          qaEnabled: true
+        };
+      }
+    };
+  }
 
   window.__pushFeedStatus = (status) => {
     const prev = previousFeedState;

@@ -107,6 +107,10 @@ build/
 
 `CHANGELOG.md` 记录历史变化，不作为当前映射规则来源。
 
+涉及 Market Runtime 验证时，优先使用 Developer-only Market QA Harness，不得依赖 DevTools clipboard 连续注入作为正式验证方式。
+
+QA Harness 只允许在 development + explicit QA flag 下启用。QA 输入必须走正式行情业务链，不得直接 force Market State 或 Cow Action。完整使用方法以 `scripts/run-market-qa.js`、相关 harness 文件和 `memory.md` 为准。
+
 ## 代码修改与调试
 
 - 遵循最小修改原则，修复真实原因，复用现有结构。
