@@ -545,7 +545,8 @@
   let undoTimer = null;
   let actionToastTimer = null;
   let searchSeq = 0, searchTimer = null, currentSearchResults = [];
-  let lastQuoteMeta = { quoteDate: '', quoteTime: '', receivedAt: '', requestMs: 0, transport: '' };
+  let lastQuoteMeta = { symbol: '', quoteDate: '', quoteTime: '', receivedAt: '', requestMs: 0, transport: '' };
+  let lastQuoteSymbol = null;
   let lastFeedStatus = { state: 'sim', consecutiveFailures: 0, nextRefreshMs: 0, requestMs: 0, transport: '' };
   let previousFeedState = 'sim';
   let lastFreshnessClass = 'sim';
@@ -1659,15 +1660,26 @@
     ].join('\n');
   }
 
+  // 只记录 quote 的归属和值，不触发 Market State、Cow Action 或任何 UI 行为。
+  function recordCurrentQuoteMeta({ symbol, price, prevClose, quoteDate = '', quoteTime = '', receivedAt = '', requestMs = 0, transport = '' } = {}) {
+    const normalized = normalizeSymbol(symbol);
+    const numericPrice = Number(price), numericPrevClose = Number(prevClose);
+    if (!normalized || !Number.isFinite(numericPrice) || !Number.isFinite(numericPrevClose) || numericPrevClose <= 0) return false;
+    lastQuoteSymbol = normalized;
+    lastPrice = numericPrice; lastPrevClose = numericPrevClose;
+    lastQuoteMeta = { symbol: normalized, quoteDate, quoteTime, receivedAt, requestMs, transport };
+    return true;
+  }
+
   // real-data injection from Electron main process
   window.__pushMarket = (data) => {
     simMode = false;
     if (simBtn) simBtn.classList.remove('active');
     if (realBtn) realBtn.classList.add('active');
     window.lastMarketName = data.name;
-    lastQuoteMeta = { quoteDate: data.quoteDate || '', quoteTime: data.quoteTime || '', receivedAt: data.receivedAt || new Date().toISOString(), requestMs: Number(data.requestMs) || 0, transport: data.transport || '' };
-    updateSymbolLabel(data.symbol || currentSymbol, data.name);
-    lastPrice = data.price; lastPrevClose = data.prevClose;
+    const normalizedSymbol = normalizeSymbol(data.symbol || currentSymbol);
+    recordCurrentQuoteMeta({ symbol: normalizedSymbol, price: data.price, prevClose: data.prevClose, quoteDate: data.quoteDate || '', quoteTime: data.quoteTime || '', receivedAt: data.receivedAt || new Date().toISOString(), requestMs: Number(data.requestMs) || 0, transport: data.transport || '' });
+    updateSymbolLabel(normalizedSymbol || currentSymbol, data.name);
     evaluatePhase();
     if (!restMode) applyMarket(data.price, data.prevClose, '真实');
     refreshFeedFreshness();
@@ -1703,6 +1715,7 @@
           manualRest,
           restMode,
           lowProfileMode,
+          lastQuoteSymbol,
           qaEnabled: true
         };
       }
@@ -1714,6 +1727,7 @@
       configure({ currentSymbol: nextCurrent = 'sh000001', watchlist: nextWatchlist = [], scale = 130 } = {}) {
         currentSymbol = normalizeSymbol(nextCurrent) || 'sh000001';
         watchlist = sanitizeSymbolList(nextWatchlist, WATCHLIST_MAX);
+        lastQuoteSymbol = null; lastQuoteMeta = { symbol: '', quoteDate: '', quoteTime: '', receivedAt: '', requestMs: 0, transport: '' };
         watchAlertStates.clear(); watchlist.forEach(item => seedWatchAlert(item.symbol));
         manualRest = false; setUIScale(scale, { commit: false }); renderSymbolControls(); refreshWatchAlertUI();
         return true;
@@ -1722,10 +1736,14 @@
         if (!input || typeof input.symbol !== 'string' || normalizeSymbol(input.symbol) === currentSymbol) return false;
         processWatchQuote({ ...input, symbol: normalizeSymbol(input.symbol) }); renderTickerWatchlist(); refreshWatchAlertUI(); return true;
       },
+      setCurrentQuote(input) {
+        if (!input || typeof input.symbol !== 'string' || normalizeSymbol(input.symbol) !== currentSymbol) return false;
+        return recordCurrentQuoteMeta({ symbol: input.symbol, price: input.price, prevClose: input.prevClose, quoteDate: input.quoteDate || '', quoteTime: input.quoteTime || '', transport: 'developer-alert-qa' });
+      },
       snapshot() {
         const watchAlerts = Object.fromEntries([...watchAlertStates].map(([symbol, state]) => [symbol, { ...state }]));
         const rowMarkers = Object.fromEntries(watchlist.map(item => [item.symbol, Boolean(watchAlertStates.get(item.symbol)?.pending)]));
-        return { currentSymbol, headBadgeVisible: Boolean(marketAlertBadge && !marketAlertBadge.hidden), tickerMenuVisible: document.getElementById('tickerWatchMenu')?.classList.contains('visible') || false, watchAlerts, rowMarkers, scale: uiScalePercent, currentAction: currentState.id, playbackSequenceId };
+        return { currentSymbol, lastQuoteSymbol, lastPrice, lastPrevClose, lastQuoteDate: lastQuoteMeta.quoteDate, headBadgeVisible: Boolean(marketAlertBadge && !marketAlertBadge.hidden), tickerMenuVisible: document.getElementById('tickerWatchMenu')?.classList.contains('visible') || false, watchAlerts, rowMarkers, scale: uiScalePercent, currentAction: currentState.id, playbackSequenceId };
       },
       clickHeadBadge() { marketAlertBadge?.click(); return true; },
       clickWatchSymbol(symbol) { const row = [...document.querySelectorAll('.ticker-watch-item')].find(el => el.dataset.symbol === normalizeSymbol(symbol)); if (!row) return false; row.click(); return true; },
@@ -1762,9 +1780,8 @@
       if (d.error) throw new Error(d.error);
       webFeedFailures = 0;
       window.lastMarketName = d.name;
-      lastQuoteMeta = { quoteDate: d.quoteDate || '', quoteTime: d.quoteTime || '', receivedAt: new Date().toISOString(), requestMs: Date.now()-started, transport: 'web-proxy' };
+      recordCurrentQuoteMeta({ symbol: d.symbol || currentSymbol, price: d.price, prevClose: d.prevClose, quoteDate: d.quoteDate || '', quoteTime: d.quoteTime || '', receivedAt: new Date().toISOString(), requestMs: Date.now()-started, transport: 'web-proxy' });
       updateSymbolLabel(d.symbol || currentSymbol, d.name);
-      lastPrice = d.price; lastPrevClose = d.prevClose;
       lastFeedStatus = { state:'online', consecutiveFailures:0, nextRefreshMs:webFeedDelay(), requestMs:Date.now()-started, transport:'web-proxy' };
       evaluatePhase(); if (!restMode) applyMarket(d.price, d.prevClose, '真实'); refreshFeedFreshness();
     } catch (e) {
@@ -1842,8 +1859,10 @@
     sym = normalizeSymbol(sym); if (!sym) return;
     const previous = currentSymbol;
     if (previous && previous !== sym && watchlist.some(v => v.symbol === previous)) {
-      const previousZone = alertZone({ symbol: previous, price: lastPrice, prevClose: lastPrevClose });
+      const hasTrustedPreviousQuote = lastQuoteSymbol === previous && Number.isFinite(lastPrice) && Number.isFinite(lastPrevClose) && lastPrevClose > 0;
+      const previousZone = hasTrustedPreviousQuote ? alertZone({ symbol: previous, price: lastPrice, prevClose: lastPrevClose }) : null;
       if (previousZone) watchAlertStates.set(previous, { ...(watchAlertStates.get(previous) || {}), lastZone: previousZone, quoteDate: lastQuoteMeta.quoteDate || '', initialized: true, pending: false, unseen: false });
+      else seedWatchAlert(previous);
     }
     currentSymbol = sym; saveCurrentSymbol();
     const read = watchAlertStates.get(sym); if (read?.pending) { read.pending = false; read.unseen = false; console.log('[watch-alert] read symbol=' + sym); }

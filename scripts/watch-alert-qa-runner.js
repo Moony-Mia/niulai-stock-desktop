@@ -48,6 +48,24 @@ async function runLogic(win) {
 
 async function runInteraction(win) {
   log('SUITE_START', { suite: 'interaction' }); let pass = true; await configure(win);
+  await api(win, 'configure({ currentSymbol: "sh600000", scale: 130, watchlist: [{ symbol: "sh600000", name: "浦发银行" }, { symbol: "sh000001", name: "上证指数" }] })');
+  const trustedBefore = await snapshot(win);
+  pass = assert(await api(win, 'setCurrentQuote({ symbol: "sh600000", price: 108, prevClose: 100, quoteDate: "2026-08-31", quoteTime: "10:00:00" })') && (await snapshot(win)).lastQuoteSymbol === 'sh600000', 'trusted-current-quote-ownership', 'sh600000', (await snapshot(win)).lastQuoteSymbol) && pass;
+  await api(win, 'clickWatchSymbol("sh000001")');
+  await push(win, 'sh600000', 108); let trustedBaseline = await snapshot(win);
+  pass = assert(trustedBaseline.watchAlerts.sh600000.lastZone === 'strong_up' && !trustedBaseline.watchAlerts.sh600000.pending && !trustedBaseline.watchAlerts.sh600000.unseen && !trustedBaseline.rowMarkers.sh600000 && !trustedBaseline.headBadgeVisible, 'trusted-current-background-baseline', 'strong-background-first-quote-baseline-only', trustedBaseline.watchAlerts.sh600000) && pass;
+  await push(win, 'sh600000', 106); let trustedNormal = await snapshot(win);
+  pass = assert(trustedNormal.watchAlerts.sh600000.lastZone === 'normal' && !trustedNormal.watchAlerts.sh600000.pending, 'trusted-current-background-normal-reset', 'normal-without-alert', trustedNormal.watchAlerts.sh600000) && pass;
+  await push(win, 'sh600000', 108); let trustedReentry = await snapshot(win);
+  pass = assert(trustedReentry.watchAlerts.sh600000.pending && trustedReentry.watchAlerts.sh600000.unseen && trustedReentry.rowMarkers.sh600000 && trustedReentry.headBadgeVisible, 'trusted-current-background-reentry', 'alert-after-exit-and-reenter', trustedReentry.watchAlerts.sh600000) && pass;
+  pass = assert(trustedReentry.currentAction === trustedBefore.currentAction && trustedReentry.playbackSequenceId === trustedBefore.playbackSequenceId, 'trusted-current-background-cow-isolation', { action: trustedBefore.currentAction, sequence: trustedBefore.playbackSequenceId }, { action: trustedReentry.currentAction, sequence: trustedReentry.playbackSequenceId }) && pass;
+  await api(win, 'configure({ currentSymbol: "sh600000", scale: 130, watchlist: [{ symbol: "sh600000", name: "浦发银行" }, { symbol: "sz000001", name: "平安银行" }, { symbol: "sz300750", name: "宁德时代" }] })');
+  await api(win, 'setCurrentQuote({ symbol: "sh600000", price: 108, prevClose: 100, quoteDate: "2026-08-31", quoteTime: "10:00:00" })');
+  await api(win, 'clickWatchSymbol("sz000001")'); await api(win, 'clickWatchSymbol("sz300750")');
+  await push(win, 'sz000001', 108); let fastSwitchBaseline = await snapshot(win);
+  pass = assert(fastSwitchBaseline.watchAlerts.sz000001.initialized && fastSwitchBaseline.watchAlerts.sz000001.lastZone === 'strong_up' && !fastSwitchBaseline.watchAlerts.sz000001.pending && !fastSwitchBaseline.headBadgeVisible, 'untrusted-fast-switch-background-baseline', 'first-quote-baseline-only', fastSwitchBaseline.watchAlerts.sz000001) && pass;
+  await push(win, 'sz000001', 106); await push(win, 'sz000001', 108); let fastSwitchReentry = await snapshot(win);
+  pass = assert(fastSwitchReentry.watchAlerts.sz000001.pending && fastSwitchReentry.watchAlerts.sz000001.unseen && fastSwitchReentry.headBadgeVisible, 'untrusted-fast-switch-background-reentry', 'alert-after-exit-and-reenter', fastSwitchReentry.watchAlerts.sz000001) && pass;
   await push(win, 'sh600000', 106); await push(win, 'sh600000', 108);
   let s = await snapshot(win); const action = s.currentAction, sequence = s.playbackSequenceId;
   await api(win, 'clickHeadBadge()'); s = await snapshot(win);

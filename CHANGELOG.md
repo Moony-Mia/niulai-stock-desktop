@@ -2,6 +2,11 @@
 
 ## 2026-08-31
 
+- 修复 Watchlist Alert current quote 归属：正式 quote 记录 `lastQuoteSymbol`，`selectSymbol()` 只有在 quote 确实属于 previous current 且数值有效时才继承 background baseline；未知 previous quote 不再猜测为 `normal`。
+- Alert QA 增加可信 current → background baseline、退出重置 → reentry，以及快速 A→B→C 切换隔离断言；interaction 3/3、Alert all 和 Market QA all 均通过。
+
+## 2026-08-31
+
 - 新增 Developer-only Watchlist Alert QA Harness：`npm run qa:watch-alert -- --suite all`，支持 `logic` / `interaction` / `visual`、合成 quote、真实 DOM 点击和 80% / 130% / 160% visual hold。
 - Alert QA 仅在未打包且显式 `NIULAI_ALERT_QA=1` 时启用，并与 `NIULAI_MARKET_QA=1` 互斥；QA synthetic quote 只进入正式 Alert detector，不触碰 current Market State / Cow Action 链，也不发起真实 watchlist 或 current feed 网络请求。
 - Alert QA logic 已覆盖 baseline、同一 strong 不重复、退出重入、双向、multi-symbol、head badge / row marker 交互、删除撤销、跨交易日和 Cow isolation。

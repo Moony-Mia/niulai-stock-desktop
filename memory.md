@@ -619,3 +619,10 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - QA API 为 `window.__niulaiWatchAlertQA`，只在 Alert QA query 下存在，负责 configure、synthetic quote、snapshot、真实 DOM badge/menu/symbol click 与 setScale；synthetic quote 复用正式 `processWatchQuote()` / `alertZone()` / `watchAlertStates` / `refreshWatchAlertUI()`，未复制阈值或 Alert 实现。
 - QA 期间关闭真实 watchlist quote polling、current feed refresh 和 Market QA runner；Alert QA 不调用 `__pushMarket()`、`applyMarket()`、`requestAction()` 或 `setState()`。逻辑和交互 suite 通过，逻辑重复运行 3/3；visual suite 完成 Electron 80/130/160 hold，截图观察到红色 head badge，视觉 PASS 仍以人工逐项检查为准。
 - `logic`、`interaction`、`visual`、`all` suite 均通过；logic 重复运行 3/3 通过。视觉 suite 在 macOS Electron 实际窗口完成 80/130/160 hold，并观察到 head badge；DOM click 交互通过，物理鼠标逐项点击与透明 hit-test 仍需人工复核。`npm run qa:market -- --suite all --hold 1200` 通过；普通 `npm start` smoke 启动成功。Windows Runtime、Packaging、Release 未执行，未修改 market/state/spritesheet/asset authority。
+
+# 2026-08-31 Current Quote Ownership and Background Baseline QA
+
+- `QUOTE_OWNERSHIP_EXPLICIT=YES`：renderer 通过 `lastQuoteSymbol` 与 `recordCurrentQuoteMeta()` 记录最后一份有效 quote 的 symbol、价格、昨收和 quoteDate；启动默认 `simPrice/simPrevClose` 不再被视为可信 symbol quote。正式 `__pushMarket()` 和 Web real feed 都记录 ownership。
+- `selectSymbol()` 只有在 `lastQuoteSymbol === previous` 且价格/昨收有效时才用 previous quote 建 background baseline；否则调用现有 `seedWatchAlert(previous)` 进入 uninitialized 状态，禁止把其他 symbol 的行情猜成 `normal`。
+- Alert QA 仅新增 developer-only `setCurrentQuote()` 记录 ownership，不触发 Market State/Cow Action；`interaction` 已覆盖 `trusted-current-background-baseline` → normal → `trusted-current-background-reentry`，以及 A→B→C 快速切换的 `untrusted-fast-switch-background-baseline` → reentry。结果：`TRUSTED_CURRENT_TO_BACKGROUND=PASS`、`UNTRUSTED_FAST_SWITCH_TO_BACKGROUND=PASS`、`CURRENT_BACKGROUND_QA_REPEAT=3/3`。
+- 当前验证：Alert interaction 3/3、Alert all、Market QA all、普通 `npm start` smoke 均通过；`MACOS_ALERT_VISIBLE_RUNTIME=PARTIAL`、`PHYSICAL_MOUSE_VALIDATION=NOT FULLY VERIFIED`、`TRANSPARENT_MOUSE_HIT_REGRESSION=NOT FULLY VERIFIED` 保持不变。Windows Runtime、Packaging、Release 未执行。
