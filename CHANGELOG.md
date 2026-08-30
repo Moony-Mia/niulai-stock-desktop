@@ -2,6 +2,15 @@
 
 ## 2026-08-30
 
+- 基于已批准的 crying A/B/C Key Poses 开发完整 8-frame HR Sequence Candidate：F2/F4/F7 直接复用批准 Anchor，新增 F1/F3/F5/F6/F8 连续过渡帧；完成 Contact Sheet、Face Strip、Body Rhythm、Loop Seam、failed 对比、Tears-OFF 和 120ms 三循环 QA-only 预览。
+- 当前仅完成 HR Candidate Sequence，状态为 `CRYING FULL HR SEQUENCE HUMAN REVIEW REQUIRED`；未进入 Alpha、192×208、spritesheet、Action Registry、状态机、Runtime、打包或发布。
+
+- 完成 `crying` Continuous Key Pose Revision：以现有 Cry Peak Candidate B 为唯一 Motion Anchor，生成 Pre-Cry A revision、有限 Identity 修正的 Peak B revision 和 Heavy Sob C revision；旧 candidates 保留。
+- 完成 A→B→C continuity、`failed → A → B → C`、面部、身体 silhouette、Cry Peak Tears ON/OFF 五类 QA-only 对比；确认本轮仍停在 `CRYING KEY POSE HUMAN REVIEW REQUIRED`。
+- `crying` 尚未进入正式 Action、spritesheet、Action Registry、状态机、Runtime、Alpha、192×208、打包或发布。
+
+## 2026-08-30
+
 - 完成 `celebration_dance` 状态机触发接入：复用现有 `marketState.state === 'strong_up'`（`changePct >= 1.5`）正向事件，仅在进入该状态的边沿通过现有 `requestAction()` 触发，不加入随机动作池。
 - 保持 `celebration_dance` Registry priority=10、loop/fallback/low-profile 语义不变；连续相同行情状态不会重复重播，离开 `strong_up` 后由现有市场动作 priority 机制接管。
 - macOS Runtime 已启动并通过 QA-only 业务事件注入验证完整触发入口，确认 spritesheet `1536×2912`、row 13、8 帧、120ms；重复状态未重触发，负向状态可退出庆祝动作。临时注入已删除；Windows、打包和发布未执行，未进行人工逐帧视觉回归。

@@ -4,6 +4,24 @@
 
 最后更新：2026-08-30（Asia/Shanghai）
 
+## 2026-08-30 crying Full HR Sequence Candidate（Human Review Pending）
+
+- 上一轮批准状态已作为硬前提：`POSE_A=APPROVED`、`POSE_B=APPROVED_AS_CRY_PEAK_ANCHOR`、`POSE_C=APPROVED`。本轮将 F2/F4/F7 分别直接复用批准的 A/B/C R2 文件，未重新设计三个 Anchor。
+- 新增 `assets/cow-v2/candidates/crying/crying_f01_candidate_hr.png` 至 `crying_f08_candidate_hr.png` 的 8-frame HR Candidate Sequence，统一为 `1128×1394 RGB PNG`。F1/F3/F5/F6/F8 由相邻批准 Anchor 做连续动作派生；F5 只做 1px 级画布统一，不缩放、不重绘。
+- Frame responsibilities：F1 Emotion Break、F2 Approved Cry Build、F3 Cry Rise、F4 Approved Cry Peak A、F5 Short Release、F6 Cry Peak B、F7 Approved Heavy Sob、F8 Cry Hold / Seam。F4 与 F6 保持第二峰节奏差异，F8→F1 保留持续哭泣 loop seam。
+- QA-only 输出：`/tmp/crying_full_sequence_contact_sheet.png`、`/tmp/crying_anchor_comparison.png`、`/tmp/crying_face_strip.png`、`/tmp/crying_body_rhythm_strip.png`、`/tmp/crying_loop_seam_f7_f8_f1_f2.png`、`/tmp/failed_vs_crying_f1_f8.png`、`/tmp/crying_peak_tears_off_comparison.png`、`/tmp/crying_full_sequence_120ms_3loops.gif`。
+- Candidate-level QA：Identity / camera / body scale / foot baseline 稳定；A→B→C 扩展为 F1→F8 的 head、shoulder、chest-belly、mouth、eye、tear rhythm 可读；F4/F6 去泪后仍可读为爆哭峰值；未进入 Alpha、192×208、spritesheet、Registry、状态机、Runtime 或发布。
+- 当前状态：`CRYING FULL HR SEQUENCE HUMAN REVIEW REQUIRED`，尚未升格 Master，等待完整 8 帧人工审核。
+
+## 2026-08-30 crying Continuous Key Pose Revision（Human Review Pending）
+
+- `crying` 仍是 HR Key Pose 候选，不是正式 Action；未加入 Action Registry、spritesheet、状态机、Runtime 或任何业务映射。
+- 本轮以 `assets/cow-v2/candidates/crying/crying_peak_candidate_hr_r2.png` 为唯一 Motion Anchor；A 由 Peak 向前回退一个节奏点，C 由 Peak 向后释放一个节奏点，未将 A/B/C 作为三个独立角色重新设计。
+- 新增 `crying_pre_cry_candidate_hr_r2.png`、`crying_peak_candidate_hr_r2.png`、`crying_heavy_sob_candidate_hr_r2.png`，旧 A/B/C candidates 保留不覆盖；三张仍为 HR RGB candidate，未执行 Alpha、192×208、spritesheet 或正式透明化。
+- QA-only 对比输出位于 `/tmp/crying_abc_continuity_qa.png`、`/tmp/failed_crying_abcs_qa.png`、`/tmp/crying_abc_face_crop_qa.png`、`/tmp/crying_abc_silhouette_rhythm_qa.png`、`/tmp/crying_peak_tears_on_off_qa.png`。
+- 候选级检查确认 A→B→C 的 head / shoulder / chest-belly / mouth / tear build→peak→release 曲线成立，Cry Peak 去除泪水后仍可读为爆哭；正式牛 Identity、渲染/透明背景管线仍需人工验收。
+- 当前状态：`CRYING KEY POSE HUMAN REVIEW REQUIRED`。下一步只有在人工确认 A→B→C continuity、Identity 与 Cry Peak 后，才可进入 crying Full HR Sequence Development。
+
 ## 2026-08-30 celebration_dance State Machine Trigger Integration
 
 - 已找到并接入项目已有的单义正向事件：`marketState.state === 'strong_up'`，其真实条件为 `changePct >= 1.5`，既有语义为强势上涨 / `excited`，原有动作仍为 `jumping`。
