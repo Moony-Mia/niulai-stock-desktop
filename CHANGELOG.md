@@ -2,6 +2,9 @@
 
 ## 2026-08-30
 
+- F6 Candidate 02 已完成人工视觉验收并被选定为 `Right Release / Early Return` HR Master 来源；Candidate 01 未采用但继续保留，其实际视觉更接近 F5 Peak，存在较明显 `F5_TOO_CLOSE` 倾向。
+- F6 HR Master 已由 Candidate 02 原文件直接复制冻结为 `assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f6_master_hr.png`；Source / Master 均为 PNG、`1205 × 1306`、`RGB`、3 通道、无 Alpha、`1,654,904 bytes`，SHA-256 为 `5f7d4ccb651c99eb0e13aeb1a22b8af68c063bed23a3f07ccdf2ceb6a9ea02ff`，`SHA256_MATCH=YES`、`BYTE_IDENTICAL=YES`，`cmp` 已通过。
+- F1/F2/F3/F4/F5/F6 已形成连续正式 HR Anchors；F7/F8 尚未生成，完整 8 帧尚未完成，Alpha、192×208、alignment、canvas normalization、spritesheet、Registry、状态机和业务逻辑均未执行。下一阶段为 `F7 Near Center B / Return Arm Exchange Candidate Generation`。
 - 已生成两张 `celebration_dance` F6 `Right Release / Early Return` High-Resolution Candidate：Candidate 01（`Continuity First / Peak Release`）与 Candidate 02（`Return Momentum First / Stronger Release`），等待人工视觉验收；F6 Master 尚未选择、尚未冻结。
 - Candidate 01 保留更多 F5 右侧 Peak 惯性；Candidate 02 回程方向更明确但仍未进入 F7。两张均保持 Identity、Camera、Surface、Lighting、双脚接地和可追踪的双臂 Anatomy，未发现 Peak 过近、Center 过近、F2 机械镜像或左臂腹部融合风险。
 - F6 Candidate 01 为 `1205 × 1306` RGB PNG、3 通道、无 Alpha、`1,585,626 bytes`、SHA-256 `5a1ac3304dd68fe9c42f1bbdf75e52382706b8b4f1a2855c8eed013177d1177c`；Candidate 02 为 `1205 × 1306` RGB PNG、3 通道、无 Alpha、`1,654,904 bytes`、SHA-256 `5f7d4ccb651c99eb0e13aeb1a22b8af68c063bed23a3f07ccdf2ceb6a9ea02ff`。

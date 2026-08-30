@@ -403,6 +403,15 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 当前连续正式 HR Anchors 已形成：F1 Left Peak ✅ → F2 Left Release ✅ → F3 Near Center A ✅ → F4 Right Anticipation ✅ → F5 Right Peak ✅。F6 Right Release、F7 Near Center B、F8 Left Anticipation 尚未生成，完整 8 帧尚未完成；Alpha、192×208、alignment、canvas normalization、spritesheet、Action Registry、状态机和业务逻辑均未进入。
 - F4 Freeze 后下一阶段记录为 `F6 Right Release / Early Return Candidate Generation`，仅记录阶段，不在本轮执行。
 
+# 2026-08-30 celebration_dance F6 Right Release / Early Return HR Master 冻结
+
+- F6 `Right Release / Early Return` 已完成人工视觉验收，正式选择 Candidate 02：`assets/cow-v2/actions/celebration_dance/celebration_dance_f6_candidate_02.png`。选择依据为 F5 → F6 continuity 成立，保留正确 Right-side Inertia，Hip 已开始释放但仍明显右偏，右腿仍主承重但开始释放，左腿 Early Return 清楚，Torso Counterbalance Release 合理，右拳开始下降，左手开始离开腹部并上升，Return Direction 清楚，F7 Remaining Space 充足；不存在明显 `F7_TOO_CLOSE` 或 `MECHANICAL_F2_MIRROR`。
+- F6 High-Resolution Master 已由 Candidate 02 原文件直接复制冻结：`assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f6_master_hr.png`。Source 与 Master 均为 PNG、`1205 × 1306`、`RGB`、3 通道、无 Alpha、`1,654,904 bytes`，SHA-256 均为 `5f7d4ccb651c99eb0e13aeb1a22b8af68c063bed23a3f07ccdf2ceb6a9ea02ff`；`SHA256_MATCH=YES`、`BYTE_IDENTICAL=YES`，并已通过 `cmp` 字节级比较。
+- Candidate 01：`assets/cow-v2/actions/celebration_dance/celebration_dance_f6_candidate_01.png` 未选作 Master，继续保留为历史 Candidate；其实际视觉更靠近 F5 Peak，存在较明显 `F5_TOO_CLOSE` 倾向。不删除、不修改、不移动。Candidate 02 Source 也继续保留。
+- 本次冻结未进行视觉修改、重新编码、resize、crop、translation、alignment、canvas normalization 或 Alpha 处理；白色 RGB 背景仍保留，尚未转为 `192 × 208`。
+- 当前正式 HR Anchors 已形成：F1 Left Peak ✅ → F2 Left Release ✅ → F3 Near Center A ✅ → F4 Right Anticipation ✅ → F5 Right Peak ✅ → F6 Right Release ✅。F7 Near Center B、F8 Left Anticipation 尚未生成，完整 8 帧尚未完成；Alpha、192×208、alignment、canvas normalization、spritesheet、Action Registry、状态机和业务逻辑均未进入。
+- F6 Freeze 后下一阶段记录为 `F7 Near Center B / Return Arm Exchange Candidate Generation`，仅记录阶段，不在本轮执行。F7 必须体现 `Right → Left` 的运动历史，不得复制或机械镜像 F3。
+
 # 2026-08-30 celebration_dance F6 Right Release / Early Return Candidates
 
 - 已生成两张 F6 `Right Release / Early Return` High-Resolution Candidate：`assets/cow-v2/actions/celebration_dance/celebration_dance_f6_candidate_01.png` 与 `assets/cow-v2/actions/celebration_dance/celebration_dance_f6_candidate_02.png`，等待人工视觉验收；F6 Master 尚未选择、尚未冻结。
