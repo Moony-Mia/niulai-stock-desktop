@@ -384,3 +384,10 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - F1 Left Peak、F2 Left Release、F5 Right Peak 当前已成为 `celebration_dance` 正式 HR Anchors。F3 `Near Center A / Arm Exchange`、F4、F6、F7、F8 尚未生成，完整 8 帧尚未完成。
 - 本次冻结未修改 F2 视觉，未 resize、crop、translation 或 alignment；白色 RGB 背景保留，Alpha 未处理，尚未转为 `192 × 208`。尚未修改正式 spritesheet、Action Registry、状态机或业务逻辑。
 - 下一阶段为 `F3 Near Center A / Arm Exchange Candidate Generation`。F3 参考优先级为：F1 Left Peak HR Master、F2 Left Release HR Master、F5 Right Peak HR Master；F2 是 F3 最重要的局部连续性参考。F3 重点为接近中线、接近交换重心、左拳继续下降、右手继续上升、两腿接近交换、上身接近正中且双脚接地；不得变成普通站姿、双臂融合或 Identity 漂移。
+
+# 2026-08-30 celebration_dance F3 Candidates
+
+- 已生成两张 F3 `Near Center A / Arm Exchange` High-Resolution Candidate：`assets/cow-v2/actions/celebration_dance/celebration_dance_f3_candidate_01.png` 与 `assets/cow-v2/actions/celebration_dance/celebration_dance_f3_candidate_02.png`；均等待人工验收，F3 Master 尚未选择、尚未冻结。
+- Candidate 01 定位为 `Continuity First`：优先承接 F2，保留少量左侧惯性，交换较保守并为 F4 留出空间。Candidate 02 定位为 `Exchange First`：中心与左右手交换更明确，但仍不得进入 F4 Right Anticipation。两张候选都不是 F4、F5、idle 或普通站姿。
+- 两张候选均以 F2 Left Release HR Master 为第一参考、F1 Left Peak HR Master 为第二参考、F5 Right Peak HR Master 为第三参考；未使用旧候选、silhouette、Structure / Occlusion、Volume Blockout 或其他非正式研究素材。
+- F3 候选保持白色 RGB 背景，未处理 Alpha，未转 `192 × 208`，未做 alignment、canvas normalization 或 spritesheet 接入；F1、F2、F5 HR Master 未修改。未生成 F4/F6/F7/F8，完整 8 帧尚未完成。

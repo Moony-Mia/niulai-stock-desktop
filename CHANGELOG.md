@@ -2,6 +2,12 @@
 
 ## 2026-08-30
 
+- 已生成两张 `celebration_dance` F3 `Near Center A / Arm Exchange` High-Resolution Candidate：Candidate 01（`Continuity First`）与 Candidate 02（`Exchange First`），等待人工验收，尚未选择或冻结 F3 Master。
+- F3 候选以 F2 Left Release HR Master 为第一参考，F1 Left Peak HR Master 为第二参考，F5 Right Peak HR Master 为第三参考；未使用旧候选或历史失败路线。
+- 两张 F3 候选均保留白色 RGB 背景，未处理 Alpha、未转 `192 × 208`、未 alignment，未修改 F1/F2/F5 Master、spritesheet、Registry、状态机或业务逻辑；F4/F6/F7/F8 与完整 8 帧尚未生成。
+
+## 2026-08-30
+
 - `celebration_dance_f2_candidate_01.png` 已通过人工验收并被选定为 F2 Source；`celebration_dance_f2_candidate_02.png` 未选用为 Master，继续保留。
 - F2 `Left Release / Early Transition` 已冻结为 `assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f2_master_hr.png`；Source 与 Master 字节级一致，SHA-256 均为 `19821889a5b4d00dc5ac0c97e277ef69f3ba6e274eedcc4258a4b1e47c846f7b`。
 - F2 保持白色 RGB 背景，未进行视觉修改、resize、crop、translation 或 alignment，未处理 Alpha，未转 `192 × 208`。
