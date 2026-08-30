@@ -2,6 +2,13 @@
 
 ## 2026-08-30
 
+- 完成 `celebration_dance Alpha Preparation / Background Removal Engineering`：新增八张 `1344 × 1456 RGBA` Alpha HR engineering copies及 `alpha_manifest.json`。
+- 使用边界连通近白背景分割（4-connectivity，边界中位 RGB，容差 20），仅处理画布边界连通背景；执行 edge-only 抗锯齿 Alpha 与 white-matte 去污染，未 resize、crop、translate、rotate，未修改 Master 或 aligned source。
+- 技术 Alpha QA 通过：画布、背景透明、位置、比例、opaque core RGB、内部透明洞和轮廓侵蚀均符合要求；QA-only 接触表与 8 帧 100ms 无限循环 GIF 位于 `/tmp/celebration_dance_alpha_qa/`。`WHITE_MATTE_HALO=WATCH` 留待人工验收。
+- `Human Alpha Acceptance = pending`。本轮未执行 `192 × 208`、spritesheet、Action Registry、状态机、Runtime、npm start、打包或发布。
+
+## 2026-08-30
+
 - 已完成 `celebration_dance HR Alignment / Canvas / Baseline Engineering`。八个 HR Master 未修改，`HR_MASTER_MUTATION=NO`；新增 aligned HR engineering copies 与确定性 `alignment.json`，未修改 spritesheet、Registry 或 Runtime。
 - 选定 aligned Canvas 为 `1344 × 1456`：严格 `12:13`、对应 `7×` 的 `192 × 208` production ratio，并能在 `scale=1.0` 下容纳八帧原始 HR Canvas。alignment 仅使用固定 head / muzzle anchor 与 ground-contact baseline 的整数 dx/dy 平移；无 resize、crop、rotate、warp、重采样、Alpha 或逐帧 bbox 居中。
 - F1–F8 aligned copies 全部通过 `SOURCE_PIXEL_REGION_MATCH=YES`、`CLIPPING=NO`、`COMMON_CANVAS=YES`、`SCALE_CHANGE=NO`；`CHOREOGRAPHY_PRESERVED=YES`、`LOOP_SEAM_PRESERVED=YES`。manifest 为 `assets/cow-v2/actions/celebration_dance/aligned/alignment.json`。

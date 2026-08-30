@@ -4,6 +4,15 @@
 
 最后更新：2026-08-30（Asia/Shanghai）
 
+## 2026-08-30 celebration_dance Alpha HR Preparation（技术通过，等待人工验收）
+
+- F1–F8 正式 HR Master 与 aligned HR RGB source 的 SHA-256 已重新核验并与权威记录一致；`HR_MASTER_MUTATION=NO`、`ALIGNED_SOURCE_MUTATION=NO`。
+- 新增 `assets/cow-v2/actions/celebration_dance/alpha_hr/` 八张 `1344 × 1456 RGBA` Alpha engineering copies 及 `alpha_manifest.json`。输入 aligned source 未覆盖。
+- 采用确定性 border-connected near-white segmentation：边界中位 RGB、最大通道绝对差容差 `20`、4-connectivity flood fill；仅边界连通近白区域作为背景。边缘使用 edge-only 抗锯齿 Alpha 与 white-matte unmix，opaque core RGB 不变。
+- 技术结果：`ALPHA_CANVAS_MATCH=YES`、`BACKGROUND_ALPHA_ZERO=YES`、`POSITION_CHANGE=NO`、`SCALE_CHANGE=NO`、`OPAQUE_CORE_RGB_MATCH=YES`、`INTERNAL_ALPHA_HOLE=NO`、`ALPHA_EROSION=NO`。接触表已检查白、50% 灰、黑、棋盘、洋红背景；灰底和黑底 GIF 均 8 帧、100 ms/frame、600px 高、无限循环。
+- QA-only 临时输出：`/tmp/celebration_dance_alpha_qa/`。`WHITE_MATTE_HALO=WATCH`，等待人工 Gray/Black/Checkerboard Alpha Acceptance；未记录 Human Alpha Acceptance 完成。
+- 本轮未执行 `192 × 208`、premultiplied-alpha-safe resize、spritesheet、Action Registry、状态机、Runtime、npm start、打包或发布。
+
 ## 2026-08-30 celebration_dance 左峰值 HR Master 冻结（当前权威）
 
 - `celebration_dance_left_peak_identity_correction_02.png` 已通过人工视觉验收，并作为 `celebration_dance Left Peak High-Resolution Master` 正式锁定。
