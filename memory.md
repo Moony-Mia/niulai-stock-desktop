@@ -421,6 +421,15 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 当前正式 HR 序列已形成：F1 Left Peak ✅ → F2 Left Release ✅ → F3 Near Center A ✅ → F4 Right Anticipation ✅ → F5 Right Peak ✅ → F6 Right Release ✅ → F7 Near Center B ✅。F8 Left Anticipation 尚未生成，完整 8 帧尚未完成，Loop Seam 尚未正式验收；Alpha、192×208、alignment、canvas normalization、spritesheet、Action Registry、状态机和业务逻辑均未进入。
 - F7 Freeze 后下一阶段记录为 `F8 Left Anticipation / Pre-Peak / Loop Seam Candidate Generation`，仅记录阶段，不在本轮执行。F8 后续需同时参考 F7 → F8 与 F8 → F1，并以 F2 检查 F8 → F1 → F2 的自然 Peak 进入与释放。
 
+# 2026-08-30 celebration_dance F8 Left Anticipation / Pre-Peak / Loop Seam HR Master 冻结
+
+- F8 `Left Anticipation / Pre-Peak / Loop Seam` 已完成人工视觉验收，正式选择 Candidate 02：`assets/cow-v2/actions/celebration_dance/celebration_dance_f8_candidate_02.png`。其 F7 → F8 continuity、左侧 Hip Shift、Left-leg Weight Gain、Right-leg Release、左拳高位、右手 Belly / Cross-belly Entry、Torso Right Counterbalance 与 Leftward Motion Direction 均成立；F8 → F1 Loop Continuity、F1 Peak Separation 及 F8 → F1 → F2 的 Approach → Peak → Release 节奏合理，未发现明显 F1 Clone、Loop Direction Reversal、Mechanical Symmetry 或 Arm Belly Occlusion。
+- F8 High-Resolution Master 已由 Candidate 02 原文件直接复制冻结：`assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f8_master_hr.png`。Source 与 Master 均为 PNG、`1200 × 1311`、`RGB`、3 通道、无 Alpha、`1,604,905 bytes`，SHA-256 均为 `f9a8bc92ed049e522fe8bd1820b9baa08156b6619a4de19cb12e2da5246e2947`；`SHA256_MATCH=YES`、`BYTE_IDENTICAL=YES`，并已通过 `cmp` 字节级比较。
+- Candidate 01：`assets/cow-v2/actions/celebration_dance/celebration_dance_f8_candidate_01.png` 未选作 Master，继续保留为历史 Candidate；其 Identity / Anatomy 合格，但实际更靠近 F1 Peak，`F1_TOO_CLOSE` 风险高于 Candidate 02，可能压缩 F8 → F1 最后进入动作空间。不删除、不修改、不移动。Candidate 02 Source 也继续保留。
+- 本次冻结未进行视觉修改、重新编码、resize、crop、translation、alignment、baseline normalization、canvas normalization 或 Alpha 处理；白色 RGB 背景仍保留，尚未转为 `192 × 208`。未进行完整 8 帧正式验收或运行时动画验证。
+- 当前正式 HR Master 已形成完整序列：F1 Left Peak ✅ → F2 Left Release ✅ → F3 Near Center A ✅ → F4 Right Anticipation ✅ → F5 Right Peak ✅ → F6 Right Release ✅ → F7 Near Center B ✅ → F8 Left Anticipation ✅。这只表示 8 个 HR Master 已具备，不代表 `celebration_dance` 已完整接入或发布。
+- 当前仍未完成：Full 8-frame HR Sequence Acceptance、Loop Seam Final Acceptance、Alpha、192×208、alignment、baseline normalization、canvas normalization、spritesheet、Action Registry、状态机、业务逻辑、npm start、打包、macOS 动画运行验证和 Windows 验证。下一阶段记录为 `celebration_dance Full 8-Frame HR Sequence & Loop Seam Acceptance`，仅记录阶段，不在本轮执行。
+
 # 2026-08-30 celebration_dance F8 Left Anticipation / Pre-Peak / Loop Seam Candidates
 
 - 已生成两张 F8 `Left Anticipation / Pre-Peak / Loop Seam` High-Resolution Candidate：`assets/cow-v2/actions/celebration_dance/celebration_dance_f8_candidate_01.png` 与 `assets/cow-v2/actions/celebration_dance/celebration_dance_f8_candidate_02.png`，等待人工视觉验收；F8 Master 尚未选择、尚未冻结。
