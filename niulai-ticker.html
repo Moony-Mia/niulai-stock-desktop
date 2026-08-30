@@ -471,7 +471,8 @@
     { id: 'turning', name: 'Turning', segments: [{ row: 10, frames: 8 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
     { id: 'idle_blink', name: 'Idle Blink', segments: [{ row: 11, frames: 5 }], loop: false, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
     { id: 'sleep', name: 'Sleep', segments: [{ row: 12, frames: 8 }], loop: true, speed: 'slow', priority: 30, fallback: 'idle', lowProfileAllowed: true },
-    { id: 'celebration_dance', name: 'Celebration Dance', segments: [{ row: 13, frames: 8 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true }
+    { id: 'celebration_dance', name: 'Celebration Dance', segments: [{ row: 13, frames: 8 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true },
+    { id: 'crying', name: 'Crying', segments: [{ row: 14, frames: 8 }], loop: true, speed: 'normal', priority: 10, fallback: 'idle', lowProfileAllowed: true }
   ];
   const stateById = Object.fromEntries(ACTIONS.map(action => [action.id, action]));
   // V1 兼容别名：保留内部调用方对 STATES 的读取，不再维护第二份动作表。

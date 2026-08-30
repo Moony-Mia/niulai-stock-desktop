@@ -133,12 +133,12 @@ def main():
         draw.line((i * 192, 202, (i + 1) * 192 - 1, 202), fill=(255, 0, 255, 220), width=1)
         draw.line((i * 192 + 96, 0, i * 192 + 96, 207), fill=(0, 180, 255, 170), width=1)
     strip.save(QA_DIR / "crying_alignment_qa.png")
-    sheet = Image.open(ROOT / "spritesheet.webp").convert("RGBA")
     comparison = Image.new("RGB", (4 * 384, 2 * 416), (238, 238, 238))
     draw = ImageDraw.Draw(comparison)
     for j, frame in enumerate((1, 4, 6, 8)):
-        for row, label, y in ((5, "FAILED", 0), (0, "CRYING", 416)):
-            cell = sheet.crop((j * 192, row * 208, (j + 1) * 192, (row + 1) * 208))
+        failed_cell = Image.open(ROOT / "spritesheet.webp").convert("RGBA").crop((j * 192, 5 * 208, (j + 1) * 192, 6 * 208))
+        crying_cell = Image.open(PRODUCTION_DIR / f"crying_f{frame:02d}_production_192.png").convert("RGBA")
+        for cell, label, y in ((failed_cell, "FAILED", 0), (crying_cell, "CRYING", 416)):
             bg = Image.new("RGBA", cell.size, (238, 238, 238, 255))
             bg.alpha_composite(cell)
             comparison.paste(bg.convert("RGB").resize((384, 416), Image.Resampling.NEAREST), (j * 384, y))

@@ -2,6 +2,11 @@
 
 ## 2026-08-31
 
+- Integrated the approved crying production frames into spritesheet row 14 and registered the crying action for independent playback.
+- Preserved existing rows and action definitions; did not connect crying to `strong_down`, packaging, or release.
+
+## 2026-08-31
+
 - Approved crying full HR sequence and prepared transparent aligned 192×208 production candidates for human review.
 - Kept the approved F1–F8 HR source unchanged; did not add a crying action, modify the spritesheet, Action Registry, market state, state machine, Runtime, packaging, or release.
 

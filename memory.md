@@ -4,13 +4,14 @@
 
 最后更新：2026-08-31（Asia/Shanghai）
 
-## 2026-08-31 crying Alpha + Production Preparation（Production Human Review Pending）
+## 2026-08-31 crying Spritesheet + Action Registry Integration（业务触发仍未接入）
 
-- `crying` F1–F8 批准 HR 源已重新核验：全部为 `1128×1394 RGB PNG`，F1→F8 顺序正确，SHA-256 与人工审核锁定记录逐一一致；HR 帧未修改、未重新生成，未升格 HR Master。
-- 新增 `assets/cow-v2/actions/crying/prepare_production.py`，按现有 `celebration_dance` 分层思路执行确定性 `approved_hr_rgb → alpha_hr → aligned → production_192`：边界连通近白 flood fill、透明背景、统一 `0.15` 全局缩放、统一 `192×208` 画布与整数定位；没有 AI、重绘、插值、光流、动作设计或 anatomy 修改。
-- 新增 `assets/cow-v2/actions/crying/production_192/` 八张 `192×208 RGBA` candidates，以及 `alpha_hr/`、`aligned/`、`qa/` 下的工程/QA 资产；当前仍需以小尺寸动态预览做人审。
-- QA 资产包括 contact sheet、`120ms` 三循环 GIF、浅/中/深背景 Alpha QA、alignment guide 和正式 spritesheet failed 对比；未修改正式 spritesheet、未分配 crying row，未修改 Action Registry、状态机、行情映射或 Runtime。
-- 当前状态：`CRYING 192×208 PRODUCTION HUMAN REVIEW REQUIRED`；`HUMAN_REVIEW_STATUS=PENDING`，不得进入 spritesheet assembly 或 `strong_down` 接入。
+- `crying` F1–F8 批准 HR 源和 `production_192/` 八帧已重新核验，Production Human Review=PASS；Production 文件未修改。
+- 正式 `spritesheet.webp` 已从 `1536×2912` 扩展为 `1536×3120`，保持 `192×208` cell，旧 row 0–13 decoded pixels exact preserved，新增 row 14 为 crying，列 0–7 严格对应 F1→F8。row 14 round-trip 的可见像素与 Alpha 与 Production Source exact；WebP 透明区隐藏 RGB 仍由编码器规范化。
+- `niulai-ticker.html` Action Registry 新增 `crying`：`segments: [{ row: 14, frames: 8 }]`、`loop: true`、`speed: 'normal'`、`priority: 10`、`fallback: 'idle'`、`lowProfileAllowed: true`；沿用现有 `normal=120ms/frame`，未修改旧 14 个 Action。
+- macOS 独立动作播放已实际验证：spritesheet 加载 `1536×3120`，Registry lookup 与调用成功，窗口实际显示 crying row 14，未回退 idle/failed，观察到爆哭峰值；项目原有 Electron CSP warning 除外，无本轮播放错误。临时 QA trigger 已删除。
+- `crying_failed_comparison_qa.png` 已修复为使用正式 failed row 5 与当前 crying Production F1/F4/F6/F8；不是 Runtime 资产。
+- 当前正式状态：`15 actions / 15 spritesheet rows`；`strong_down → crying` 尚未实现，`marketState.js`、`cowStateMachine.js`、`timeState.js` 未修改；Windows Runtime、Packaging、Release 未执行。
 
 ## 2026-08-30 crying Full HR Sequence Candidate（Human Review Pending）
 
