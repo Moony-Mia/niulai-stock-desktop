@@ -1,0 +1,150 @@
+{
+  "action": "crying",
+  "status": "production_candidate_human_review_pending",
+  "source_stage": "approved_hr_rgb",
+  "alpha_method": "deterministic_border_connected_near_white_flood_fill",
+  "alignment_method": "global_scale_plus_integer_translation",
+  "global_scale_factor": 0.15,
+  "target_canvas": "192x208",
+  "mode": "RGBA",
+  "frame_order": "F1→F8",
+  "frame_count": 8,
+  "human_review_status": "PENDING",
+  "frames": [
+    {
+      "frame": "F01",
+      "source_path": "assets/cow-v2/candidates/crying/crying_f01_candidate_hr.png",
+      "source_sha256": "d3b7166eb67160cf634b2b8d4dd082a42a0548faf8f0a641f644d410f0935df2",
+      "alpha_path": "assets/cow-v2/actions/crying/alpha_hr/crying_f01_alpha_hr.png",
+      "aligned_path": "assets/cow-v2/actions/crying/aligned/crying_f01_aligned_hr.png",
+      "production_path": "assets/cow-v2/actions/crying/production_192/crying_f01_production_192.png",
+      "production_sha256": "d3415ab991404aea79f8f346c781b16709ccabf9065f513b3f01067c38502220",
+      "canvas": [
+        192,
+        208
+      ],
+      "mode": "RGBA",
+      "global_scale_factor": 0.15,
+      "per_frame_scale_variation": false
+    },
+    {
+      "frame": "F02",
+      "source_path": "assets/cow-v2/candidates/crying/crying_f02_candidate_hr.png",
+      "source_sha256": "09a8018712efa8e76b5f721c83704b1b6fdc097d0901775f852e2cd9523aabc1",
+      "alpha_path": "assets/cow-v2/actions/crying/alpha_hr/crying_f02_alpha_hr.png",
+      "aligned_path": "assets/cow-v2/actions/crying/aligned/crying_f02_aligned_hr.png",
+      "production_path": "assets/cow-v2/actions/crying/production_192/crying_f02_production_192.png",
+      "production_sha256": "b3a949d487f9229ac34f7513097e0b940edac3671c097f16cc53afd80061248f",
+      "canvas": [
+        192,
+        208
+      ],
+      "mode": "RGBA",
+      "global_scale_factor": 0.15,
+      "per_frame_scale_variation": false
+    },
+    {
+      "frame": "F03",
+      "source_path": "assets/cow-v2/candidates/crying/crying_f03_candidate_hr.png",
+      "source_sha256": "ffd14fdfb67d6c9b3207c8ef14a39641770e41b3ce85b8bda7de777d35b900a8",
+      "alpha_path": "assets/cow-v2/actions/crying/alpha_hr/crying_f03_alpha_hr.png",
+      "aligned_path": "assets/cow-v2/actions/crying/aligned/crying_f03_aligned_hr.png",
+      "production_path": "assets/cow-v2/actions/crying/production_192/crying_f03_production_192.png",
+      "production_sha256": "c06330aabd915af86bb364200c24cf7784a1b99b85515cef9bc7a4a2e50964a9",
+      "canvas": [
+        192,
+        208
+      ],
+      "mode": "RGBA",
+      "global_scale_factor": 0.15,
+      "per_frame_scale_variation": false
+    },
+    {
+      "frame": "F04",
+      "source_path": "assets/cow-v2/candidates/crying/crying_f04_candidate_hr.png",
+      "source_sha256": "d560558b696e786a3c8f0e700f28bc4226c09f55d154afc488b75fe6b169ce49",
+      "alpha_path": "assets/cow-v2/actions/crying/alpha_hr/crying_f04_alpha_hr.png",
+      "aligned_path": "assets/cow-v2/actions/crying/aligned/crying_f04_aligned_hr.png",
+      "production_path": "assets/cow-v2/actions/crying/production_192/crying_f04_production_192.png",
+      "production_sha256": "89d3ef22288ba9a1d7eb997b81363f05ef2ac484999eb2328e41941706ab3d49",
+      "canvas": [
+        192,
+        208
+      ],
+      "mode": "RGBA",
+      "global_scale_factor": 0.15,
+      "per_frame_scale_variation": false
+    },
+    {
+      "frame": "F05",
+      "source_path": "assets/cow-v2/candidates/crying/crying_f05_candidate_hr.png",
+      "source_sha256": "4b85285e237bfbef6af2c5b530e6531b04bfa631b477de62cafd5159400b0ae9",
+      "alpha_path": "assets/cow-v2/actions/crying/alpha_hr/crying_f05_alpha_hr.png",
+      "aligned_path": "assets/cow-v2/actions/crying/aligned/crying_f05_aligned_hr.png",
+      "production_path": "assets/cow-v2/actions/crying/production_192/crying_f05_production_192.png",
+      "production_sha256": "b5118dd8b3c1b95ce8f691584c6eb691bac7e6c390b1a1b6a0fdeb1528257034",
+      "canvas": [
+        192,
+        208
+      ],
+      "mode": "RGBA",
+      "global_scale_factor": 0.15,
+      "per_frame_scale_variation": false
+    },
+    {
+      "frame": "F06",
+      "source_path": "assets/cow-v2/candidates/crying/crying_f06_candidate_hr.png",
+      "source_sha256": "e78660b91c76ae7fa8d8cb174b120603149451fb4d83b317cd9c1ee04a414052",
+      "alpha_path": "assets/cow-v2/actions/crying/alpha_hr/crying_f06_alpha_hr.png",
+      "aligned_path": "assets/cow-v2/actions/crying/aligned/crying_f06_aligned_hr.png",
+      "production_path": "assets/cow-v2/actions/crying/production_192/crying_f06_production_192.png",
+      "production_sha256": "3bf488d23873a8073deb04793cc035d6934b5a8010eca4b385bc383324ab4c79",
+      "canvas": [
+        192,
+        208
+      ],
+      "mode": "RGBA",
+      "global_scale_factor": 0.15,
+      "per_frame_scale_variation": false
+    },
+    {
+      "frame": "F07",
+      "source_path": "assets/cow-v2/candidates/crying/crying_f07_candidate_hr.png",
+      "source_sha256": "0e514f1a71936c6e0444b2d5b65467dadff2bbc2979cdd1b99412ff0e49f438e",
+      "alpha_path": "assets/cow-v2/actions/crying/alpha_hr/crying_f07_alpha_hr.png",
+      "aligned_path": "assets/cow-v2/actions/crying/aligned/crying_f07_aligned_hr.png",
+      "production_path": "assets/cow-v2/actions/crying/production_192/crying_f07_production_192.png",
+      "production_sha256": "51e5fb412b7e1ca914b095db4122a301402df4e22a89e473b62015b49a960625",
+      "canvas": [
+        192,
+        208
+      ],
+      "mode": "RGBA",
+      "global_scale_factor": 0.15,
+      "per_frame_scale_variation": false
+    },
+    {
+      "frame": "F08",
+      "source_path": "assets/cow-v2/candidates/crying/crying_f08_candidate_hr.png",
+      "source_sha256": "3db0997795453ae6ec5ee7b0c4ea038f7bbb02bd108b89e6252bd0a6e381f4c0",
+      "alpha_path": "assets/cow-v2/actions/crying/alpha_hr/crying_f08_alpha_hr.png",
+      "aligned_path": "assets/cow-v2/actions/crying/aligned/crying_f08_aligned_hr.png",
+      "production_path": "assets/cow-v2/actions/crying/production_192/crying_f08_production_192.png",
+      "production_sha256": "36df6417a6576e2b8d1d6bfcbfc44d12f3a4bd0e6007c6360cf3615e806f619c",
+      "canvas": [
+        192,
+        208
+      ],
+      "mode": "RGBA",
+      "global_scale_factor": 0.15,
+      "per_frame_scale_variation": false
+    }
+  ],
+  "qa_assets": [
+    "assets/cow-v2/actions/crying/qa/crying_alpha_background_qa.png",
+    "assets/cow-v2/actions/crying/qa/crying_alignment_qa.png",
+    "assets/cow-v2/actions/crying/qa/crying_production_contact_sheet.png",
+    "assets/cow-v2/actions/crying/qa/crying_failed_comparison_qa.png",
+    "assets/cow-v2/actions/crying/qa/crying_production_120ms_3loops.gif"
+  ]
+}

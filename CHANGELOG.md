@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2026-08-31
+
+- Approved crying full HR sequence and prepared transparent aligned 192×208 production candidates for human review.
+- Kept the approved F1–F8 HR source unchanged; did not add a crying action, modify the spritesheet, Action Registry, market state, state machine, Runtime, packaging, or release.
+
 ## 2026-08-30
 
 - 基于已批准的 crying A/B/C Key Poses 开发完整 8-frame HR Sequence Candidate：F2/F4/F7 直接复用批准 Anchor，新增 F1/F3/F5/F6/F8 连续过渡帧；完成 Contact Sheet、Face Strip、Body Rhythm、Loop Seam、failed 对比、Tears-OFF 和 120ms 三循环 QA-only 预览。

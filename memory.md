@@ -2,7 +2,15 @@
 
 > 后续 ChatGPT / Codex / AI 接手本项目时，开始改代码前必须先阅读本文件。每次完成并验证一轮已批准的功能改动后，必须同步更新本文件。
 
-最后更新：2026-08-30（Asia/Shanghai）
+最后更新：2026-08-31（Asia/Shanghai）
+
+## 2026-08-31 crying Alpha + Production Preparation（Production Human Review Pending）
+
+- `crying` F1–F8 批准 HR 源已重新核验：全部为 `1128×1394 RGB PNG`，F1→F8 顺序正确，SHA-256 与人工审核锁定记录逐一一致；HR 帧未修改、未重新生成，未升格 HR Master。
+- 新增 `assets/cow-v2/actions/crying/prepare_production.py`，按现有 `celebration_dance` 分层思路执行确定性 `approved_hr_rgb → alpha_hr → aligned → production_192`：边界连通近白 flood fill、透明背景、统一 `0.15` 全局缩放、统一 `192×208` 画布与整数定位；没有 AI、重绘、插值、光流、动作设计或 anatomy 修改。
+- 新增 `assets/cow-v2/actions/crying/production_192/` 八张 `192×208 RGBA` candidates，以及 `alpha_hr/`、`aligned/`、`qa/` 下的工程/QA 资产；当前仍需以小尺寸动态预览做人审。
+- QA 资产包括 contact sheet、`120ms` 三循环 GIF、浅/中/深背景 Alpha QA、alignment guide 和正式 spritesheet failed 对比；未修改正式 spritesheet、未分配 crying row，未修改 Action Registry、状态机、行情映射或 Runtime。
+- 当前状态：`CRYING 192×208 PRODUCTION HUMAN REVIEW REQUIRED`；`HUMAN_REVIEW_STATUS=PENDING`，不得进入 spritesheet assembly 或 `strong_down` 接入。
 
 ## 2026-08-30 crying Full HR Sequence Candidate（Human Review Pending）
 
