@@ -4,6 +4,14 @@
 
 最后更新：2026-08-30（Asia/Shanghai）
 
+## 2026-08-30 celebration_dance Action Registry Integration
+
+- `niulai-ticker.html` Action Registry 新增 `celebration_dance`：`segments: [{ row: 13, frames: 8 }]`、`loop: true`、`speed: 'normal'`、`priority: 10`、`fallback: 'idle'`、`lowProfileAllowed: true`。沿用既有 `CELL_W=192`、`CELL_H=208` 与 `ACTION_SPEED_MS.normal=120ms`，实际约 `8.33 FPS`；未新造独立 timing 系统。
+- Runtime 真实验证已在 macOS 开发环境完成：使用临时 QA-only 调用已有 `setState()` / `requestAction()` 播放 `celebration_dance`，确认 spritesheet 加载为 `1536×2912`、动作实际显示 row 13、8 帧按 0→7 读取，并观察到循环中的左/右重心变化；临时 hook 已移除，未进入正式逻辑。
+- 渲染器现有计算 `segment.row * CELL_H` 实际得到 `13×208=2704`，尺寸、canvas、scale、anchor、baseline 均复用统一动作路径；没有修改其他 action、状态机触发规则或业务事件绑定。
+- Registry 静态 QA：`REGISTRY_ACTION_EXISTS=YES`、`REGISTRY_ROW=13`、`REGISTRY_FRAME_COUNT=8`、`REGISTRY_FRAME_ORDER=PASS`、`REGISTRY_LOOP=PASS`、`REGISTRY_TIMING=PASS`；`EXISTING_ACTION_REGISTRY_MUTATION=NO`、`STATE_MACHINE_BEHAVIOR_MUTATION=NO`、`SPRITESHEET_MUTATION=NO`、`PRODUCTION_192_MUTATION=NO`。
+- 本轮未接入涨停、盈利、上涨、点击、定时器或随机业务触发；Windows Runtime、打包与发布未验证/未执行。Runtime QA 截图为 `/tmp/celebration_dance_runtime_validation.png` 与 `/tmp/celebration_dance_runtime_validation_2.png`，不属于项目资产。
+
 ## 2026-08-30 celebration_dance Spritesheet Integration
 
 - `assets/cow-v2/actions/celebration_dance/production_192/` F1–F8 已按只读输入整合进正式 `spritesheet.webp`；八个输入文件尺寸均为 `192×208 RGBA`，SHA-256 与 production commit `cbfd899819d9a9699050b9f853c20d9ea2082b69` 记录一致，`PRODUCTION_192_MUTATION=NO`。

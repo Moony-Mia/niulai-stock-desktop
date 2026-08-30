@@ -176,6 +176,10 @@
 - 明确 AI 协作规范
 # 2026-08-29
 
+- `celebration_dance` 已加入 `niulai-ticker.html` Action Registry：row 13、8 frames、F1→F8、`loop: true`、`speed: normal`、`fallback: idle`。项目统一 `normal` 播放间隔为 `120ms/frame`（约 8.33 FPS），未新增独立计时系统，也未改变其他 action 配置。
+- 已在 macOS 开发环境通过临时 QA-only 调用既有 `setState()` / `requestAction()` 完成真实 Runtime 渲染验证：spritesheet 加载 `1536×2912`，实际显示 row 13，8 帧顺序读取并循环；`13×208=2704` 的 row origin 与统一 `drawImage` 路径一致。临时 hook 已移除。
+- Runtime 验证未改变状态机、行情映射、随机动作池、定时器或业务触发；Windows Runtime、打包与发布未执行。QA 截图位于 `/tmp/celebration_dance_runtime_validation.png` 与 `/tmp/celebration_dance_runtime_validation_2.png`。
+
 - `celebration_dance` 已完成 Spritesheet Integration：F1–F8 production `192×208 RGBA` 按 F1→F8 写入正式 `spritesheet.webp` 新增 row 13，sheet 从 `1536×2704` 扩展为 `1536×2912`，8列与 cell 尺寸保持不变；旧 row 0–12 坐标保持不动。
 - 坐标：F1 `(0,2704)`、F2 `(192,2704)`、F3 `(384,2704)`、F4 `(576,2704)`、F5 `(768,2704)`、F6 `(960,2704)`、F7 `(1152,2704)`、F8 `(1344,2704)`，每帧 `192×208`。
 - Production 输入 SHA-256 已重新核验并与既有记录一致；`PRODUCTION_192_MUTATION=NO`。使用当前正式 WebP 无损编码方式。解码后旧区域 alpha>0 像素与目标 cell 可见像素/Alpha exact；透明隐藏 RGB 因 WebP codec 规范化而变化，未将其误报为全 RGBA exact。
