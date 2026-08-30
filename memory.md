@@ -421,6 +421,17 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 当前正式 HR 序列已形成：F1 Left Peak ✅ → F2 Left Release ✅ → F3 Near Center A ✅ → F4 Right Anticipation ✅ → F5 Right Peak ✅ → F6 Right Release ✅ → F7 Near Center B ✅。F8 Left Anticipation 尚未生成，完整 8 帧尚未完成，Loop Seam 尚未正式验收；Alpha、192×208、alignment、canvas normalization、spritesheet、Action Registry、状态机和业务逻辑均未进入。
 - F7 Freeze 后下一阶段记录为 `F8 Left Anticipation / Pre-Peak / Loop Seam Candidate Generation`，仅记录阶段，不在本轮执行。F8 后续需同时参考 F7 → F8 与 F8 → F1，并以 F2 检查 F8 → F1 → F2 的自然 Peak 进入与释放。
 
+# 2026-08-30 celebration_dance HR Alignment / Canvas / Baseline Engineering
+
+- `celebration_dance` HR Alignment / Canvas / Baseline Engineering 已完成。正式 HR Master 仍是唯一 authoritative visual source；本轮新建的 aligned HR Copy 是 production engineering intermediate，未修改八个 Master，确认 `HR_MASTER_MUTATION=NO`。
+- 由于仓库现有 production spritesheet 基线为 `1536 × 2704`、`8 × 13`、单帧 `192 × 208`，且未发现现成 celebration_dance alignment convention，选用 `1344 × 1456` 作为 aligned HR Canvas：严格 `12:13`、对应 `7×` 的 `192 × 208`，并能在不缩放的情况下容纳八张原始 HR Canvas 与当前角色占屏比例。`QA Canvas padding ≠ Production alignment`。
+- Alignment 仅使用固定 head / muzzle anchor 与 ground-contact baseline 的整数像素 dx/dy 平移；`scale=1.0`、rotation=0、crop=false、resized=false、alpha=false、无重采样。禁止逐帧 bbox 居中，保留 Hip 横向 choreography、Weight Transfer、Leg / Arm trajectory、Peak Separation 与 F8 → F1 Loop Seam。
+- Aligned outputs：`assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f1_aligned_hr.png`（SHA-256 `b4a52eabe973bea2b345a83b28e3217534b444cb603a1bb087dc36bd943df900`，dx=70，dy=147）；F2（`f3057e051511b34722a758ae36ff731e602b97b711d49c7935e5b79077556c0c`，dx=105，dy=138）；F3（`4744ece0beede0e9d85fde63bc8926b2924679cea2ac2b1c19ebd7963bc27403`，dx=83，dy=137）；F4（`0fc665fa52b671bfc81a223bd9a0d4008821ec17ea7493679419fe9fffc399fa`，dx=107，dy=143）。
+- Aligned outputs continued：F5（`3f5935ac61ab08c8211aa500bb9862a222e863ccfb227f4f1257c6aa7fc1e5c2`，dx=122，dy=142）；F6（`69f2f21dd1c2e8079cfd0ffea7616cd76796be468b3e67088a9721f695c47c60`，dx=50，dy=148）；F7（`8be57c7f5dcfa22831d8fa4c56ef47a74fb224eccc641c4d1522dbb027617c5f`，dx=113，dy=143）；F8（`9245dc05e14636edc58691fb74dec9aae653fc80eef181dfdcd1272052cdfff1`，dx=91，dy=140）。所有 aligned PNG 均为 `1344 × 1456` RGB、3 通道、无 Alpha。
+- Deterministic manifest：`assets/cow-v2/actions/celebration_dance/aligned/alignment.json`。每帧均通过 `SOURCE_PIXEL_REGION_MATCH=YES` 与 `CLIPPING=NO`，统一 `COMMON_CANVAS=YES`、`SCALE_CHANGE=NO`；本轮 `CHOREOGRAPHY_PRESERVED=YES`、`LOOP_SEAM_PRESERVED=YES`。
+- Alignment QA-only preview：`/var/folders/xw/v1zhzd5d06x_zppth87hhthm0000gn/T/celebration-dance-aligned-qa.lklsetfq/celebration_dance_aligned_contact_sheet_qa.png` 与 `celebration_dance_aligned_loop_600px_qa.gif`。GIF 为 600px 高、8 actual frames、100ms/frame、`LOOP=INFINITE`，未加入项目资产。
+- 本轮未执行 Alpha、192×208 Production Frames、spritesheet assembly、Action Registry、状态机、业务逻辑、Runtime、npm start、打包、发布、macOS 动画运行验证或 Windows 验证。下一阶段为 `celebration_dance Alpha preparation / 192×208 Production Frames`，仅记录阶段，不在本轮执行。
+
 # 2026-08-30 celebration_dance Human Full-Loop Acceptance
 
 - `celebration_dance` Human Full-Loop Acceptance 已完成。人工实际观看 `celebration_dance_human_review_10fps` 的 F1 → F8、约 10 FPS、无 interpolation / optical flow / morph / tween 的完整循环预览，最终结果为：`A. HUMAN FULL-LOOP ACCEPTED`。

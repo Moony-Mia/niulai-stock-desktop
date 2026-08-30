@@ -1,0 +1,181 @@
+{
+  "action": "celebration_dance",
+  "canvas": {
+    "width": 1344,
+    "height": 1456,
+    "aspect_ratio": "12:13",
+    "scale_from_192x208": 7
+  },
+  "target_production_size": "192x208",
+  "alignment_method": "integer_translation_only",
+  "resized": false,
+  "cropped": false,
+  "rotated": false,
+  "alpha": false,
+  "master_mutation": false,
+  "choreography_preserved": true,
+  "loop_seam_preserved": true,
+  "notes": "Aligned HR engineering intermediate. White padding and fixed-anchor integer translation only. Source ROI is preserved pixel-for-pixel. QA-only padding is distinct from production alignment.",
+  "frames": [
+    {
+      "frame": "F1",
+      "source_path": "assets/cow-v2/actions/celebration_dance/masters/celebration_dance_left_peak_master_hr.png",
+      "source_sha256": "c8fe7910471520316756ff11a5d62a8ce447d5cb7423ee43c7763f951a468b2b",
+      "source_size": [
+        1203,
+        1307
+      ],
+      "dx": 70,
+      "dy": 147,
+      "scale": 1.0,
+      "rotation": 0,
+      "crop": false,
+      "aligned_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f1_aligned_hr.png",
+      "aligned_sha256": "b4a52eabe973bea2b345a83b28e3217534b444cb603a1bb087dc36bd943df900",
+      "source_pixel_region_match": "YES",
+      "clipping": "NO",
+      "head_anchor_approx_x": 602,
+      "baseline_approx_y": 1261
+    },
+    {
+      "frame": "F2",
+      "source_path": "assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f2_master_hr.png",
+      "source_sha256": "19821889a5b4d00dc5ac0c97e277ef69f3ba6e274eedcc4258a4b1e47c846f7b",
+      "source_size": [
+        1202,
+        1308
+      ],
+      "dx": 105,
+      "dy": 138,
+      "scale": 1.0,
+      "rotation": 0,
+      "crop": false,
+      "aligned_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f2_aligned_hr.png",
+      "aligned_sha256": "f3057e051511b34722a758ae36ff731e602b97b711d49c7935e5b79077556c0c",
+      "source_pixel_region_match": "YES",
+      "clipping": "NO",
+      "head_anchor_approx_x": 567,
+      "baseline_approx_y": 1270
+    },
+    {
+      "frame": "F3",
+      "source_path": "assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f3_master_hr.png",
+      "source_sha256": "bbd352979d221ed65fbc4d047755ff1eeaee1f18a7a5214cad2f1c33e583a38b",
+      "source_size": [
+        1203,
+        1307
+      ],
+      "dx": 83,
+      "dy": 137,
+      "scale": 1.0,
+      "rotation": 0,
+      "crop": false,
+      "aligned_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f3_aligned_hr.png",
+      "aligned_sha256": "4744ece0beede0e9d85fde63bc8926b2924679cea2ac2b1c19ebd7963bc27403",
+      "source_pixel_region_match": "YES",
+      "clipping": "NO",
+      "head_anchor_approx_x": 589,
+      "baseline_approx_y": 1271
+    },
+    {
+      "frame": "F4",
+      "source_path": "assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f4_master_hr.png",
+      "source_sha256": "266dc65fa820ae2d83808e730d4a5ecacdfac6bdf9cc82cb636f66740b096b1b",
+      "source_size": [
+        1202,
+        1308
+      ],
+      "dx": 107,
+      "dy": 143,
+      "scale": 1.0,
+      "rotation": 0,
+      "crop": false,
+      "aligned_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f4_aligned_hr.png",
+      "aligned_sha256": "0fc665fa52b671bfc81a223bd9a0d4008821ec17ea7493679419fe9fffc399fa",
+      "source_pixel_region_match": "YES",
+      "clipping": "NO",
+      "head_anchor_approx_x": 565,
+      "baseline_approx_y": 1265
+    },
+    {
+      "frame": "F5",
+      "source_path": "assets/cow-v2/actions/celebration_dance/masters/celebration_dance_right_peak_master_hr.png",
+      "source_sha256": "62366ae6b12f22d4d5178cff107e7a337640e7eab7e879fb585cc6792caf2727",
+      "source_size": [
+        1204,
+        1306
+      ],
+      "dx": 122,
+      "dy": 142,
+      "scale": 1.0,
+      "rotation": 0,
+      "crop": false,
+      "aligned_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f5_aligned_hr.png",
+      "aligned_sha256": "3f5935ac61ab08c8211aa500bb9862a222e863ccfb227f4f1257c6aa7fc1e5c2",
+      "source_pixel_region_match": "YES",
+      "clipping": "NO",
+      "head_anchor_approx_x": 550,
+      "baseline_approx_y": 1266
+    },
+    {
+      "frame": "F6",
+      "source_path": "assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f6_master_hr.png",
+      "source_sha256": "5f7d4ccb651c99eb0e13aeb1a22b8af68c063bed23a3f07ccdf2ceb6a9ea02ff",
+      "source_size": [
+        1205,
+        1306
+      ],
+      "dx": 50,
+      "dy": 148,
+      "scale": 1.0,
+      "rotation": 0,
+      "crop": false,
+      "aligned_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f6_aligned_hr.png",
+      "aligned_sha256": "69f2f21dd1c2e8079cfd0ffea7616cd76796be468b3e67088a9721f695c47c60",
+      "source_pixel_region_match": "YES",
+      "clipping": "NO",
+      "head_anchor_approx_x": 622,
+      "baseline_approx_y": 1260
+    },
+    {
+      "frame": "F7",
+      "source_path": "assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f7_master_hr.png",
+      "source_sha256": "bb9ac32ad2022b5b38d12a64350fd6c47139a03bdd1827babef3c6a9e47f64a7",
+      "source_size": [
+        1199,
+        1312
+      ],
+      "dx": 113,
+      "dy": 143,
+      "scale": 1.0,
+      "rotation": 0,
+      "crop": false,
+      "aligned_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f7_aligned_hr.png",
+      "aligned_sha256": "8be57c7f5dcfa22831d8fa4c56ef47a74fb224eccc641c4d1522dbb027617c5f",
+      "source_pixel_region_match": "YES",
+      "clipping": "NO",
+      "head_anchor_approx_x": 559,
+      "baseline_approx_y": 1265
+    },
+    {
+      "frame": "F8",
+      "source_path": "assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f8_master_hr.png",
+      "source_sha256": "f9a8bc92ed049e522fe8bd1820b9baa08156b6619a4de19cb12e2da5246e2947",
+      "source_size": [
+        1200,
+        1311
+      ],
+      "dx": 91,
+      "dy": 140,
+      "scale": 1.0,
+      "rotation": 0,
+      "crop": false,
+      "aligned_path": "assets/cow-v2/actions/celebration_dance/aligned/celebration_dance_f8_aligned_hr.png",
+      "aligned_sha256": "9245dc05e14636edc58691fb74dec9aae653fc80eef181dfdcd1272052cdfff1",
+      "source_pixel_region_match": "YES",
+      "clipping": "NO",
+      "head_anchor_approx_x": 581,
+      "baseline_approx_y": 1268
+    }
+  ]
+}

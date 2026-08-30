@@ -2,6 +2,12 @@
 
 ## 2026-08-30
 
+- 已完成 `celebration_dance HR Alignment / Canvas / Baseline Engineering`。八个 HR Master 未修改，`HR_MASTER_MUTATION=NO`；新增 aligned HR engineering copies 与确定性 `alignment.json`，未修改 spritesheet、Registry 或 Runtime。
+- 选定 aligned Canvas 为 `1344 × 1456`：严格 `12:13`、对应 `7×` 的 `192 × 208` production ratio，并能在 `scale=1.0` 下容纳八帧原始 HR Canvas。alignment 仅使用固定 head / muzzle anchor 与 ground-contact baseline 的整数 dx/dy 平移；无 resize、crop、rotate、warp、重采样、Alpha 或逐帧 bbox 居中。
+- F1–F8 aligned copies 全部通过 `SOURCE_PIXEL_REGION_MATCH=YES`、`CLIPPING=NO`、`COMMON_CANVAS=YES`、`SCALE_CHANGE=NO`；`CHOREOGRAPHY_PRESERVED=YES`、`LOOP_SEAM_PRESERVED=YES`。manifest 为 `assets/cow-v2/actions/celebration_dance/aligned/alignment.json`。
+- 已生成 Alignment QA-only Contact Sheet 与 600px aligned loop GIF；GIF 验证为 8 actual frames、100ms/frame、`LOOP=INFINITE`，位于系统临时目录，未加入项目资产。
+- 本轮未执行 Alpha、192×208 Production Frames、spritesheet、Action Registry、状态机、业务逻辑、Runtime、npm start、打包、发布或平台运行验证。下一阶段为 `celebration_dance Alpha preparation / 192×208 Production Frames`。
+
 - `celebration_dance` Human Full-Loop Acceptance 已完成；人工实际观看 Normal 10 FPS F1 → F8 完整循环，最终结果为 `A. HUMAN FULL-LOOP ACCEPTED`。
 - Overall Dance Readability、Rhythm、Left Peak、Right Peak、Loop Seam、Identity 均通过人工验收；F8 → F1 → F2 的 Approach → Peak → Release、F4 → F5 → F6 的 Peak 节奏均成立。Surface / Lighting 差异在完整播放中可接受，无 HR Frame Rework required。
 - P0 = None。上一阶段 P1 观察项经人工完整循环复核后未形成 HR 返工阻塞；P2 的 canvas size、framing、baseline、minor center drift 和 padding / placement 仍属于后续工程处理，不是 HR Pose 问题。
