@@ -403,6 +403,16 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 当前连续正式 HR Anchors 已形成：F1 Left Peak ✅ → F2 Left Release ✅ → F3 Near Center A ✅ → F4 Right Anticipation ✅ → F5 Right Peak ✅。F6 Right Release、F7 Near Center B、F8 Left Anticipation 尚未生成，完整 8 帧尚未完成；Alpha、192×208、alignment、canvas normalization、spritesheet、Action Registry、状态机和业务逻辑均未进入。
 - F4 Freeze 后下一阶段记录为 `F6 Right Release / Early Return Candidate Generation`，仅记录阶段，不在本轮执行。
 
+# 2026-08-30 celebration_dance F6 Right Release / Early Return Candidates
+
+- 已生成两张 F6 `Right Release / Early Return` High-Resolution Candidate：`assets/cow-v2/actions/celebration_dance/celebration_dance_f6_candidate_01.png` 与 `assets/cow-v2/actions/celebration_dance/celebration_dance_f6_candidate_02.png`，等待人工视觉验收；F6 Master 尚未选择、尚未冻结。
+- Candidate 01 定位为 `Continuity First / Peak Release`：更像 F5 刚开始释放的下一帧，保留更多右侧 Peak 惯性，Hip 仅部分回收，右腿仍明显主承重，左腿保持较大左侧展开，右拳开始下降、左手刚离开腹部，为 F7 留出较大空间。
+- Candidate 02 定位为 `Return Momentum First / Stronger Release`：比 Candidate 01 更明确地向中心回程，但仍明显右偏；右腿仍主承重但释放更多，左腿回收更多，Torso 更接近中轴，右拳下降更多、左手上升更多，仍保留 F7 Near Center 的下一步空间。
+- 两张候选均以 F5 Right Peak HR Master 为第一参考、F4 Right Anticipation HR Master 为第二参考、F3 Near Center A HR Master 为第三参考、F2 Left Release HR Master 为轨迹上下文、F1 Left Peak HR Master 为远端上下文；未使用旧候选、机械镜像、silhouette、Structure / Occlusion、Volume Blockout 或其他非正式研究素材。
+- Candidate 01：`1205 × 1306`、`RGB PNG`、3 通道、无 Alpha、`1,585,626 bytes`、SHA-256 `5a1ac3304dd68fe9c42f1bbdf75e52382706b8b4f1a2855c8eed013177d1177c`。Candidate 02：`1205 × 1306`、`RGB PNG`、3 通道、无 Alpha、`1,654,904 bytes`、SHA-256 `5f7d4ccb651c99eb0e13aeb1a22b8af68c063bed23a3f07ccdf2ceb6a9ea02ff`。两张均已通过 PNG 可读取检查。
+- Candidate 级视觉 QA：两张均保持 Identity、Camera / Scale、Surface / Lighting、头部正面与淡定表情；均表现 F5 → F6 的右侧惯性释放、Hip 回收、右腿仍承重、左腿回收、右拳下降、左手离开腹部并上升、Torso 反平衡减弱、双臂可追踪且分离、双脚接地；未发现 `F5_TOO_CLOSE`、`F7_TOO_CLOSE`、`MECHANICAL_F2_MIRROR` 或 `ARM_BELLY_OCCLUSION`。
+- 本轮未进行 Alpha、192×208、resize、crop、translation、alignment、canvas normalization、spritesheet assembly、Action Registry、状态机或业务逻辑修改；F7/F8 未生成，完整 8 帧尚未完成。
+
 # 2026-08-30 celebration_dance F4 Right Anticipation Candidates
 
 - 已生成两张 F4 `Right Anticipation / Pre-Peak` High-Resolution Candidate：`assets/cow-v2/actions/celebration_dance/celebration_dance_f4_candidate_01.png` 与 `assets/cow-v2/actions/celebration_dance/celebration_dance_f4_candidate_02.png`，等待人工视觉验收；F4 Master 尚未选择、尚未冻结。
