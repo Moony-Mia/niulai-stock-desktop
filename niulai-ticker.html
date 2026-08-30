@@ -498,6 +498,7 @@
   let frameIndex = 0, lastFrameTime = 0, speed = 1, uiScalePercent = 130;
   let playback = { actionId: 'idle', segmentIndex: 0, frameIndex: 0, elapsedMs: 0, onComplete: null, loopOverride: null };
   let currentActionPriority = ACTIONS[0].priority;
+  let currentActionCategory = 'default';
   let simMode = true, restMode = false, currentSymbol = 'sh000001', lowProfileMode = false;
   let simPrice = 3200.00, simPrevClose = 3200.00; // 初始持平，避免启动瞬间先闪涨态红色
   let lastDir = 'flat';
@@ -630,6 +631,7 @@
     if (!options.force && action.id === currentState.id) return true;
     currentState = action;
     currentActionPriority = requestedPriority;
+    currentActionCategory = options.category || 'default';
     playback = { actionId: action.id, segmentIndex: 0, frameIndex: 0, elapsedMs: 0, onComplete: options.onComplete || null, loopOverride: options.once === true ? false : null };
     frameIndex = 0;
     if (document.getElementById('stateGrid')) renderButtons();
@@ -915,11 +917,10 @@
     lastPrice = price; lastPrevClose = prevClose;
     const changePct = ((price - prevClose)/prevClose)*100;
     const marketState = window.marketStateEngine
-      ? window.marketStateEngine.getState(changePct)
+      ? window.marketStateEngine.getState(changePct, { symbol: currentSymbol })
       : { state: 'flat', direction: 'flat', changePct };
     const marketAction = resolveMarketAction(marketState);
     const dir = marketState.direction;
-    const enteredStrongUp = marketState.state === 'strong_up' && lastMarketState !== 'strong_up';
     lastMarketState = marketState.state;
     const color = setTheme(dir);
     const now = getLogicalNow();
@@ -928,15 +929,14 @@
     setTicker(source==='模拟' ? '上证指数(模拟)' : window.lastMarketName || '上证指数', currentSymbol, price, changePct, sourceTime);
     if (source === '模拟') { feedStatusDot.className = 'sim'; feedTime.textContent = logicalTime; }
 
-    // 市场状态离开 strong_down 时允许 crying 释放给较低 priority 的目标动作；
-    // strong_down 持续刷新仍走同 action 去重，不会反复重置 crying 到 F1。
-    const leavingCrying = currentState.id === 'crying' && marketAction.action !== 'crying';
-    requestAction(marketAction.action, { priority: marketAction.priority, force: leavingCrying });
-    // strong_up 是现有市场状态的边沿事件；只在进入时触发，避免行情刷新反复重播。
-    // 显式事件可启动低优先级庆祝动作；后续更高优先级行情动作仍可正常抢占。
-    if (enteredStrongUp) {
-      requestAction('celebration_dance', { force: true, priority: stateById.celebration_dance.priority });
-    }
+    // 有效市场状态改变动作时，允许新的 market action 释放旧 market action；
+    // 仅传入 category=market 的正式行情请求可使用该 release，不放宽 ambient 抢占。
+    const marketTransition = currentActionCategory === 'market' && currentState.id !== marketAction.action;
+    requestAction(marketAction.action, {
+      priority: marketAction.priority,
+      category: 'market',
+      force: marketTransition
+    });
     if (dir === 'up' || dir === 'down') {
       setSlogan('', color);
     } else {

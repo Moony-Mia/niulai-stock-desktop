@@ -4,6 +4,14 @@
 
 最后更新：2026-08-31（Asia/Shanghai）
 
+## 2026-08-31 Index / Stock Market Profiles and Up Action Re-layering
+
+- Market state classification now has one centralized source in `marketState.js`: `index` and `stock`; unknown symbols fall back to `stock` (`UNKNOWN_INSTRUMENT_FALLBACK=stock`). Current supported A-share index symbols and `int_nasdaq` / `int_dji` / `int_sp500` classify as `index`; ordinary `sh`/`sz` symbols classify as `stock` unless they match the supported index pattern.
+- Index profile: `strong_up >= +2.00%`; `up >= +0.50% and < +2.00%`; `down <= -0.50% and > -3.00%`; `strong_down <= -3.00%`.
+- Stock profile: `strong_up >= +7.00%`; `up >= +2.00% and < +7.00%`; `down <= -2.00% and > -7.00%`; `strong_down <= -7.00%`. This is the product's current stock emotion grouping, not a universal securities-market definition.
+- Formal action mapping is `strong_up → jumping`, `up → celebration_dance`, `flat → idle`, `down → failed`, `strong_down → crying`. The previous `strong_up` edge-triggered celebration behavior was removed; continuous same-state quotes remain deduplicated and looping.
+- Renderer market arbitration now permits a valid market-state action to replace the previous market action even when its request priority is lower, while ambient actions cannot use that release. Spritesheet, Action Registry, and production assets were not modified. Automated tests passed; macOS runtime visual verification for this change remains pending; Windows, packaging, and release were not executed.
+
 ## 2026-08-31 strong_down → crying Business Integration（macOS PASS）
 
 - 当前产品规则为指数当日涨跌幅：`strong_down <= -3.00%`（包含边界）；`down <= -0.50% 且 > -3.00%`；`up >= +0.50%`；`strong_up >= +1.50%` 保持不变。此前 `strong_down=-1.5%` 已替换为 `-3.0%`，不是证券市场通用定义。

@@ -2,6 +2,12 @@
 
 ## 2026-08-31
 
+- Split market-state thresholds into index and stock profiles, mapped normal `up` states to `celebration_dance`, and reserved `jumping` for `strong_up`.
+- Added centralized symbol classification with an `index`/`stock` model and stock fallback; removed the previous `strong_up` celebration edge trigger and added market-to-market priority release for downward transitions such as `jumping` → `celebration_dance`.
+- Automated boundary and transition validation passed. macOS runtime validation was not executed in this change; Windows, packaging, and release were not executed.
+
+## 2026-08-31
+
 - Changed the index strong-down threshold from -1.5% to -3.0% and mapped `strong_down` to the registered `crying` action.
 - Ordinary `down` remains `failed`; the `strong_up` threshold and celebration-dance edge behavior remain unchanged. macOS business-trigger runtime validation passed; Windows, packaging, and release were not executed.
 

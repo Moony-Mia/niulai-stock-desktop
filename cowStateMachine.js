@@ -38,8 +38,7 @@ window.cowStateMachine = {
       case "up":
         return {
           emotion: "happy",
-          // V2 的 happy/tail_wag 素材尚未加入；沿用当前实际展示的 jumping。
-          action: "jumping", priority: 60, category: "market"
+          action: "celebration_dance", priority: 60, category: "market"
         };
 
       case "flat":
