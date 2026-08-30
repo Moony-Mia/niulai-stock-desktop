@@ -394,6 +394,16 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 当前 `celebration_dance` HR Anchor 状态：F1 Left Peak ✅；F2 Left Release ✅；F3 Near Center A ✅；F5 Right Peak ✅。F4 Right Anticipation、F6 Right Release、F7 Near Center B、F8 Left Anticipation 尚未生成，完整 8 帧尚未完成；Alpha、192×208、spritesheet、Action Registry、状态机和业务逻辑均未进入。
 - F3 Freeze 后下一阶段记录为 `F4 Right Anticipation / Pre-Peak Candidate Generation`，仅记录阶段，不在本轮执行。
 
+# 2026-08-30 celebration_dance F4 Right Anticipation Candidates
+
+- 已生成两张 F4 `Right Anticipation / Pre-Peak` High-Resolution Candidate：`assets/cow-v2/actions/celebration_dance/celebration_dance_f4_candidate_01.png` 与 `assets/cow-v2/actions/celebration_dance/celebration_dance_f4_candidate_02.png`，等待人工视觉验收；F4 Master 尚未选择、尚未冻结。
+- Candidate 01 定位为 `Continuity First / Moderate Pre-Peak`：从 F3 明显进入右侧但保持较保守的 Hip / Weight Shift / Torso Counterbalance，右拳进入高位、左手进入上腹 / 中腹方向，为 F4 → F5 保留更多空间。
+- Candidate 02 定位为 `Peak Preparation First / Strong Pre-Peak`：比 Candidate 01 更强地进入右侧，右腿主承重、左腿释放、左向反平衡和双臂接近 F5 的趋势更明确，但仍未复制 F5 Peak。
+- 两张候选均以 F3 Near Center A HR Master 为第一参考、F5 Right Peak HR Master 为第二参考、F2 Left Release HR Master 为第三参考、F1 Left Peak HR Master 为第四参考；未使用旧候选、Identity Correction、silhouette、Structure / Occlusion、Volume Blockout 或其他非正式研究素材。
+- Candidate 01：`1203 × 1308`、`RGB PNG`、无 Alpha、`1,686,536 bytes`、SHA-256 `86f9691127ee3fdaac4fb6e3f7b826884b25effa1fb0f9d4efa3f814217cf0fb`。Candidate 02：`1202 × 1308`、`RGB PNG`、无 Alpha、`1,695,054 bytes`、SHA-256 `266dc65fa820ae2d83808e730d4a5ecacdfac6bdf9cc82cb636f66740b096b1b`。两张均已通过 PNG 可读取检查。
+- Candidate 级视觉 QA：两张均保持 Identity、Camera / Scale、Surface / Lighting、头部正面与淡定表情；Hip 明显右移、右腿承重增强、左腿释放、右拳上升、左手下降、Torso 开始左向反平衡、F5 方向清楚；双臂可追踪且分离，双脚接地，未发现 `F3_TOO_CLOSE`、`F5_TOO_CLOSE`、`VERTICAL_MOTION_TOO_STRONG` 或 `LEFT_ARM_OCCLUSION_FAIL`。
+- 本轮未进行 Alpha、192×208、resize、crop、translation、alignment、canvas normalization、spritesheet assembly、Action Registry、状态机或业务逻辑修改；F6/F7/F8 未生成，完整 8 帧尚未完成。
+
 # 2026-08-30 celebration_dance F3 Candidates
 
 - 已生成两张 F3 `Near Center A / Arm Exchange` High-Resolution Candidate：`assets/cow-v2/actions/celebration_dance/celebration_dance_f3_candidate_01.png` 与 `assets/cow-v2/actions/celebration_dance/celebration_dance_f3_candidate_02.png`；均等待人工验收，F3 Master 尚未选择、尚未冻结。

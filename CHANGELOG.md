@@ -2,6 +2,10 @@
 
 ## 2026-08-30
 
+- 已生成两张 `celebration_dance` F4 `Right Anticipation / Pre-Peak` High-Resolution Candidate：Candidate 01（`Continuity First / Moderate Pre-Peak`）与 Candidate 02（`Peak Preparation First / Strong Pre-Peak`），等待人工视觉验收；F4 Master 尚未选择、尚未冻结。
+- Candidate 01 更强调 F3 → F4 连续性和 F4 → F5 剩余空间；Candidate 02 更强调右侧进入和 F5 预备感，但两张都未复制 F5 Peak。两张候选均保持 Identity、Camera、Surface 和基本 Lighting，未发现双脚离地、过强垂直运动或左臂腹部融合风险。
+- F4 Candidate 01 为 `1203 × 1308` RGB PNG、无 Alpha、`1,686,536 bytes`、SHA-256 `86f9691127ee3fdaac4fb6e3f7b826884b25effa1fb0f9d4efa3f814217cf0fb`；Candidate 02 为 `1202 × 1308` RGB PNG、无 Alpha、`1,695,054 bytes`、SHA-256 `266dc65fa820ae2d83808e730d4a5ecacdfac6bdf9cc82cb636f66740b096b1b`。
+- 当前正式状态为 F1 ✅、F2 ✅、F3 ✅、F4 Candidate only、F5 ✅；F6/F7/F8、完整 8 帧、Alpha、192×208、alignment、canvas normalization、spritesheet、Registry、状态机和业务逻辑均未执行。
 - 人工视觉验收正式选择 `celebration_dance_f3_candidate_01.png` 作为 F3 `Near Center A / Arm Exchange` HR Master 来源：其 F2 → F3 连续性、左侧惯性、接近中心的 Hip、尚未完成的 Weight Exchange、清楚的 Arm Exchange 以及为 F4 保留的动作空间均符合 F3 职责；Candidate 02 保留但不选。
 - F3 HR Master 已由 Candidate 01 原文件直接复制冻结为 `assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f3_master_hr.png`；Source / Master 均为 `1203 × 1307`、`RGB PNG`、`1,629,213 bytes`，SHA-256 为 `bbd352979d221ed65fbc4d047755ff1eeaee1f18a7a5214cad2f1c33e583a38b`，并已通过字节级一致性验证。
 - 本次仅完成 F3 Master Freeze，未生成 F4/F6/F7/F8，未完成完整 8 帧，未处理 Alpha、192×208、alignment、canvas normalization、spritesheet、Registry、状态机或业务逻辑；下一阶段为 `F4 Right Anticipation / Pre-Peak Candidate Generation`。
