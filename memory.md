@@ -394,6 +394,15 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - 当前 `celebration_dance` HR Anchor 状态：F1 Left Peak ✅；F2 Left Release ✅；F3 Near Center A ✅；F5 Right Peak ✅。F4 Right Anticipation、F6 Right Release、F7 Near Center B、F8 Left Anticipation 尚未生成，完整 8 帧尚未完成；Alpha、192×208、spritesheet、Action Registry、状态机和业务逻辑均未进入。
 - F3 Freeze 后下一阶段记录为 `F4 Right Anticipation / Pre-Peak Candidate Generation`，仅记录阶段，不在本轮执行。
 
+# 2026-08-30 celebration_dance F4 Right Anticipation / Pre-Peak HR Master 冻结
+
+- F4 `Right Anticipation / Pre-Peak` 已完成人工视觉验收，正式选择 Candidate 02：`assets/cow-v2/actions/celebration_dance/celebration_dance_f4_candidate_02.png`。Candidate 02 更准确占据 F3 与 F5 之间的 Pre-Peak 位置：F3 → F4 continuity 正确，Hip 已明显向右进入但未达到 F5 极值，Weight 已明显转移到右腿，左腿开始释放但未达到 F5 最大侧伸，Torso 已开始反向平衡，右拳进入高位但仍有 Peak 空间，左手开始进入横腹但尚未完成，F5 remaining space 合理。
+- F4 High-Resolution Master 已由 Candidate 02 原文件直接复制冻结：`assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f4_master_hr.png`。Source 与 Master 均为 `1202 × 1308`、`RGB PNG`、3 通道、`1,695,054 bytes`，SHA-256 均为 `266dc65fa820ae2d83808e730d4a5ecacdfac6bdf9cc82cb636f66740b096b1b`；`SHA256_MATCH=YES`、`BYTE_IDENTICAL=YES`，并已通过 `cmp` 字节级比较。
+- Candidate 01：`assets/cow-v2/actions/celebration_dance/celebration_dance_f4_candidate_01.png` 未选作 Master，继续保留为历史 Candidate；其实际视觉更靠近 F5 Peak，会压缩 F4 → F5 的最终动作空间。不删除、不修改、不移动。Candidate 02 Source 也继续保留。
+- 本次冻结未进行视觉修改、重新编码、resize、crop、translation、alignment、canvas normalization 或 Alpha 处理；白色 RGB 背景仍保留，尚未转为 `192 × 208`。
+- 当前连续正式 HR Anchors 已形成：F1 Left Peak ✅ → F2 Left Release ✅ → F3 Near Center A ✅ → F4 Right Anticipation ✅ → F5 Right Peak ✅。F6 Right Release、F7 Near Center B、F8 Left Anticipation 尚未生成，完整 8 帧尚未完成；Alpha、192×208、alignment、canvas normalization、spritesheet、Action Registry、状态机和业务逻辑均未进入。
+- F4 Freeze 后下一阶段记录为 `F6 Right Release / Early Return Candidate Generation`，仅记录阶段，不在本轮执行。
+
 # 2026-08-30 celebration_dance F4 Right Anticipation Candidates
 
 - 已生成两张 F4 `Right Anticipation / Pre-Peak` High-Resolution Candidate：`assets/cow-v2/actions/celebration_dance/celebration_dance_f4_candidate_01.png` 与 `assets/cow-v2/actions/celebration_dance/celebration_dance_f4_candidate_02.png`，等待人工视觉验收；F4 Master 尚未选择、尚未冻结。

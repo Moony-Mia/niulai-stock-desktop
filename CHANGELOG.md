@@ -2,6 +2,9 @@
 
 ## 2026-08-30
 
+- F4 Candidate 02 已完成人工视觉验收并被选定为 `Right Anticipation / Pre-Peak` HR Master 来源；Candidate 01 保留但不采用，其实际视觉更接近 F5 Peak，会压缩 F4 → F5 的最终动作空间。
+- F4 HR Master 已由 Candidate 02 原文件直接复制冻结为 `assets/cow-v2/actions/celebration_dance/masters/celebration_dance_f4_master_hr.png`；Source / Master 均为 `1202 × 1308`、`RGB PNG`、3 通道、`1,695,054 bytes`，SHA-256 为 `266dc65fa820ae2d83808e730d4a5ecacdfac6bdf9cc82cb636f66740b096b1b`，`SHA256_MATCH=YES`、`BYTE_IDENTICAL=YES`。
+- F1/F2/F3/F4/F5 已形成连续正式 HR Anchors；F6/F7/F8 尚未生成，完整 8 帧尚未完成，Alpha、192×208、alignment、canvas normalization、spritesheet、Registry、状态机和业务逻辑均未执行。下一阶段为 `F6 Right Release / Early Return Candidate Generation`。
 - 已生成两张 `celebration_dance` F4 `Right Anticipation / Pre-Peak` High-Resolution Candidate：Candidate 01（`Continuity First / Moderate Pre-Peak`）与 Candidate 02（`Peak Preparation First / Strong Pre-Peak`），等待人工视觉验收；F4 Master 尚未选择、尚未冻结。
 - Candidate 01 更强调 F3 → F4 连续性和 F4 → F5 剩余空间；Candidate 02 更强调右侧进入和 F5 预备感，但两张都未复制 F5 Peak。两张候选均保持 Identity、Camera、Surface 和基本 Lighting，未发现双脚离地、过强垂直运动或左臂腹部融合风险。
 - F4 Candidate 01 为 `1203 × 1308` RGB PNG、无 Alpha、`1,686,536 bytes`、SHA-256 `86f9691127ee3fdaac4fb6e3f7b826884b25effa1fb0f9d4efa3f814217cf0fb`；Candidate 02 为 `1202 × 1308` RGB PNG、无 Alpha、`1,695,054 bytes`、SHA-256 `266dc65fa820ae2d83808e730d4a5ecacdfac6bdf9cc82cb636f66740b096b1b`。
