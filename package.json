@@ -1,6 +1,6 @@
 {
   "name": "niulai-yellow-desktop-pet",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": true,
   "description": "Codex pet 'niulai-yellow' wrapped as a floating WorkBuddy desktop pet (Electron)",
   "main": "main.js",
@@ -37,6 +37,9 @@
       "main.js",
       "preload.js",
       "niulai-ticker.html",
+      "marketState.js",
+      "cowStateMachine.js",
+      "timeState.js",
       "spritesheet.webp",
       "tray.png",
       "package.json"

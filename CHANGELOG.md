@@ -263,6 +263,7 @@
 - `celebration_dance` Corrected Alpha HR 已完成人工最终验收；从已提交 Alpha HR 按精确 `1/7`、LANCZOS、premultiplied-alpha-safe pipeline 生成八张 `192×208 RGBA` production frames，写入 `assets/cow-v2/actions/celebration_dance/production_192/`。192×208 Technical QA 通过；未修改 spritesheet、Registry、Runtime、打包或发布。
 # 2026-08-31
 
+- `1.0.6`：修复 Windows 安装包漏打包 `marketState.js`、`cowStateMachine.js`、`timeState.js`，避免正式安装版退回 `flat / idle` 兜底状态。
 - `1.0.5`：启用 NSIS 差分更新并统一安装包文件名，修正 `latest.yml` 与 Release 资产名称不一致导致的完整包回退问题。
 - `1.0.4`：修复切换标的后真实行情可能沿用旧 `currentSymbol`，导致个股涨跌阈值和牛动作分类错误的问题；报价归属确认后再进入 `Market State → Cow Action` 链路。
 - `1.0.3`：补充行情诊断中的行情状态、当前动作和低调模式字段，便于核对 `down → failed` 动作链路。
