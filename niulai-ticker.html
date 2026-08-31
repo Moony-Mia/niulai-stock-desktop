@@ -387,6 +387,9 @@
       <button id="diagToggle" class="btn" type="button">行情诊断</button>
       <div id="marketDiag" class="diag-panel">
         <div class="diag-row"><span>当前标的</span><span id="diagSymbol">--</span></div>
+        <div class="diag-row"><span>行情状态</span><span id="diagMarketState">--</span></div>
+        <div class="diag-row"><span>当前动作</span><span id="diagAction">--</span></div>
+        <div class="diag-row"><span>低调模式</span><span id="diagLowProfile">关闭</span></div>
         <div class="diag-row"><span>行情源</span><span>新浪</span></div>
         <div class="diag-row"><span>源行情时间</span><span id="diagQuoteTime">--</span></div>
         <div class="diag-row"><span>最后接收</span><span id="diagReceived">--</span></div>
@@ -1638,6 +1641,9 @@
     const age = currentQuoteAgeSeconds();
     const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
     set('diagSymbol', currentSymbol || '--');
+    set('diagMarketState', lastMarketState || '--');
+    set('diagAction', currentState?.id || '--');
+    set('diagLowProfile', lowProfileMode ? '开启' : '关闭');
     set('diagQuoteTime', lastQuoteMeta.quoteDate && lastQuoteMeta.quoteTime ? `${lastQuoteMeta.quoteDate} ${lastQuoteMeta.quoteTime}` : '--');
     set('diagReceived', lastQuoteMeta.receivedAt ? formatClockTime(lastQuoteMeta.receivedAt) : '--');
     set('diagAge', age === null ? '--' : `${age} 秒`);
@@ -1652,6 +1658,9 @@
     return [
       '牛来看盘神器 · 行情诊断',
       `当前标的: ${currentSymbol || '--'}`,
+      `行情状态: ${lastMarketState || '--'}`,
+      `当前动作: ${currentState?.id || '--'}`,
+      `低调模式: ${lowProfileMode ? '开启' : '关闭'}`,
       '行情源: 新浪',
       `状态: ${lastFeedStatus.state || '--'}`,
       `源行情时间: ${lastQuoteMeta.quoteDate || '--'} ${lastQuoteMeta.quoteTime || '--'}`,
