@@ -2187,7 +2187,17 @@
     mouseInteractiveState = value;
     require('electron').ipcRenderer.send('set-mouse-interactive', value);
   }
-  const mouseActiveZones = [petbox, document.getElementById('hud'), document.getElementById('petMenu'), document.getElementById('timeSimulator')].filter(Boolean);
+  // ticker 虽然通常位于 petbox 内，但单独列出可避免透明窗口在顶部快捷切换
+  // 区域命中恢复时受外层 transform/窗口 resize 影响，确保行情栏始终可点。
+  const mouseActiveZones = [
+    petbox,
+    document.getElementById('ticker'),
+    document.getElementById('tickerWatchMenu'),
+    document.getElementById('tickerSymbolTrigger'),
+    document.getElementById('hud'),
+    document.getElementById('petMenu'),
+    document.getElementById('timeSimulator'),
+  ].filter(Boolean);
   let mouseInteractiveState = null;
   function pointInRect(x, y, rect) {
     return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
