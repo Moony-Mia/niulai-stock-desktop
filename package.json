@@ -1,6 +1,6 @@
 {
   "name": "niulai-yellow-desktop-pet",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": true,
   "description": "Codex pet 'niulai-yellow' wrapped as a floating WorkBuddy desktop pet (Electron)",
   "main": "main.js",
@@ -59,13 +59,14 @@
       "icon": "icon.ico"
     },
     "nsis": {
+      "differentialPackage": true,
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": true,
       "shortcutName": "牛来看盘神器",
-      "artifactName": "牛来看盘神器 Setup ${version}.${ext}",
+      "artifactName": "niulai-yellow-desktop-setup-${version}.${ext}",
       "installerIcon": "icon.ico",
       "uninstallerIcon": "icon.ico"
     },
