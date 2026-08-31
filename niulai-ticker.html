@@ -83,7 +83,7 @@
   .low-profile #slogan { color: #c7c7cc !important; }
   .low-profile #ticker .bot { visibility: hidden; }
 
-  #petbox { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.3); display: flex; flex-direction: column; align-items: center; pointer-events: auto; -webkit-app-region: no-drag; transform-origin: center center; }
+  #petbox { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; pointer-events: auto; -webkit-app-region: no-drag; transform-origin: center center; }
   #slogan { font-size: 32px; font-weight: 900; letter-spacing: 4px; color: #fff;
     text-shadow: 0 0 2px rgba(0,0,0,.95), 0 0 4px rgba(0,0,0,.85), 0 0 8px rgba(0,0,0,.7), 0 2px 12px rgba(0,0,0,.6);
     margin-bottom: 4px; transition: color .4s ease; white-space: pre-line; text-align: center; line-height: 1.08;
@@ -170,6 +170,9 @@
   .hud-field-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .hud-field-head > span { font-size: var(--hud-meta-size); line-height: 1.25; color: rgba(255,255,255,.62); font-variant-numeric: tabular-nums; }
   .quiet-mode-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .work-hours-row { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 5px; align-items: center; }
+  .work-hours-row input[type="time"] { width: 100%; min-width: 0; box-sizing: border-box; border: 1px solid rgba(255,255,255,.18); border-radius: 5px; padding: 5px 4px; background: rgba(255,255,255,.08); color: rgba(255,255,255,.9); color-scheme: dark; font: 10px "SF Mono", Consolas, monospace; }
+  .work-hours-separator { color: rgba(255,255,255,.55); font-size: 10px; }
   .quiet-mode-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .quiet-mode-description { font-size: var(--hud-meta-size); line-height: 1.35; color: rgba(255,255,255,.55); }
   .quiet-mode-toggle { flex: 0 0 auto; width: 34px; height: 19px; margin-top: 1px; appearance: none; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; background: rgba(255,255,255,.12); cursor: pointer; position: relative; transition: background .2s ease, border-color .2s ease; }
@@ -373,7 +376,11 @@
         <label class="hud-label" for="uiScaleRange">大小精调</label>
         <span id="uiScaleFineValue">130%</span>
       </div>
-      <input id="uiScaleRange" type="range" min="50" max="200" step="5" value="130" aria-label="界面大小精调" />
+  <input id="uiScaleRange" type="range" min="50" max="200" step="5" value="130" aria-label="牛本体大小精调" />
+    </div>
+    <div class="hud-field">
+      <div class="hud-field-head"><label class="hud-label">我的上班时间</label><span id="workHoursValue">08:30–17:00</span></div>
+      <div class="work-hours-row"><input id="workStartTime" type="time" value="08:30" aria-label="上班开始时间" /><span class="work-hours-separator">至</span><input id="workEndTime" type="time" value="17:00" aria-label="下班结束时间" /></div>
     </div>
     <div class="hud-field quiet-mode-row">
       <div class="quiet-mode-copy">
@@ -535,6 +542,8 @@
   const RECENT_KEY = 'niulai.recentSymbols.v1';
   const CURRENT_SYMBOL_KEY = 'niulai.currentSymbol.v1';
   const LOW_PROFILE_KEY = 'niulai.lowProfile.v1';
+  const WORK_HOURS_KEY = 'niulai.workHours.v1';
+  let workStartMinutes = 8 * 60 + 30, workEndMinutes = 17 * 60;
   const DEFAULT_WATCHLIST = [
     { symbol: 'sh000001', name: '上证指数' },
     { symbol: 'sz399001', name: '深证成指' },
@@ -757,7 +766,25 @@
   function setUIScale(value, { commit = true } = {}) {
     uiScalePercent = clampScalePercent(value);
     const factor = uiScalePercent / 100;
-    petbox.style.transform = `translate(-50%, -50%) scale(${factor})`;
+    // 100% 是行情卡/UI 的下限；低于 100% 时只缩小牛本体，避免文字和控件变得难以阅读。
+    const uiFactor = Math.max(1, factor);
+    const cowFactor = factor;
+    // 直接控制行情卡和口号，避免父级 transform 在透明窗口 resize 后失去可见缩放。
+    ticker.style.transform = `scale(${uiFactor})`;
+    ticker.style.transformOrigin = 'center bottom';
+    slogan.style.transform = `scale(${uiFactor})`;
+    slogan.style.transformOrigin = 'center bottom';
+    petbox.style.transform = 'translate(-50%, -50%)';
+    // 同步改变 stage/canvas 的实际布局尺寸，让行情卡始终跟随牛的真实位置。
+    stage.style.width = `${192 * cowFactor}px`;
+    stage.style.height = `${208 * cowFactor}px`;
+    stage.style.marginTop = '0px';
+    stage.style.transform = 'none';
+    const cowCanvas = stage.querySelector('canvas');
+    if (cowCanvas) {
+      cowCanvas.style.width = `${192 * cowFactor}px`;
+      cowCanvas.style.height = `${208 * cowFactor}px`;
+    }
     syncScaleControls();
     if (commit) commitUIScale();
   }
@@ -1201,13 +1228,13 @@
     const day = d.getDay();
     if (day === 0 || day === 6) return 'weekend';
     const m = d.getHours() * 60 + d.getMinutes();
+    if (m < workStartMinutes || m >= workEndMinutes) return 'evening';
 
     if (m < 9 * 60 + 25) return 'closed';
     if (m < 9 * 60 + 30) return 'preopen';
     if (m < 11 * 60 + 30) return 'trading';
     if (m < 11 * 60 + 40) return 'lunch-prompt';
-    if (m < 12 * 60 + 55) return 'lunch';
-    if (m < 13 * 60) return 'afternoon';
+    if (m < 13 * 60) return 'lunch';
     if (m < 15 * 60) return 'trading';
     if (m < 15 * 60 + 10) return 'close';
     if (m < 16 * 60 + 55) return 'review';
@@ -1216,6 +1243,24 @@
   }
 
   function marketPhase() { return getWorkBuddyPhaseAt(getLogicalNow()); }
+
+  function syncWorkHoursUI() {
+    const format = minutes => `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+    const start = document.getElementById('workStartTime'), end = document.getElementById('workEndTime'), value = document.getElementById('workHoursValue');
+    if (start) start.value = format(workStartMinutes);
+    if (end) end.value = format(workEndMinutes);
+    if (value) value.textContent = `${format(workStartMinutes)}–${format(workEndMinutes)}`;
+  }
+
+  function saveWorkHours() { try { localStorage.setItem(WORK_HOURS_KEY, JSON.stringify({ start: workStartMinutes, end: workEndMinutes })); } catch (_) {} }
+
+  function applyWorkHours() {
+    const start = document.getElementById('workStartTime'), end = document.getElementById('workEndTime');
+    const parse = value => { const [h, m] = String(value || '').split(':').map(Number); return Number.isInteger(h) && Number.isInteger(m) && h >= 0 && h < 24 && m >= 0 && m < 60 ? h * 60 + m : null; };
+    const nextStart = parse(start?.value), nextEnd = parse(end?.value);
+    if (nextStart === null || nextEnd === null || nextStart >= nextEnd) { syncWorkHoursUI(); return; }
+    workStartMinutes = nextStart; workEndMinutes = nextEnd; syncWorkHoursUI(); saveWorkHours(); currentPhase = null; evaluatePhase();
+  }
 
   // 牛来的一天：交易态仍由 applyMarket 根据涨跌控制动作；生活态负责文字和非交易动画。
   function applyPhase(phase) {
@@ -1871,6 +1916,8 @@
     applyLowProfileMode(quietModeToggle.checked);
     saveLowProfileMode();
   };
+  document.getElementById('workStartTime')?.addEventListener('change', applyWorkHours);
+  document.getElementById('workEndTime')?.addEventListener('change', applyWorkHours);
 
   // 归一化股票代码：支持 sh600519 / 600519 / 600519.SH / 600519 sh 等常见写法
   function normalizeSymbol(raw) {
@@ -1956,6 +2003,11 @@
   const storedCurrent = normalizeSymbol(safeLoadJSON(CURRENT_SYMBOL_KEY, ''));
   if (storedCurrent) currentSymbol = storedCurrent;
   else if (watchlist.length) currentSymbol = watchlist[0].symbol;
+  const savedWorkHours = safeLoadJSON(WORK_HOURS_KEY, null);
+  if (savedWorkHours && Number.isInteger(savedWorkHours.start) && Number.isInteger(savedWorkHours.end) && savedWorkHours.start < savedWorkHours.end) {
+    workStartMinutes = savedWorkHours.start; workEndMinutes = savedWorkHours.end;
+  }
+  syncWorkHoursUI();
   applyLowProfileMode(safeLoadJSON(LOW_PROFILE_KEY, false) === true);
   renderSymbolControls();
   refreshWatchAlertUI();
