@@ -263,6 +263,7 @@
 - `celebration_dance` Corrected Alpha HR 已完成人工最终验收；从已提交 Alpha HR 按精确 `1/7`、LANCZOS、premultiplied-alpha-safe pipeline 生成八张 `192×208 RGBA` production frames，写入 `assets/cow-v2/actions/celebration_dance/production_192/`。192×208 Technical QA 通过；未修改 spritesheet、Registry、Runtime、打包或发布。
 # 2026-08-31
 
+- `1.0.3`：补充行情诊断中的行情状态、当前动作和低调模式字段，便于核对 `down → failed` 动作链路。
 - 修复顶部行情栏标的快捷切换在透明窗口穿透状态下偶发无法点击的问题：将行情栏、快捷菜单和切换按钮加入显式鼠标命中区域。
 - 完善低调模式的行情动作隔离：开启后所有行情方向性动作统一回退到 `idle`，包括强涨庆祝和强跌哭泣；时间相位的轻动作不受影响。名称与当前价格保留，涨跌幅/涨跌额、方向颜色和行情粒子继续隐藏或中性化。
 - 版本号升级至 `1.0.1`，对应 Windows 透明窗口鼠标命中修复。
