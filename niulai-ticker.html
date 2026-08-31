@@ -1692,6 +1692,13 @@
     if (realBtn) realBtn.classList.add('active');
     window.lastMarketName = data.name;
     const normalizedSymbol = normalizeSymbol(data.symbol || currentSymbol);
+    // 真实行情必须先确认报价归属，再进入 Market State / Cow Action 链路；
+    // 否则切换标的后的首个报价可能仍按旧标的阈值分类。
+    if (normalizedSymbol && normalizedSymbol !== currentSymbol) {
+      currentSymbol = normalizedSymbol;
+      saveCurrentSymbol();
+      renderSymbolControls();
+    }
     recordCurrentQuoteMeta({ symbol: normalizedSymbol, price: data.price, prevClose: data.prevClose, quoteDate: data.quoteDate || '', quoteTime: data.quoteTime || '', receivedAt: data.receivedAt || new Date().toISOString(), requestMs: Number(data.requestMs) || 0, transport: data.transport || '' });
     updateSymbolLabel(normalizedSymbol || currentSymbol, data.name);
     evaluatePhase();
