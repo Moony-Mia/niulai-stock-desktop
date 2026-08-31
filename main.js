@@ -138,7 +138,8 @@ function createWindow() {
 function setupAutoUpdater() {
   if (!app.isPackaged || updaterReady) return;
   updaterReady = true;
-  autoUpdater.autoDownload = false;
+  // 检测到新版本后立即后台下载，应用无需退出；下载完成后再提示重启安装。
+  autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.on('update-available', info => win?.webContents.send('updater-status', { state: 'available', version: info.version }));
   autoUpdater.on('update-not-available', info => win?.webContents.send('updater-status', { state: 'latest', version: info.version }));
