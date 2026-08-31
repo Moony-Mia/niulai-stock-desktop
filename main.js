@@ -500,20 +500,6 @@ ipcMain.on('drag-window', (e, x, y, petBottom) => {
   win.setPosition(next.x, next.y);
 });
 
-// 打开侧边设置前，先把桌宠所在窗口的中心对齐到当前显示器中心，
-// 这样窗口扩展容纳设置面板时，牛和指数卡不会被挤到屏幕左侧。
-ipcMain.on('center-window-on-screen', () => {
-  if (!win || win.isDestroyed()) return;
-  const cursorPoint = screen.getCursorScreenPoint();
-  const display = screen.getDisplayNearestPoint(cursorPoint);
-  const bounds = win.getBounds();
-  const area = display.workArea;
-  win.setPosition(
-    Math.round(area.x + (area.width - bounds.width) / 2),
-    Math.round(area.y + (area.height - bounds.height) / 2),
-  );
-});
-
 // 根据渲染层内容调整窗口大小，但保持牛所在的屏幕锚点不动。
 // 重要：窗口可能为了透明留白而延伸到 workArea 之外，不能再把“整扇窗口”强行夹回工作区，
 // 否则牛贴任务栏时一打开侧边设置，窗口扩容就会把牛斜着推向左上。

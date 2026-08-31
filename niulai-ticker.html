@@ -2100,9 +2100,6 @@
     hud.classList.toggle('visible', show);
     if (show) {
       // 先决定左右侧，再按真实竖向面板尺寸扩窗。Electron resize 事件触发后会再次定位，避免只露半截。
-      if (window.__inElectron && typeof require !== 'undefined') {
-        require('electron').ipcRenderer.send('center-window-on-screen');
-      }
       positionSettingsPanel();
       requestAnimationFrame(() => {
         reportSize();

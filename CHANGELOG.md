@@ -2,6 +2,10 @@
 
 ## 2026-08-31
 
+- `1.1.2`：修正设置面板展开行为，保留牛在用户原本放置的角落位置，不再自动移动到屏幕中央。
+
+- 修正设置面板布局：打开“更多设置”时不再自动把桌宠移动到显示器中央，保留用户原本放置在角落的位置，仅在原位置旁展开设置面板。
+
 - `1.1.1`：修复指数行情卡缩放后偏离牛头中心的问题，优化设置面板展开时的桌宠居中布局，并将隐藏到后台与退出程序分开。
 
 - 修复 Watchlist Alert current quote 归属：正式 quote 记录 `lastQuoteSymbol`，`selectSymbol()` 只有在 quote 确实属于 previous current 且数值有效时才继承 background baseline；未知 previous quote 不再猜测为 `normal`。
