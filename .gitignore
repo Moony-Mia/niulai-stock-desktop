@@ -2,6 +2,8 @@ node_modules/
 dist/
 *.log
 .DS_Store
+memory.md
+AGENTS.md
 
 *.app
 *.dmg
