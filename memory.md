@@ -626,3 +626,11 @@ Windows `npm start` 启动验证通过；控制台仅见既有 Electron CSP warn
 - `selectSymbol()` 只有在 `lastQuoteSymbol === previous` 且价格/昨收有效时才用 previous quote 建 background baseline；否则调用现有 `seedWatchAlert(previous)` 进入 uninitialized 状态，禁止把其他 symbol 的行情猜成 `normal`。
 - Alert QA 仅新增 developer-only `setCurrentQuote()` 记录 ownership，不触发 Market State/Cow Action；`interaction` 已覆盖 `trusted-current-background-baseline` → normal → `trusted-current-background-reentry`，以及 A→B→C 快速切换的 `untrusted-fast-switch-background-baseline` → reentry。结果：`TRUSTED_CURRENT_TO_BACKGROUND=PASS`、`UNTRUSTED_FAST_SWITCH_TO_BACKGROUND=PASS`、`CURRENT_BACKGROUND_QA_REPEAT=3/3`。
 - 当前验证：Alert interaction 3/3、Alert all、Market QA all、普通 `npm start` smoke 均通过；`MACOS_ALERT_VISIBLE_RUNTIME=PARTIAL`、`PHYSICAL_MOUSE_VALIDATION=NOT FULLY VERIFIED`、`TRANSPARENT_MOUSE_HIT_REGRESSION=NOT FULLY VERIFIED` 保持不变。Windows Runtime、Packaging、Release 未执行。
+
+# 2026-08-31 Windows Packaging Sync
+
+- 已从 GitHub `origin/main` 快进同步 Mac 新进度至 commit `bc4570f726a3f52f206ee27067621de760e0be13`；本地 `main` 与远端一致，源码工作区干净。
+- 使用 Electron `33.4.11` 与 electron-builder `26.15.6` 在 Windows x64 重新生成安装版和便携版；项目未配置 `npm test`，因此未执行成功该命令。Watchlist Alert QA 的逻辑与交互阶段通过，视觉阶段在本次执行窗口内未完整收尾。
+- 最新 Windows 安装版：`dist/牛来看盘神器 Setup 1.0.0.exe`，已复制至 `E:\Moony\MoonyMade\牛来看盘神器Win\牛来看盘神器 Setup 1.0.0.exe`；文件大小 `89,979,190` bytes，SHA-256 `4E137C6D383ECB4F400EE3E3AD7495248AC84CE49EA3CA4893831D970F32616A`。
+- 最新 Windows 便携版：`dist/牛来看盘神器-1.0.0-portable.exe`，已复制至 `E:\Moony\MoonyMade\牛来看盘神器Win\牛来看盘神器-1.0.0-portable.exe`；文件大小 `89,598,686` bytes，SHA-256 `A30BE7F4C3E7998856078816C6E30F70826E8FF152E1F2F6F1EA70D89F1F26F2`。
+- 已确认发布目录中的两个文件与本地 `dist` 产物校验值一致。Windows 实机安装、启动、交互和发布验收仍未完成；macOS 封装本轮未执行。
