@@ -23,6 +23,7 @@
   "build": {
     "appId": "com.moony.niulai",
     "productName": "牛来看盘神器",
+    "publish": [{ "provider": "github", "owner": "Moony-Mia", "repo": "niulai-stock-desktop", "releaseType": "release" }],
     "electronLanguages": [
       "zh-CN",
       "ja",
@@ -71,5 +72,8 @@
     "portable": {
       "artifactName": "牛来看盘神器-${version}-portable.${ext}"
     }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
   }
 }

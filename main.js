@@ -1,4 +1,5 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage, globalShortcut, ipcMain, screen, powerMonitor } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
 
@@ -32,6 +33,7 @@ let lastFeedError = '';
 let lastFeedTransport = '';
 let lastSearchError = '';
 let currentFeedDelay = 5000;
+let updaterReady = false;
 // PER-10: 透明桌宠窗口锚点与鼠标命中状态
 let resizeAnchor = null;
 let mouseInteractive = true;
@@ -132,6 +134,21 @@ function createWindow() {
 
   win.on('closed', () => { win = null; });
 }
+
+function setupAutoUpdater() {
+  if (!app.isPackaged || updaterReady) return;
+  updaterReady = true;
+  autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.on('update-available', info => win?.webContents.send('updater-status', { state: 'available', version: info.version }));
+  autoUpdater.on('download-progress', info => win?.webContents.send('updater-status', { state: 'downloading', percent: Math.round(info.percent) }));
+  autoUpdater.on('update-downloaded', info => win?.webContents.send('updater-status', { state: 'downloaded', version: info.version }));
+  autoUpdater.on('error', error => { bootLog('[UPDATER] ' + (error?.message || error)); win?.webContents.send('updater-status', { state: 'error' }); });
+  autoUpdater.checkForUpdates().catch(error => bootLog('[UPDATER-CHECK] ' + (error?.message || error)));
+}
+
+ipcMain.on('updater-download', () => { if (app.isPackaged) autoUpdater.downloadUpdate().catch(error => bootLog('[UPDATER-DOWNLOAD] ' + error.message)); });
+ipcMain.on('updater-install', () => { if (app.isPackaged) autoUpdater.quitAndInstall(); });
 
 function sinaUrl(symbol) {
   // 美股特殊处理：这里仅保留接口占位，Sina 美股接口不稳定，可用备用源替换
@@ -572,6 +589,7 @@ if (!gotLock) {
 
   app.whenReady().then(() => {
     createWindow();
+    setTimeout(setupAutoUpdater, 2500);
     createTray();
     globalShortcut.register('CommandOrControl+Shift+P', () => toggle());
     const timeShortcutOK = globalShortcut.register('CommandOrControl+Shift+T', () => toggleTimeSimulator());

@@ -72,6 +72,9 @@
   #ticker.feed-reconnecting { opacity: .88; }
   #ticker .mid { margin-top: 3px; font-size: 17px; font-weight: 900; font-family: "SF Mono", Consolas, monospace; transition: color .25s ease; }
   #ticker .bot { margin-top: 2px; font-size: 11px; font-weight: 800; display: flex; gap: 6px; }
+  #updaterNotice { display:none; position:fixed; left:50%; bottom:10px; transform:translateX(-50%); z-index:100; padding:7px 9px; border:1px solid rgba(255,255,255,.2); border-radius:7px; background:rgba(20,20,24,.95); color:#fff; font-size:10px; box-shadow:0 5px 18px rgba(0,0,0,.35); align-items:center; gap:7px; white-space:nowrap; }
+  #updaterNotice.visible { display:flex; }
+  #updaterNotice button { border:1px solid rgba(255,255,255,.2); border-radius:5px; padding:3px 6px; background:rgba(10,132,255,.3); color:#fff; cursor:pointer; font:inherit; }
   #ticker .mid.up, #ticker .up { color: #ff453a; }
   #ticker .mid.down, #ticker .down { color: #30d158; }
   #ticker .mid.flat, #ticker .flat { color: #aeaeb2; }
@@ -317,6 +320,7 @@
 </style>
 </head>
 <body>
+<div id="updaterNotice" role="status"><span id="updaterNoticeText"></span><button id="updaterNoticeAction" type="button"></button></div>
 <div id="wrap">
   <div id="bg"></div>
 
@@ -1819,6 +1823,18 @@
   const simBtn = document.getElementById('simBtn');
   const realBtn = document.getElementById('realBtn');
   const quietModeToggle = document.getElementById('quietModeToggle');
+  const updaterNotice = document.getElementById('updaterNotice');
+  const updaterNoticeText = document.getElementById('updaterNoticeText');
+  const updaterNoticeAction = document.getElementById('updaterNoticeAction');
+  if (typeof require !== 'undefined') {
+    require('electron').ipcRenderer.on('updater-status', (_event, status) => {
+      if (!status || !updaterNotice) return;
+      if (status.state === 'available') { updaterNoticeText.textContent = `发现新版本 ${status.version}`; updaterNoticeAction.textContent = '下载更新'; updaterNotice.classList.add('visible'); updaterNoticeAction.onclick = () => { updaterNoticeText.textContent = '正在下载更新…'; updaterNoticeAction.hidden = true; require('electron').ipcRenderer.send('updater-download'); }; }
+      if (status.state === 'downloading') { updaterNoticeText.textContent = `正在下载更新 ${status.percent}%`; updaterNoticeAction.hidden = true; updaterNotice.classList.add('visible'); }
+      if (status.state === 'downloaded') { updaterNoticeText.textContent = `新版本 ${status.version} 已下载`; updaterNoticeAction.textContent = '重启安装'; updaterNoticeAction.hidden = false; updaterNoticeAction.onclick = () => require('electron').ipcRenderer.send('updater-install'); updaterNotice.classList.add('visible'); }
+      if (status.state === 'error') updaterNotice.classList.remove('visible');
+    });
+  }
   if (simBtn) simBtn.onclick = () => { stopWebFeed(); window.__setSimulated(true); manualRest = false; evaluatePhase(); };
   if (realBtn) realBtn.onclick = () => {
     if (window.__inElectron) { window.__setSimulated(false); manualRest = false; evaluatePhase(); }
