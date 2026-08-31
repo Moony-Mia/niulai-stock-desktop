@@ -141,6 +141,7 @@ function setupAutoUpdater() {
   // 只提示发现新版本；用户点击“下载更新”后才开始下载。
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
+  win?.webContents.send('updater-status', { state: 'checking' });
   autoUpdater.on('update-available', info => win?.webContents.send('updater-status', { state: 'available', version: info.version }));
   autoUpdater.on('update-not-available', info => win?.webContents.send('updater-status', { state: 'latest', version: info.version }));
   autoUpdater.on('download-progress', info => win?.webContents.send('updater-status', { state: 'downloading', percent: Math.round(info.percent) }));
@@ -150,7 +151,11 @@ function setupAutoUpdater() {
 }
 
 ipcMain.on('updater-download', () => { if (app.isPackaged) autoUpdater.downloadUpdate().catch(error => bootLog('[UPDATER-DOWNLOAD] ' + error.message)); });
-ipcMain.on('updater-check', () => { if (app.isPackaged) autoUpdater.checkForUpdates().catch(error => bootLog('[UPDATER-CHECK-MANUAL] ' + error.message)); });
+ipcMain.on('updater-check', () => {
+  if (!app.isPackaged) return;
+  win?.webContents.send('updater-status', { state: 'checking' });
+  autoUpdater.checkForUpdates().catch(error => bootLog('[UPDATER-CHECK-MANUAL] ' + error.message));
+});
 ipcMain.on('updater-install', () => { if (app.isPackaged) autoUpdater.quitAndInstall(); });
 
 function sinaUrl(symbol) {
