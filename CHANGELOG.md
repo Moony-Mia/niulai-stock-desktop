@@ -2,6 +2,8 @@
 
 ## 2026-08-31
 
+- `1.1.1`：修复指数行情卡缩放后偏离牛头中心的问题，优化设置面板展开时的桌宠居中布局，并将隐藏到后台与退出程序分开。
+
 - 修复 Watchlist Alert current quote 归属：正式 quote 记录 `lastQuoteSymbol`，`selectSymbol()` 只有在 quote 确实属于 previous current 且数值有效时才继承 background baseline；未知 previous quote 不再猜测为 `normal`。
 - Alert QA 增加可信 current → background baseline、退出重置 → reentry，以及快速 A→B→C 切换隔离断言；interaction 3/3、Alert all 和 Market QA all 均通过。
 
@@ -262,6 +264,11 @@
 - 修正 `celebration_dance` Alpha Background Islands：确认问题帧为 F1/F5/F8，采用统一两阶段背景检测、corrected mask application，并防止 edge treatment 将 removed island core 写回 Alpha；从 aligned HR RGB 重建 F1–F8 `1344×1456 RGBA` Alpha HR。Technical Corrected Alpha QA 完成，Human Corrected Alpha Acceptance 仍 pending；未执行 192×208。
 - `celebration_dance` Corrected Alpha HR 已完成人工最终验收；从已提交 Alpha HR 按精确 `1/7`、LANCZOS、premultiplied-alpha-safe pipeline 生成八张 `192×208 RGBA` production frames，写入 `assets/cow-v2/actions/celebration_dance/production_192/`。192×208 Technical QA 通过；未修改 spritesheet、Registry、Runtime、打包或发布。
 # 2026-08-31
+
+- 修复指数行情卡在缩放后偏离牛头中心的问题：保留 `left: 50%` 对应的 `translateX(-50%)`，缩放时不再把卡片左边缘误对齐到牛头中心。
+- 压缩指数行情卡宽度至 190px，并收紧内边距和标的名称占位，减少横向占用，同时保留价格、涨跌幅和行情时间显示。
+- 修复打开“更多设置”后指数面板和牛本体被挤到屏幕左侧的问题：打开设置时先将桌宠窗口中心对齐当前显示器，再扩展窗口容纳右侧设置面板。
+- 将快捷菜单中的“关闭牛来”拆分为“隐藏到后台”和“退出程序”：隐藏只收起窗口并继续保留托盘与后台行情，退出程序才结束应用。
 
 - `1.1.0`：新增用户上班时间与午休设置，优化牛本体/行情卡缩放跟随，并保留低调模式与自动更新能力。
 - 增加用户上班时间设置，默认 `08:30–17:00`，并将用户午休统一为 `11:30–13:00`；工作时间外进入休息状态，设置通过 localStorage 持久化，不改变 A 股交易时间规则。

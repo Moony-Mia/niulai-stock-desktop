@@ -467,8 +467,11 @@ ipcMain.handle('fetch-watchlist-quotes', async (_event, symbols) => {
   }
 });
 
+ipcMain.on('hide-pet', () => {
+  if (win && !win.isDestroyed()) win.hide();
+});
+
 ipcMain.on('close-pet', () => {
-  if (win) win.destroy();
   app.quit();
 });
 
@@ -495,6 +498,20 @@ ipcMain.on('drag-window', (e, x, y, petBottom) => {
   const display = screen.getDisplayNearestPoint(cursorPoint);
   const next = clampDragToWorkArea(x, y, petBottom, display.workArea);
   win.setPosition(next.x, next.y);
+});
+
+// 打开侧边设置前，先把桌宠所在窗口的中心对齐到当前显示器中心，
+// 这样窗口扩展容纳设置面板时，牛和指数卡不会被挤到屏幕左侧。
+ipcMain.on('center-window-on-screen', () => {
+  if (!win || win.isDestroyed()) return;
+  const cursorPoint = screen.getCursorScreenPoint();
+  const display = screen.getDisplayNearestPoint(cursorPoint);
+  const bounds = win.getBounds();
+  const area = display.workArea;
+  win.setPosition(
+    Math.round(area.x + (area.width - bounds.width) / 2),
+    Math.round(area.y + (area.height - bounds.height) / 2),
+  );
 });
 
 // 根据渲染层内容调整窗口大小，但保持牛所在的屏幕锚点不动。
@@ -560,7 +577,7 @@ function createTray() {
   const menu = Menu.buildFromTemplate([
     { label: '显示 / 隐藏', click: () => toggle() },
     { type: 'separator' },
-    { label: '退出', click: () => app.quit() },
+    { label: '退出程序', click: () => app.quit() },
   ]);
   tray.setToolTip('牛来看盘神器');
   tray.setContextMenu(menu);

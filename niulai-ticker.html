@@ -21,10 +21,10 @@
     background: rgba(0,0,0,.75);
     border: 1px solid rgba(255,255,255,.22);
     border-radius: 8px;
-    padding: 6px 18px 6px 16px;
-    width: 210px;
-    min-width: 210px;
-    max-width: 210px;
+    padding: 6px 10px;
+    width: 190px;
+    min-width: 190px;
+    max-width: 190px;
     box-shadow: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -35,7 +35,7 @@
   #ticker .top { display: flex; justify-content: space-between; align-items: center; gap: 5px; font-size: 11px; }
   #ticker .name { font-weight: 800; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .ticker-symbol-trigger {
-    min-width: 0; max-width: 122px; padding: 0; border: 0; background: transparent; color: #fff;
+    min-width: 0; max-width: 102px; padding: 0; border: 0; background: transparent; color: #fff;
     display: inline-flex; align-items: center; gap: 4px; cursor: pointer; text-align: left; font: inherit;
   }
   .ticker-symbol-trigger:not(:disabled):hover .name { text-decoration: underline; text-underline-offset: 2px; }
@@ -452,7 +452,8 @@
     </div>
     <div class="menu-sep"></div>
     <button class="mi" id="moreSettings" type="button">⚙ 更多设置</button>
-    <button class="mi danger" id="closePet" type="button">✕ 关闭牛来</button>
+    <button class="mi" id="hidePet" type="button">— 隐藏到后台</button>
+    <button class="mi danger" id="closePet" type="button">✕ 退出程序</button>
   </div>
 </div>
 
@@ -770,7 +771,9 @@
     const uiFactor = Math.max(1, factor);
     const cowFactor = factor;
     // 直接控制行情卡和口号，避免父级 transform 在透明窗口 resize 后失去可见缩放。
-    ticker.style.transform = `scale(${uiFactor})`;
+    // ticker 本身用 left:50% 定位；缩放时必须保留 translateX(-50%)，
+    // 否则会把卡片左边缘放到牛头中心，导致整张指数卡向右偏移半个宽度。
+    ticker.style.transform = `translateX(-50%) scale(${uiFactor})`;
     ticker.style.transformOrigin = 'center bottom';
     slogan.style.transform = `scale(${uiFactor})`;
     slogan.style.transformOrigin = 'center bottom';
@@ -2097,6 +2100,9 @@
     hud.classList.toggle('visible', show);
     if (show) {
       // 先决定左右侧，再按真实竖向面板尺寸扩窗。Electron resize 事件触发后会再次定位，避免只露半截。
+      if (window.__inElectron && typeof require !== 'undefined') {
+        require('electron').ipcRenderer.send('center-window-on-screen');
+      }
       positionSettingsPanel();
       requestAnimationFrame(() => {
         reportSize();
@@ -2256,6 +2262,14 @@
       require('electron').ipcRenderer.send('close-pet');
     } else {
       window.close(); // 浏览器模式：仅关闭自身窗口（脚本打开的才有效）
+    }
+  });
+  const hidePetBtn = document.getElementById('hidePet');
+  if (hidePetBtn) hidePetBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    hidePetMenu();
+    if (window.__inElectron && typeof require !== 'undefined') {
+      require('electron').ipcRenderer.send('hide-pet');
     }
   });
   // HUD 内「关闭面板」按钮：仅收起设置面板，不退出宠物
