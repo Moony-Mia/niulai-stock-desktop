@@ -1,6 +1,6 @@
 {
   "name": "niulai-yellow-desktop-pet",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "private": true,
   "description": "Codex pet 'niulai-yellow' wrapped as a floating WorkBuddy desktop pet (Electron)",
   "main": "main.js",
