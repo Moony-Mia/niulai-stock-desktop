@@ -399,6 +399,7 @@
         <div class="diag-row"><span>连接方式</span><span id="diagTransport">--</span></div>
         <button id="copyDiag" class="btn" type="button">复制诊断信息</button>
       </div>
+      <div class="hud-field updater-check-row"><button id="updaterCheckButton" class="btn" type="button">检查更新</button></div>
       <div id="updaterNotice" role="status"><span id="updaterNoticeText"></span><button id="updaterNoticeAction" type="button"></button></div>
       <div id="undoToast"><span id="undoText">已移除</span><button id="undoDelete" type="button">撤销</button></div>
     </div>
@@ -1842,6 +1843,13 @@
   const updaterNotice = document.getElementById('updaterNotice');
   const updaterNoticeText = document.getElementById('updaterNoticeText');
   const updaterNoticeAction = document.getElementById('updaterNoticeAction');
+  const updaterCheckButton = document.getElementById('updaterCheckButton');
+  if (updaterCheckButton) updaterCheckButton.onclick = () => {
+    updaterCheckButton.disabled = true;
+    updaterCheckButton.textContent = '正在检查…';
+    if (typeof require !== 'undefined') require('electron').ipcRenderer.send('updater-check');
+    setTimeout(() => { updaterCheckButton.disabled = false; updaterCheckButton.textContent = '检查更新'; }, 3000);
+  };
   if (typeof require !== 'undefined') {
     require('electron').ipcRenderer.on('updater-status', (_event, status) => {
       if (!status || !updaterNotice) return;

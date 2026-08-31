@@ -148,6 +148,7 @@ function setupAutoUpdater() {
 }
 
 ipcMain.on('updater-download', () => { if (app.isPackaged) autoUpdater.downloadUpdate().catch(error => bootLog('[UPDATER-DOWNLOAD] ' + error.message)); });
+ipcMain.on('updater-check', () => { if (app.isPackaged) autoUpdater.checkForUpdates().catch(error => bootLog('[UPDATER-CHECK-MANUAL] ' + error.message)); });
 ipcMain.on('updater-install', () => { if (app.isPackaged) autoUpdater.quitAndInstall(); });
 
 function sinaUrl(symbol) {

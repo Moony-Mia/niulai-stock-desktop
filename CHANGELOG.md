@@ -263,6 +263,7 @@
 - `celebration_dance` Corrected Alpha HR 已完成人工最终验收；从已提交 Alpha HR 按精确 `1/7`、LANCZOS、premultiplied-alpha-safe pipeline 生成八张 `192×208 RGBA` production frames，写入 `assets/cow-v2/actions/celebration_dance/production_192/`。192×208 Technical QA 通过；未修改 spritesheet、Registry、Runtime、打包或发布。
 # 2026-08-31
 
+- `1.0.9`：在“更多设置”增加“检查更新”按钮，可手动触发更新检查，便于验证 NSIS 差分更新链路。
 - `1.0.8`：更新提示改为嵌入“更多设置”面板，下载和重启安装按钮直接在设置中操作。
 - 将自动更新提示和“下载更新/重启安装”按钮移入“更多设置”面板，避免悬浮提示在透明窗口中出现可见但不可点击的情况。
 - `1.0.7`：修复自动更新提示条在透明窗口中可见但按钮无法点击的问题，将更新提示区域加入鼠标命中范围。
