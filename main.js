@@ -141,6 +141,7 @@ function setupAutoUpdater() {
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.on('update-available', info => win?.webContents.send('updater-status', { state: 'available', version: info.version }));
+  autoUpdater.on('update-not-available', info => win?.webContents.send('updater-status', { state: 'latest', version: info.version }));
   autoUpdater.on('download-progress', info => win?.webContents.send('updater-status', { state: 'downloading', percent: Math.round(info.percent) }));
   autoUpdater.on('update-downloaded', info => win?.webContents.send('updater-status', { state: 'downloaded', version: info.version }));
   autoUpdater.on('error', error => { bootLog('[UPDATER] ' + (error?.message || error)); win?.webContents.send('updater-status', { state: 'error' }); });
