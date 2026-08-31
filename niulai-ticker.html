@@ -1901,9 +1901,9 @@
   if (typeof require !== 'undefined') {
     require('electron').ipcRenderer.on('updater-status', (_event, status) => {
       if (!status || !updaterNotice) return;
-      if (status.state === 'available') { updaterNoticeText.textContent = `发现新版本 ${status.version}，作者手搓中…`; updaterNoticeAction.hidden = true; updaterNotice.classList.add('visible'); }
+      if (status.state === 'available') { updaterNoticeText.textContent = `发现新版本 ${status.version}`; updaterNoticeAction.textContent = '下载更新'; updaterNoticeAction.hidden = false; updaterNoticeAction.onclick = () => { updaterNoticeAction.disabled = true; require('electron').ipcRenderer.send('updater-download'); }; updaterNotice.classList.add('visible'); }
       if (status.state === 'latest') { updaterCheckButton.disabled = false; updaterCheckButton.textContent = '已经最新了，别催了'; updaterNoticeText.textContent = `当前已是最新版本 ${status.version}`; updaterNoticeAction.hidden = true; updaterNotice.classList.add('visible'); }
-      if (status.state === 'downloading') { updaterNoticeText.textContent = `作者手搓中 ${status.percent}%`; updaterNoticeAction.hidden = true; updaterNotice.classList.add('visible'); }
+      if (status.state === 'downloading') { updaterNoticeText.textContent = `正在下载更新 ${status.percent}%`; updaterNoticeAction.hidden = true; updaterNotice.classList.add('visible'); }
       if (status.state === 'downloaded') { updaterNoticeText.textContent = `新版本 ${status.version} 已下载`; updaterNoticeAction.textContent = '重启安装'; updaterNoticeAction.hidden = false; updaterNoticeAction.onclick = () => require('electron').ipcRenderer.send('updater-install'); updaterNotice.classList.add('visible'); }
       if (status.state === 'error') updaterNotice.classList.remove('visible');
     });
