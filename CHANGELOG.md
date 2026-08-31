@@ -261,3 +261,9 @@
 - feat: add idle_blink as a one-shot low-profile action on spritesheet row 11
 - 修正 `celebration_dance` Alpha Background Islands：确认问题帧为 F1/F5/F8，采用统一两阶段背景检测、corrected mask application，并防止 edge treatment 将 removed island core 写回 Alpha；从 aligned HR RGB 重建 F1–F8 `1344×1456 RGBA` Alpha HR。Technical Corrected Alpha QA 完成，Human Corrected Alpha Acceptance 仍 pending；未执行 192×208。
 - `celebration_dance` Corrected Alpha HR 已完成人工最终验收；从已提交 Alpha HR 按精确 `1/7`、LANCZOS、premultiplied-alpha-safe pipeline 生成八张 `192×208 RGBA` production frames，写入 `assets/cow-v2/actions/celebration_dance/production_192/`。192×208 Technical QA 通过；未修改 spritesheet、Registry、Runtime、打包或发布。
+# 2026-08-31
+
+- 完善低调模式的行情动作隔离：开启后所有行情方向性动作统一回退到 `idle`，包括强涨庆祝和强跌哭泣；时间相位的轻动作不受影响。名称与当前价格保留，涨跌幅/涨跌额、方向颜色和行情粒子继续隐藏或中性化。
+- 版本号升级至 `1.0.1`，对应 Windows 透明窗口鼠标命中修复。
+- Windows 封装仅保留 Electron `zh-CN`、`ja`、`en-US` 三种语言配置，重新生成并同步 `1.0.1` 安装版与便携版。
+- 修复 Windows 透明桌宠窗口在部分界面切换后牛身无法点击的问题：鼠标穿透状态改为通过 `forward=true` 转发的 `mousemove` 与实际布局矩形命中判断恢复交互，不再只依赖可能丢失的 `mouseenter`。

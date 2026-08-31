@@ -980,9 +980,10 @@
       ? window.cowStateMachine.getActionRequest(marketState)
       : { action: marketState.direction === 'up' ? 'jumping' : marketState.direction === 'down' ? 'failed' : 'idle', priority: 0 };
     const action = stateById[request.action] || stateById.idle;
-    // 低调模式只过滤行情反馈，不影响 applyPhase 的时间相位动作。
-    if (lowProfileMode && !action.lowProfileAllowed) {
-      return { ...request, action: action.fallback && stateById[action.fallback]?.lowProfileAllowed ? action.fallback : 'idle', priority: 0 };
+    // 低调模式下，所有行情方向性动作都收敛为 idle；时间相位动作仍由 applyPhase 独立管理。
+    // 这样不会因为某个新行情动作被标记为 lowProfileAllowed 而意外泄露涨跌反馈。
+    if (lowProfileMode) {
+      return { ...request, action: 'idle', priority: 0 };
     }
     return { ...request, action: action.id, priority: Number.isFinite(request.priority) ? request.priority : action.priority };
   }
@@ -2177,15 +2178,28 @@
   }
 
   // PER-10: 默认透明区域穿透；进入牛/HUD/菜单时恢复交互。
+  // Windows 下窗口一旦进入 ignore-mouse-events，mouseenter 可能不会再回到
+  // renderer，因此不能只依赖 mouseenter/mouseleave 恢复牛身的点击命中。
+  // forward=true 会继续转发 mousemove，这里用实际布局矩形做一次命中判断。
   function setMouseInteractive(value) {
     if (!window.__inElectron || typeof require === 'undefined') return;
+    if (mouseInteractiveState === value) return;
+    mouseInteractiveState = value;
     require('electron').ipcRenderer.send('set-mouse-interactive', value);
   }
   const mouseActiveZones = [petbox, document.getElementById('hud'), document.getElementById('petMenu'), document.getElementById('timeSimulator')].filter(Boolean);
-  mouseActiveZones.forEach(zone => {
-    zone.addEventListener('mouseenter', () => setMouseInteractive(true));
-    zone.addEventListener('mouseleave', () => setMouseInteractive(false));
-  });
+  let mouseInteractiveState = null;
+  function pointInRect(x, y, rect) {
+    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+  }
+  function updateMouseInteractivity(x, y) {
+    const active = mouseActiveZones.some(zone => pointInRect(x, y, zone.getBoundingClientRect()));
+    setMouseInteractive(active);
+  }
+  // 监听 window 的 mousemove 是为了兼容 Electron forward=true 的穿透转发；
+  // 命中判断使用 getBoundingClientRect，能够覆盖 transform/缩放后的牛本体。
+  window.addEventListener('mousemove', e => updateMouseInteractivity(e.clientX, e.clientY), true);
+  window.addEventListener('mouseleave', () => setMouseInteractive(false), true);
   setMouseInteractive(false);
 
   setUIScale(130, { commit: false }); evaluatePhase();

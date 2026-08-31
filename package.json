@@ -1,6 +1,6 @@
 {
   "name": "niulai-yellow-desktop-pet",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Codex pet 'niulai-yellow' wrapped as a floating WorkBuddy desktop pet (Electron)",
   "main": "main.js",
@@ -23,6 +23,11 @@
   "build": {
     "appId": "com.moony.niulai",
     "productName": "牛来看盘神器",
+    "electronLanguages": [
+      "zh-CN",
+      "ja",
+      "en-US"
+    ],
     "asar": true,
     "directories": {
       "output": "dist"
