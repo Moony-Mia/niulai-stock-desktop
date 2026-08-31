@@ -72,7 +72,7 @@
   #ticker.feed-reconnecting { opacity: .88; }
   #ticker .mid { margin-top: 3px; font-size: 17px; font-weight: 900; font-family: "SF Mono", Consolas, monospace; transition: color .25s ease; }
   #ticker .bot { margin-top: 2px; font-size: 11px; font-weight: 800; display: flex; gap: 6px; }
-  #updaterNotice { display:none; position:fixed; left:50%; bottom:10px; transform:translateX(-50%); z-index:100; padding:7px 9px; border:1px solid rgba(255,255,255,.2); border-radius:7px; background:rgba(20,20,24,.95); color:#fff; font-size:10px; box-shadow:0 5px 18px rgba(0,0,0,.35); align-items:center; gap:7px; white-space:nowrap; }
+  #updaterNotice { display:none; margin-top:7px; padding:7px; border:1px solid rgba(255,255,255,.2); border-radius:7px; background:rgba(20,20,24,.72); color:#fff; font-size:10px; align-items:center; justify-content:space-between; gap:7px; }
   #updaterNotice.visible { display:flex; }
   #updaterNotice button { border:1px solid rgba(255,255,255,.2); border-radius:5px; padding:3px 6px; background:rgba(10,132,255,.3); color:#fff; cursor:pointer; font:inherit; }
   #ticker .mid.up, #ticker .up { color: #ff453a; }
@@ -320,7 +320,6 @@
 </style>
 </head>
 <body>
-<div id="updaterNotice" role="status"><span id="updaterNoticeText"></span><button id="updaterNoticeAction" type="button"></button></div>
 <div id="wrap">
   <div id="bg"></div>
 
@@ -400,6 +399,7 @@
         <div class="diag-row"><span>连接方式</span><span id="diagTransport">--</span></div>
         <button id="copyDiag" class="btn" type="button">复制诊断信息</button>
       </div>
+      <div id="updaterNotice" role="status"><span id="updaterNoticeText"></span><button id="updaterNoticeAction" type="button"></button></div>
       <div id="undoToast"><span id="undoText">已移除</span><button id="undoDelete" type="button">撤销</button></div>
     </div>
   </div>
@@ -2226,6 +2226,7 @@
     document.getElementById('ticker'),
     document.getElementById('tickerWatchMenu'),
     document.getElementById('tickerSymbolTrigger'),
+    document.getElementById('updaterNotice'),
     document.getElementById('hud'),
     document.getElementById('petMenu'),
     document.getElementById('timeSimulator'),
