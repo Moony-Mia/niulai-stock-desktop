@@ -347,6 +347,30 @@ async function fetchIndex(symbol) {
   }
 }
 
+function parseMiniKlineBars(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.map(item => {
+    const day = typeof item?.day === 'string' ? item.day : '';
+    const open = Number(item?.open), high = Number(item?.high), low = Number(item?.low), close = Number(item?.close);
+    if (!day || !Number.isFinite(open) || !Number.isFinite(high) || !Number.isFinite(low) || !Number.isFinite(close)) return null;
+    if (high < open || high < close || low > open || low > close || high < low) return null;
+    return { day, open, high, low, close, volume: Number.isFinite(Number(item?.volume)) ? Number(item.volume) : null };
+  }).filter(Boolean);
+}
+
+async function fetchMiniKlineHistory(symbol) {
+  if (!/^(sh|sz)\d{6}$/.test(String(symbol || '').toLowerCase())) return { symbol, bars: [], supported: false };
+  const url = `https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=${encodeURIComponent(symbol)}&scale=5&ma=no&datalen=30`;
+  try {
+    const { buf, transport } = await fetchBuffer(url, 'fetchMiniKlineHistory');
+    const raw = JSON.parse(new TextDecoder('utf-8').decode(buf || Buffer.alloc(0)));
+    return { symbol, bars: parseMiniKlineBars(raw), supported: true, transport };
+  } catch (e) {
+    console.warn('[fetchMiniKlineHistory] failed:', e?.message || e);
+    return { symbol, bars: [], supported: true, error: e?.message || String(e) };
+  }
+}
+
 function getAshareFeedPhase(d = new Date()) {
   const day = d.getDay();
   if (day === 0 || day === 6) return 'weekend';
@@ -475,6 +499,8 @@ ipcMain.handle('fetch-watchlist-quotes', async (_event, symbols) => {
 ipcMain.on('hide-pet', () => {
   if (win && !win.isDestroyed()) win.hide();
 });
+
+ipcMain.handle('fetch-mini-kline', async (_event, symbol) => fetchMiniKlineHistory(String(symbol || '').toLowerCase()));
 
 ipcMain.on('close-pet', () => {
   app.quit();
